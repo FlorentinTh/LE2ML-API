@@ -1,0 +1,20 @@
+{
+	"extends": ["plugin:prettier/recommended", "plugin:json/recommended"],
+	"env": {
+		"node": true
+	},
+	"parserOptions": {
+		"parser": "babel-eslint",
+		"sourceType": "module",
+		"ecmaVersion": 2020
+	},
+	"plugins": ["prettier"],
+	"rules": {
+		"prettier/prettier": "error"
+	},
+	"settings": {
+		"import/resolver": {
+			"babel-module": {}
+		}
+	}
+}
