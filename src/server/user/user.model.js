@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import config from '../../utils/config';
+import Config from '@Config';
 
 class User extends Schema {
 	constructor() {
@@ -25,15 +25,11 @@ class User extends Schema {
 
 	setPassword(password) {
 		this.salt = crypto.randomBytes(16).toString('hex');
-		this.hash = crypto
-			.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512')
-			.toString('hex');
+		this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
 	}
 
 	validatePassword(password) {
-		const hash = crypto
-			.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512')
-			.toString('hex');
+		const hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
 		return (this.hash = hash);
 	}
 
@@ -47,7 +43,7 @@ class User extends Schema {
 				courriel: this.courriel,
 				exp: parseInt(expiry.getTime() / 1000, 10)
 			},
-			config.jwtSecret
+			Config.getConfig().jwtSecret
 		);
 	}
 

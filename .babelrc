@@ -3,7 +3,15 @@
 	"plugins": [
 		["module-resolver", {
 		  "root": ["."],
-		  "alias": {},
+		  "alias": {
+			  "@App": "./src/app",
+			  "@Server": "./src/server",
+			  "@Config": "./src/utils/Config",
+			  "@Logger": "./src/utils/logger",
+			  "@Mongo": "./src/utils/Mongo",
+			  "@Passeport": "./src/utils/passeport",
+			  "@APIError": "./src/server/helpers/APIError"
+		  },
 		  "extensions": [
 			  ".js",
 			  ".json"

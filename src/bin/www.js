@@ -6,9 +6,9 @@
 
 import debugLib from 'debug';
 import http from 'http';
-import app from '../server';
+import app from '@App';
 
-var debug = debugLib('myapp:server');
+var debug = debugLib('PiClusterApi:server');
 
 /**
  * Get port from environment and store in Express.
