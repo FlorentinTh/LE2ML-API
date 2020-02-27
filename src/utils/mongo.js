@@ -1,44 +1,46 @@
 import mongoose from 'mongoose';
-import MongooseConnectionConfig from 'mongoose-connection-config';
-import logger from '@logger';
-import config from '@config';
+import logger from '@Logger';
+import Config from '@Config';
 
-const defaultOptions = {
-	host: config.mongo.host,
-	port: config.mongo.port,
-	database: config.mongo.db,
-	connectOptions: {
-		user: config.mongo.user,
-		pass: config.mongo.password
-	}
-};
+const config = Config.getConfig();
 
 mongoose.Promise = global.Promise;
 
 class Mongo {
-	constructor(options = defaultOptions) {
-		this.options = options;
+	constructor() {
+		this.connectionString = `mongodb://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}:${config.mongo.port}/${config.mongo.db}?authSource=admin&w=1`;
 	}
 
 	async run() {
-		const connectionConfig = new MongooseConnectionConfig(this.options);
-
-		await mongoose.connect(connectionConfig.getMongoUri(), {});
+		try {
+			await mongoose.connect(this.connectionString, {
+				useNewUrlParser: true,
+				useUnifiedTopology: true,
+				useCreateIndex: true,
+				auth: {
+					authdb: 'admin'
+				}
+			});
+		}
+		catch (error) {
+			logger.error(`Connection to database failed, error: ${error.message} on worker process: ${process.pid}`);
+			process.exit(1);
+		}
 
 		mongoose.connection.on('connected', () => {
-			logger.info('Successfully connected to mongo');
+			logger.info(`Connected to database on Worker process: ${process.pid}`);
 		});
 
 		mongoose.connection.on('reconnected', () => {
-			logger.info('Successfully re-connected to mongo');
+			logger.info(`Re-onnected to database on Worker process: ${process.pid}`);
 		});
 
 		mongoose.connection.on('disconnected', () => {
-			logger.info('Successfully disconnected from mongo');
+			logger.info('Disconnected from database');
 		});
 
 		mongoose.connection.on('close', () => {
-			logger.info('Connection to mongo successfully closed');
+			logger.info('Connection to database closed');
 		});
 
 		mongoose.connection.on('error', (error) => {
@@ -47,4 +49,4 @@ class Mongo {
 	}
 }
 
-module.exports = Mongo;
+module.exports = new Mongo();

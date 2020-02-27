@@ -1,18 +1,56 @@
 import express from 'express';
-import path from 'path';
+import logger from 'morgan';
+import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import compress from 'compression';
+import cors from 'cors';
+import httpStatus from 'http-status';
+import helmet from 'helmet';
+import passport from 'passport';
 
-// import indexRouter from './server/routes/index';
+import Config from '@Config';
+import APIError from '@APIError';
+import '@Passport';
+import Mongo from '@Mongo';
+import routes from './server/auth/auth.routes';
 
-var app = express();
+const isDev = Config.getConfig().env === 'development';
+const app = express();
 
-// app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+if (isDev) {
+	app.use(logger('dev'));
+}
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(cookieParser());
+app.use(compress());
 
-// app.use(express.static(path.join(__dirname, '../public')));
+app.use(helmet());
 
-// app.use('/', indexRouter);
+app.use(cors());
+
+app.use(passport.initialize());
+
+// Todo Mongo
+
+Mongo.run();
+
+app.use('/api', routes);
+
+app.use((req, res, next) => {
+	const err = new APIError('API not found', httpStatus.NOT_FOUND);
+	next(err);
+});
+
+
+app.use((err, req, res, next) => {
+	res.status(err.status || 500).json({
+		status: 'error',
+		code: err.status,
+		message: err.message
+	  });
+});
 
 export default app;

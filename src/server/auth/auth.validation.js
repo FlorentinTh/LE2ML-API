@@ -1,11 +1,14 @@
-import Joi from '@hapi/joi';
+import { check } from 'express-validator';
 
-module.exports = {
-	login: {
-		// body: {
-		// 	username: Joi.string().required()
-		// }
-	},
-
-	register: {}
+const validation = {
+	register: [
+		check('courriel').notEmpty().isEmail(),
+		check('password').notEmpty()
+	],
+	login: [
+		check('courriel').notEmpty().isEmail(),
+		check('password').notEmpty()
+	]
 };
+
+module.exports = validation;

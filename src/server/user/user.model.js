@@ -19,7 +19,7 @@ class User extends Schema {
 		);
 
 		user.methods.setPassword = this.setPassword;
-		user.methods.validPassword = this.validPassword;
+		user.methods.validatePassword = this.validatePassword;
 		user.methods.generateJwt = this.generateJwt;
 	}
 
