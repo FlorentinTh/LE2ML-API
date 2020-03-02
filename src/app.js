@@ -15,6 +15,7 @@ import Mongo from '@Mongo';
 
 import authRoutes from './server/auth/auth.routes';
 import userRoutes from './server/user/user.routes';
+import adminRoutes from './server/admin/admin.routes';
 
 const isDev = Config.getConfig().env === 'development';
 
@@ -37,6 +38,7 @@ Mongo.run();
 
 APIv1.use('/v1', authRoutes);
 APIv1.use('/v1/user', userRoutes);
+APIv1.use('/v1/admin/user', adminRoutes);
 app.use('/api', APIv1);
 
 app.use((req, res, next) => {
@@ -49,7 +51,7 @@ app.use((err, req, res, next) => {
 		status: 'error',
 		code: err.status,
 		message: err.message
-	  });
+	});
 });
 
 export default app;
