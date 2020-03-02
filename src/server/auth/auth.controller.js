@@ -1,4 +1,3 @@
-import passport from 'passport';
 import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
 
@@ -13,7 +12,7 @@ class AuthController {
 		const bodyErrors = validationResult(req);
 
 		if (!bodyErrors.isEmpty()) {
-			next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+			return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
 		}
 
 		const user = new User();
@@ -31,6 +30,9 @@ class AuthController {
 		try {
 			await user.save();
 			res.status(httpStatus.OK).json({
+				data: {
+					user: user
+				},
 				message: 'User successfully registered'
 			});
 		}
@@ -44,7 +46,7 @@ class AuthController {
 		const bodyErrors = validationResult(req);
 
 		if (!bodyErrors.isEmpty()) {
-			next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+			return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
 		}
 
 		const email = req.body.email;
@@ -54,13 +56,13 @@ class AuthController {
 			const user = await User.findOne().where('email').in([email]).exec();
 
 			if (!user) {
-				next(new APIError('Authentication failed', httpStatus.UNAUTHORIZED));
+				return next(new APIError('Authentication failed', httpStatus.UNAUTHORIZED));
 			}
 
 			const isValidPassword = await user.validatePassword(password);
 
 			if (!isValidPassword) {
-				next(new APIError('invalid password', httpStatus.UNAUTHORIZED));
+				return next(new APIError('invalid password', httpStatus.UNAUTHORIZED));
 			}
 
 			const token = user.generateJwt(user);

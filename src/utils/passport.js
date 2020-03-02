@@ -9,7 +9,7 @@ import Config from '@Config';
 
 passport.use(new JwtStrategy({
 	jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('jwt'),
-	secretOrKey: Config.getConfig().jwtSecret
+	secretOrKey: Config.getConfig().jwtSecret,
 }, async (payload, done) => {
 	try {
 		const user = await User.findOne().where('_id').in([payload._id]).exec();

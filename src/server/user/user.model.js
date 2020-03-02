@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Config from '@Config';
+import { roles } from './../user/roles/roles';
 
 class User extends Schema {
 	constructor() {
@@ -15,10 +16,19 @@ class User extends Schema {
 					type: String,
 					required: true
 				},
+				dateCreated: {
+					type: Date,
+					default: Date.now
+				},
 				email: {
 					type: String,
 					unique: true,
 					required: true
+				},
+				role: {
+					type: String,
+					enum: [roles.ADMIN, roles.USER],
+					default: roles.USER
 				},
 				hash: String,
 				salt: String
@@ -30,6 +40,7 @@ class User extends Schema {
 		user.methods.validatePassword = this.validatePassword;
 		user.methods.generateJwt = this.generateJwt;
 		user.methods.isAuthenticated = this.isAuthenticated;
+		user.methods.checkRole = this.checkRole;
 	}
 
 	async setPassword(password) {
@@ -52,8 +63,11 @@ class User extends Schema {
 
 	isAuthenticated(token) {
 		return {
-			uid: this._id,
-			token: token
+			data: {
+				uid: this._id,
+				token: token
+			},
+			message: 'user successfully authenticated'
 		};
 	}
 }

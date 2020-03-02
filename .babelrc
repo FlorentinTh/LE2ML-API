@@ -1,18 +1,29 @@
 {
-	"presets": ["@babel/preset-env"],
+	"presets": [
+		"@babel/preset-env"
+	],
 	"plugins": [
-		["@babel/transform-runtime"], ["module-resolver",
+		[
+			"@babel/transform-runtime"
+		],
+		[
+			"module-resolver",
 			{
-				"root": ["."],
+				"root": [
+					"."
+				],
 				"alias": {
 					"@App": "./src/app",
-					"@Config": "./src/utils/Config",
+					"@Config": "./src/utils/config",
 					"@Logger": "./src/utils/logger",
-					"@Mongo": "./src/utils/Mongo",
+					"@Mongo": "./src/utils/mongo",
 					"@Passport": "./src/utils/passport",
 					"@APIError": "./src/server/helpers/APIError"
 				},
-				"extensions": [".js", ".json"]
+				"extensions": [
+					".js",
+					".json"
+				]
 			}
 		]
 	]
