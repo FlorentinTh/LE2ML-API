@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Config from '@Config';
 
@@ -7,7 +7,15 @@ class User extends Schema {
 	constructor() {
 		const user = super(
 			{
-				courriel: {
+				lastname: {
+					type: String,
+					required: true
+				},
+				firstname: {
+					type: String,
+					required: true
+				},
+				email: {
 					type: String,
 					unique: true,
 					required: true
@@ -21,37 +29,31 @@ class User extends Schema {
 		user.methods.setPassword = this.setPassword;
 		user.methods.validatePassword = this.validatePassword;
 		user.methods.generateJwt = this.generateJwt;
+		user.methods.isAuthenticated = this.isAuthenticated;
 	}
 
-	setPassword(password) {
-		this.salt = crypto.randomBytes(16).toString('hex');
-		this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+	async setPassword(password) {
+		const salt = await bcrypt.genSalt(10);
+		const hash = await bcrypt.hash(password, salt);
+		this.salt = salt;
+		this.hash = hash;
 	}
 
-	validatePassword(password) {
-		const hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+	async validatePassword(password) {
+		const hash = await bcrypt.compare(password, this.hash);
 		return (this.hash = hash);
 	}
 
 	generateJwt() {
-		const expiry = new Date();
-		expiry.setDate(expiry.getDate() + 2);
-
-		return jwt.sign(
-			{
-				id: this._id,
-				courriel: this.courriel,
-				exp: parseInt(expiry.getTime() / 1000, 10)
-			},
-			Config.getConfig().jwtSecret
-		);
+		return jwt.sign(this.toJSON(), Config.getConfig().jwtSecret, {
+			expiresIn: '2 days'
+		});
 	}
 
-	toAuthJson() {
+	isAuthenticated(token) {
 		return {
-			_id: this._id,
-			courriel: this.courriel,
-			token: this.generateJwt()
+			uid: this._id,
+			token: token
 		};
 	}
 }

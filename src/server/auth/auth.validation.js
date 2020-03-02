@@ -2,11 +2,13 @@ import { check } from 'express-validator';
 
 const validation = {
 	register: [
-		check('courriel').notEmpty().isEmail(),
+		check('firstname').notEmpty().isString(),
+		check('lastname').notEmpty().isString(),
+		check('email').notEmpty().isEmail(),
 		check('password').notEmpty()
 	],
 	login: [
-		check('courriel').notEmpty().isEmail(),
+		check('email').notEmpty().isEmail(),
 		check('password').notEmpty()
 	]
 };

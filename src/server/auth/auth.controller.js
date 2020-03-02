@@ -17,14 +17,21 @@ class AuthController {
 		}
 
 		const user = new User();
-		user.courriel = req.body.courriel;
-		user.setPassword(req.body.password);
+		user.firstname = req.body.firstname;
+		user.lastname = req.body.lastname;
+		user.email = req.body.email;
+
+		try {
+			await user.setPassword(req.body.password);
+		} catch (error) {
+			next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+		}
+
 
 		try {
 			await user.save();
-			const token = user.generateJwt();
 			res.status(httpStatus.OK).json({
-				token
+				message: 'User successfully registered'
 			});
 		}
 		catch (error) {
@@ -32,7 +39,7 @@ class AuthController {
 		}
 	}
 
-	login(req, res, next) {
+	async login(req, res, next) {
 
 		const bodyErrors = validationResult(req);
 
@@ -40,19 +47,28 @@ class AuthController {
 			next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
 		}
 
-		passport.authenticate('local', (err, user, info) => {
-			if (err) {
-				next(err);
+		const email = req.body.email;
+		const password = req.body.password;
+
+		try {
+			const user = await User.findOne().where('email').in([email]).exec();
+
+			if (!user) {
+				next(new APIError('Authentication failed', httpStatus.UNAUTHORIZED));
 			}
 
-			if (user) {
-				const token = user.generateJwt();
-				res.status(httpStatus.OK).json({ token });
+			const isValidPassword = await user.validatePassword(password);
+
+			if (!isValidPassword) {
+				next(new APIError('invalid password', httpStatus.UNAUTHORIZED));
 			}
-			else {
-				next(info);
-			}
-		})(req, res, next);
+
+			const token = user.generateJwt(user);
+			res.status(httpStatus.OK).json(user.isAuthenticated(token));
+
+		} catch (error) {
+			next(new APIError(error, httpStatus.INTERNAL_SERVER_ERROR));
+		}
 	}
 }
 
