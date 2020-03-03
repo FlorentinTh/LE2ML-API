@@ -5,7 +5,7 @@ import User from '../user/user.model';
 import APIError from '@APIError';
 
 class AuthController {
-	constructor() {}
+	constructor() { }
 
 	async register(req, res, next) {
 
@@ -30,9 +30,7 @@ class AuthController {
 		try {
 			await user.save();
 			res.status(httpStatus.OK).json({
-				data: {
-					user: user
-				},
+				data: null,
 				message: 'User successfully registered'
 			});
 		}
@@ -69,7 +67,7 @@ class AuthController {
 			res.status(httpStatus.OK).json(user.isAuthenticated(token));
 
 		} catch (error) {
-			next(new APIError(error, httpStatus.INTERNAL_SERVER_ERROR));
+			next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
 		}
 	}
 }

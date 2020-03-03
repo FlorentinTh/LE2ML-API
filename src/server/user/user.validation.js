@@ -7,6 +7,11 @@ const validation = {
 		check('firstname').notEmpty().isString(),
 		check('email').notEmpty().isEmail(),
 		check('role').notEmpty().isString().isIn([roles.ADMIN, roles.USER])
+	],
+	changePassword: [
+		check('currentPassword').notEmpty().isString(),
+		check('newPassword').notEmpty().isString(),
+		check('newPasswordConfirm').notEmpty().isString()
 	]
 };
 

@@ -20,6 +20,6 @@ passport.use(new JwtStrategy({
 
 		return done(null, user);
 	} catch (error) {
-		done(new APIError(error, httpStatus.INTERNAL_SERVER_ERROR));
+		done(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
 	}
 }));

@@ -23,4 +23,12 @@ router.route('/:id').put(
 	UserController.updateUser
 );
 
+router.route('/password/:id').put(
+	passport.authenticate('jwt', { session: false }),
+	Authority.allowOnlyRoles(roles.ADMIN, roles.USER),
+	Authority.allowSameIdentity(),
+	validation.changePassword,
+	UserController.changePassword
+);
+
 export default router;
