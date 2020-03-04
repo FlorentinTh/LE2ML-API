@@ -1,8 +1,8 @@
 {
 	"files.autoSave": "afterDelay",
 	"files.autoSaveDelay": 10000,
-	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": true
-	}
+	},
+	"eslint.validate": ["javascript"]
 }

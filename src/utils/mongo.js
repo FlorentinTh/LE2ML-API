@@ -7,47 +7,48 @@ const config = Config.getConfig();
 mongoose.Promise = global.Promise;
 
 class Mongo {
-	constructor() {
-		this.connectionString = `mongodb://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}:${config.mongo.port}/${config.mongo.db}?authSource=admin&w=1`;
+  constructor() {
+    this.connectionString = `mongodb://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}:${config.mongo.port}/${config.mongo.db}?authSource=admin&w=1`;
 
-		mongoose.connection.on('connected', () => {
-			logger.info(`Connected to database on Worker process: ${process.pid}`);
-		});
+    mongoose.connection.on('connected', () => {
+      logger.info(`Database connected. Worker process: ${process.pid}`);
+    });
 
-		mongoose.connection.on('reconnected', () => {
-			logger.info(`Re-onnected to database on Worker process: ${process.pid}`);
-		});
+    mongoose.connection.on('reconnected', () => {
+      logger.info(`Database re-onnected. Worker process: ${process.pid}`);
+    });
 
-		mongoose.connection.on('disconnected', () => {
-			logger.info('Disconnected from database');
-		});
+    mongoose.connection.on('disconnected', () => {
+      logger.info('Database disconnected');
+    });
 
-		mongoose.connection.on('close', () => {
-			logger.info('Connection to database closed');
-		});
+    mongoose.connection.on('close', () => {
+      logger.info('Database connection closed');
+    });
 
-		mongoose.connection.on('error', (error) => {
-			logger.error('ERROR: ' + error);
-		});
-	}
+    mongoose.connection.on('error', error => {
+      logger.error('Error while trying to connect to database: ' + error);
+    });
+  }
 
-	async run() {
-		try {
-			await mongoose.connect(this.connectionString, {
-				useNewUrlParser: true,
-				useUnifiedTopology: true,
-				useCreateIndex: true,
-				useFindAndModify: false,
-				auth: {
-					authdb: 'admin'
-				}
-			});
-		}
-		catch (error) {
-			logger.error(`Connection to database failed, error: ${error.message} on worker process: ${process.pid}`);
-			process.exit(1);
-		}
-	}
+  async run() {
+    try {
+      await mongoose.connect(this.connectionString, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+        auth: {
+          authdb: 'admin'
+        }
+      });
+    } catch (error) {
+      logger.error(
+        `Connection to database failed on worker: ${process.pid}. Reason: ${error.message}`
+      );
+      process.exit(1);
+    }
+  }
 }
 
 module.exports = new Mongo();

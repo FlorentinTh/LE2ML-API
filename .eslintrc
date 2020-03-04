@@ -1,51 +1,42 @@
 {
 	"extends": [
-		"env",
-		"eslint:recommended",
-		"plugin:node/recommended",
+		"standard",
+		"plugin:prettier/recommended",
 		"plugin:json/recommended"
 	],
 	"env": {
+		"es6": true,
 		"node": true
 	},
+	"globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
 	"parserOptions": {
 		"parser": "babel-eslint",
 		"sourceType": "module",
 		"ecmaVersion": 2020
 	},
 	"rules": {
-		"indent": [
-			"error",
-			"tab"
-		],
-		"linebreak-style": [
-			"error",
-			"unix"
-		],
-		"quotes": [
-			"error",
-			"single"
-		],
+		"no-console": "warn",
 		"semi": [
 			"error",
 			"always"
 		],
-		"comma-dangle": [
-			"error",
-			"never"
+		"max-len": [
+			"warn",
+			{
+				"code": 90,
+				"tabWidth": 2,
+				"comments": 110,
+				"ignoreComments": false,
+				"ignoreTrailingComments": true,
+				"ignoreUrls": true,
+				"ignoreStrings": false,
+				"ignoreTemplateLiterals": true,
+				"ignoreRegExpLiterals": true
+			}
 		],
-		"arrow-parens": [
-			"error",
-			"always"
-		],
-		"brace-style": [
-			"error",
-			"stroustrup"
-		],
-		"space-before-blocks": [
-			"error",
-			"always"
-		]
 	},
 	"settings": {
 		"import/resolver": {

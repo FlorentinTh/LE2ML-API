@@ -23,7 +23,7 @@ const app = express();
 const APIv1 = express();
 
 if (isDev) {
-	app.use(logger('dev'));
+  app.use(logger('dev'));
 }
 
 app.use(bodyParser.json());
@@ -42,16 +42,16 @@ APIv1.use('/v1/admin/user', adminRoutes);
 app.use('/api', APIv1);
 
 app.use((req, res, next) => {
-	const err = new APIError('API not found', httpStatus.NOT_FOUND);
-	next(err);
+  const err = new APIError('API not found', httpStatus.NOT_FOUND);
+  next(err);
 });
 
 app.use((err, req, res, next) => {
-	res.status(err.status || 500).json({
-		status: 'error',
-		code: err.status,
-		message: err.message
-	});
+  res.status(err.status || 500).json({
+    status: 'error',
+    code: err.status,
+    message: err.message
+  });
 });
 
 export default app;

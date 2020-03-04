@@ -5,142 +5,166 @@ import User from '../user/user.model';
 import APIError from '@APIError';
 
 class UserController {
-	constructor() { }
+  async getUserById(req, res, next) {
+    const id = req.params.id;
 
-	async getUserById(req, res, next) {
-		const id = req.params.id;
+    try {
+      const user = await User.findOne()
+        .where('_id')
+        .in([id])
+        .select(['lastname', 'firstname', 'email', 'role'])
+        .exec();
 
-		try {
-			const user = await User.findOne().where('_id').in([id]).exec();
+      if (!user) {
+        return next(new APIError('user not found', httpStatus.NOT_FOUND));
+      }
 
-			if (!user) {
-				return next(new APIError('user not found', httpStatus.NOT_FOUND));
-			}
+      res.status(httpStatus.OK).json({
+        data: {
+          user: user
+        },
+        message: 'success'
+      });
+    } catch (error) {
+      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
 
-			res.status(httpStatus.OK).json({
-				data: {
-					user: user
-				},
-				message: null
-			});
+  async getUsers(req, res, next) {
+    try {
+      const users = await User.find()
+        .select(['lastname', 'firstname', 'email', 'role', 'dateCreated'])
+        .exec();
 
-		} catch (error) {
-			next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-		}
-	}
+      if (!users) {
+        return next(new APIError('cannot find all users', httpStatus.NOT_FOUND));
+      }
 
-	async getUsers(req, res, next) {
-		try {
-			const users = await User.find().exec();
+      res.status(httpStatus.OK).json({
+        data: {
+          total: users.length,
+          users: users
+        },
+        message: 'success'
+      });
+    } catch (error) {
+      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
 
-			if (!users) {
-				return next(new APIError('cannot find all users', httpStatus.NOT_FOUND));
-			}
+  async updateUser(req, res, next) {
+    const bodyErrors = validationResult(req);
 
-			res.status(httpStatus.OK).json({
-				data: {
-					total: users.length,
-					users: users
-				},
-				message: null
-			});
+    if (!bodyErrors.isEmpty()) {
+      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+    }
 
-		} catch (error) {
-			next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-		}
-	}
+    const id = req.params.id;
+    const body = req.body;
 
-	async updateUser(req, res, next) {
+    try {
+      const user = await User.findOneAndUpdate({ _id: id }, body, { new: true }).exec();
 
-		const bodyErrors = validationResult(req);
+      if (!user) {
+        return next(
+          new APIError('user not found, cannot be updated', httpStatus.NOT_FOUND)
+        );
+      }
 
-		if (!bodyErrors.isEmpty()) {
-			return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
-		}
+      const isValidPassword = await user.validatePassword(body.password);
 
-		const id = req.params.id;
-		const body = req.body;
+      if (!isValidPassword) {
+        return next(new APIError('invalid password', httpStatus.UNAUTHORIZED));
+      }
 
-		try {
-			const user = await User.findOneAndUpdate({ _id: id }, body, { new: true }).exec();
+      res.status(httpStatus.OK).json({
+        data: {
+          user: {
+            _id: user._id,
+            lastname: user.lastname,
+            firstname: user.firstname,
+            email: user.email,
+            role: user.role
+          }
+        },
+        message: 'user successfully updated'
+      });
+    } catch (error) {
+      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
 
-			if (!user) {
-				return next(new APIError('user not found, cannot be updated', httpStatus.NOT_FOUND));
-			}
+  async removeUser(req, res, next) {
+    const id = req.params.id;
 
-			res.status(httpStatus.OK).json({
-				data: {
-					user: user
-				},
-				message: 'user successfully updated'
-			});
+    try {
+      const user = await User.remove({ _id: id }).exec();
 
-		} catch (error) {
-			next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-		}
-	}
+      if (!user) {
+        return next(
+          new APIError('user not found, cannot be removed', httpStatus.NOT_FOUND)
+        );
+      }
 
-	async removeUser(req, res, next) {
-		const id = req.params.id;
+      res.status(httpStatus.OK).json({
+        data: {
+          user: user
+        },
+        message: 'user successfully deleted'
+      });
+    } catch (error) {
+      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
 
-		try {
-			const user = await User.remove({ _id: id }).exec();
+  async changePassword(req, res, next) {
+    const bodyErrors = validationResult(req);
 
-			if (!user) {
-				return next(new APIError('user not found, cannot be removed', httpStatus.NOT_FOUND));
-			}
+    if (!bodyErrors.isEmpty()) {
+      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+    }
 
-			res.status(httpStatus.OK).json({
-				data: {
-					user: user
-				},
-				message: 'user successfully deleted'
-			});
+    const id = req.params.id;
+    const body = req.body;
 
-		} catch (error) {
-			next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-		}
-	}
+    try {
+      const user = await User.findOne()
+        .where('_id')
+        .in([id])
+        .exec();
 
-	async changePassword(req, res, next) {
-		const bodyErrors = validationResult(req);
+      if (!user) {
+        return next(
+          new APIError('user not found, password cannot be changed', httpStatus.NOT_FOUND)
+        );
+      }
 
-		if (!bodyErrors.isEmpty()) {
-			return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
-		}
+      const isValidPassword = await user.validatePassword(body.currentPassword);
 
-		const id = req.params.id;
-		const body = req.body;
+      if (!isValidPassword) {
+        return next(new APIError('invalid current password', httpStatus.UNAUTHORIZED));
+      }
 
-		try {
-			const user = await User.findOne().where('_id').in([id]).exec();
+      if (!(body.newPassword === body.newPasswordConfirm)) {
+        return next(
+          new APIError(
+            'both new password and confirmation must be identical',
+            httpStatus.INTERNAL_SERVER_ERROR
+          )
+        );
+      }
 
-			if (!user) {
-				return next(new APIError('user not found, password cannot be changed', httpStatus.NOT_FOUND));
-			}
+      await user.setPassword(body.newPassword);
 
-			const isValidPassword = await user.validatePassword(body.currentPassword);
-
-			if (!isValidPassword) {
-				return next(new APIError('invalid current password', httpStatus.NOT_FOUND));
-			}
-
-			if (!(body.newPassword === body.newPasswordConfirm)) {
-				return next(new APIError('both new password and confirmation must be identical', httpStatus.INTERNAL_SERVER_ERROR));
-			}
-
-			await user.setPassword(body.newPassword);
-
-			await user.save();
-			res.status(httpStatus.OK).json({
-				data: null,
-				message: 'password successfully changed'
-			});
-
-		} catch (error) {
-			next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-		}
-	}
+      await user.save();
+      res.status(httpStatus.OK).json({
+        data: null,
+        message: 'password successfully changed'
+      });
+    } catch (error) {
+      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
 }
 
 module.exports = new UserController();

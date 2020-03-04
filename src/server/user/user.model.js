@@ -5,71 +5,77 @@ import Config from '@Config';
 import { roles } from './../user/roles/roles';
 
 class User extends Schema {
-	constructor() {
-		const user = super(
-			{
-				lastname: {
-					type: String,
-					required: true
-				},
-				firstname: {
-					type: String,
-					required: true
-				},
-				dateCreated: {
-					type: Date,
-					default: Date.now
-				},
-				email: {
-					type: String,
-					unique: true,
-					required: true
-				},
-				role: {
-					type: String,
-					enum: [roles.ADMIN, roles.USER],
-					default: roles.USER
-				},
-				hash: String,
-				salt: String
-			},
-			{ versionKey: false }
-		);
+  constructor() {
+    const user = super(
+      {
+        lastname: {
+          type: String,
+          required: true
+        },
+        firstname: {
+          type: String,
+          required: true
+        },
+        dateCreated: {
+          type: Date,
+          default: Date.now
+        },
+        email: {
+          type: String,
+          unique: true,
+          required: true
+        },
+        role: {
+          type: String,
+          enum: [roles.ADMIN, roles.USER],
+          default: roles.USER
+        },
+        hash: String,
+        salt: String
+      },
+      { versionKey: false }
+    );
 
-		user.methods.setPassword = this.setPassword;
-		user.methods.validatePassword = this.validatePassword;
-		user.methods.generateJwt = this.generateJwt;
-		user.methods.isAuthenticated = this.isAuthenticated;
-		user.methods.checkRole = this.checkRole;
-	}
+    user.methods.setPassword = this.setPassword;
+    user.methods.validatePassword = this.validatePassword;
+    user.methods.generateJwt = this.generateJwt;
+    user.methods.isAuthenticated = this.isAuthenticated;
+    user.methods.checkRole = this.checkRole;
+  }
 
-	async setPassword(password) {
-		const salt = await bcrypt.genSalt(10);
-		const hash = await bcrypt.hash(password, salt);
-		this.salt = salt;
-		this.hash = hash;
-	}
+  async setPassword(password) {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    this.salt = salt;
+    this.hash = hash;
+  }
 
-	async validatePassword(password) {
-		const hash = await bcrypt.compare(password, this.hash);
-		return (this.hash = hash);
-	}
+  async validatePassword(password) {
+    const hash = await bcrypt.compare(password, this.hash);
+    return (this.hash = hash);
+  }
 
-	generateJwt() {
-		return jwt.sign(this.toJSON(), Config.getConfig().jwtSecret, {
-			expiresIn: '2 days'
-		});
-	}
+  generateJwt() {
+    return jwt.sign(this.toJSON(), Config.getConfig().jwtSecret, {
+      expiresIn: '2 days'
+    });
+  }
 
-	isAuthenticated(token) {
-		return {
-			data: {
-				uid: this._id,
-				token: token
-			},
-			message: 'user successfully authenticated'
-		};
-	}
+  isAuthenticated(token) {
+    return {
+      data: {
+        user: {
+          _id: this._id,
+          lastname: this.lastname,
+          firstname: this.firstname,
+          email: this.email,
+          role: this.role,
+          token: token
+        }
+      },
+      message: 'user successfully authenticated'
+    };
+  }
 }
 
 module.exports = model('User', new User());
