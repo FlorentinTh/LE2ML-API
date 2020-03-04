@@ -36,11 +36,11 @@
 				"ignoreTemplateLiterals": true,
 				"ignoreRegExpLiterals": true
 			}
-		],
+		]
 	},
 	"settings": {
 		"import/resolver": {
 			"babel-module": {}
 		}
-	}
+    }
 }
