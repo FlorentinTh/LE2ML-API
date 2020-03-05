@@ -11,7 +11,8 @@ const validation = {
     check('email')
       .notEmpty()
       .isEmail(),
-    check('password').notEmpty()
+    check('password').notEmpty(),
+    check('passwordConfirm').notEmpty()
   ],
   login: [
     check('email')

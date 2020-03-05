@@ -12,6 +12,15 @@ class AuthController {
       return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
     }
 
+    if (!(req.body.password === req.body.passwordConfirm)) {
+      return next(
+        new APIError(
+          'both password and confirmation must be identical',
+          httpStatus.UNPROCESSABLE_ENTITY
+        )
+      );
+    }
+
     const user = new User();
     user.firstname = req.body.firstname;
     user.lastname = req.body.lastname;
