@@ -18,7 +18,8 @@
 					"@Logger": "./src/utils/logger",
 					"@Mongo": "./src/utils/mongo",
 					"@Passport": "./src/utils/passport",
-					"@APIError": "./src/server/helpers/APIError"
+					"@APIError": "./src/server/helpers/APIError",
+					"@Authority": "./src/server/helpers/authority"
 				},
 				"extensions": [
 					".js",

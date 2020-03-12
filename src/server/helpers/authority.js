@@ -18,10 +18,7 @@ class Authority {
 
       if (!hasRole) {
         return next(
-          new APIError(
-            'user does not have sufficient privileges',
-            httpStatus.UNAUTHORIZED
-          )
+          new APIError('user does not have sufficient privileges', httpStatus.FORBIDDEN)
         );
       }
 

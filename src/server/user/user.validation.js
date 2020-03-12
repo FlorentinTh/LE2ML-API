@@ -19,18 +19,22 @@ const validation = {
     check('password')
       .notEmpty()
       .isString()
+      .isLength({ min: 8 })
   ],
   changePassword: [
     check('currentPassword')
       .notEmpty()
-      .isString(),
+      .isString()
+      .isLength({ min: 8 }),
     check('newPassword')
       .notEmpty()
-      .isString(),
+      .isString()
+      .isLength({ min: 8 }),
     check('newPasswordConfirm')
       .notEmpty()
       .isString()
+      .isLength({ min: 8 })
   ]
 };
 
-module.exports = validation;
+export default validation;

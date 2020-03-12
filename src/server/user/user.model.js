@@ -30,6 +30,11 @@ class User extends Schema {
           enum: [roles.ADMIN, roles.USER],
           default: roles.USER
         },
+        lastConnection: {
+          type: Date,
+          default: null,
+          required: false
+        },
         hash: String,
         salt: String
       },
@@ -65,11 +70,6 @@ class User extends Schema {
     return {
       data: {
         user: {
-          _id: this._id,
-          lastname: this.lastname,
-          firstname: this.firstname,
-          email: this.email,
-          role: this.role,
           token: token
         }
       },
@@ -78,4 +78,4 @@ class User extends Schema {
   }
 }
 
-module.exports = model('User', new User());
+export default model('User', new User());

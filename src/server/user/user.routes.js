@@ -3,7 +3,7 @@ import passport from 'passport';
 
 import UserController from './user.controller';
 import validation from './user.validation';
-import Authority from './../helpers/authority';
+import Authority from '@Authority';
 import { roles } from './roles/roles';
 
 const router = express.Router();
@@ -19,7 +19,7 @@ router
 
 router
   .route('/:id')
-  .put(
+  .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(roles.ADMIN, roles.USER),
     Authority.allowSameIdentity(),
@@ -29,7 +29,7 @@ router
 
 router
   .route('/password/:id')
-  .put(
+  .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(roles.ADMIN, roles.USER),
     Authority.allowSameIdentity(),

@@ -142,7 +142,7 @@ class UserController {
       const isValidPassword = await user.validatePassword(body.currentPassword);
 
       if (!isValidPassword) {
-        return next(new APIError('invalid current password', httpStatus.UNAUTHORIZED));
+        return next(new APIError('invalid current password', httpStatus.FORBIDDEN));
       }
 
       if (!(body.newPassword === body.newPasswordConfirm)) {
@@ -167,4 +167,4 @@ class UserController {
   }
 }
 
-module.exports = new UserController();
+export default new UserController();

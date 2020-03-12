@@ -69,6 +69,15 @@ class AuthController {
         return next(new APIError('invalid password', httpStatus.UNAUTHORIZED));
       }
 
+      const updateConnection = await User.findOneAndUpdate(
+        { _id: user.id },
+        { lastConnection: Date.now() }
+      ).exec();
+
+      if (!updateConnection) {
+        return next(new APIError('login failed', httpStatus.INTERNAL_SERVER_ERROR));
+      }
+
       const token = user.generateJwt(user);
       res.status(httpStatus.OK).json(user.isAuthenticated(token));
     } catch (error) {
@@ -77,4 +86,4 @@ class AuthController {
   }
 }
 
-module.exports = new AuthController();
+export default new AuthController();

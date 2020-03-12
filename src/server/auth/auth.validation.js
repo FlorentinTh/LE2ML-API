@@ -11,8 +11,12 @@ const validation = {
     check('email')
       .notEmpty()
       .isEmail(),
-    check('password').notEmpty(),
-    check('passwordConfirm').notEmpty()
+    check('password')
+      .notEmpty()
+      .isLength({ min: 8 }),
+    check('passwordConfirm')
+      .notEmpty()
+      .isLength({ min: 8 })
   ],
   login: [
     check('email')
@@ -22,4 +26,4 @@ const validation = {
   ]
 };
 
-module.exports = validation;
+export default validation;

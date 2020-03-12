@@ -3,7 +3,7 @@ import passport from 'passport';
 
 import UserController from '../user/user.controller';
 import validation from '../user/user.validation';
-import Authority from './../helpers/authority';
+import Authority from '@Authority';
 import { roles } from '../user/roles/roles';
 
 const router = express.Router();
@@ -26,7 +26,7 @@ router
 
 router
   .route('/:id')
-  .put(
+  .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(roles.ADMIN),
     validation.updateUser,

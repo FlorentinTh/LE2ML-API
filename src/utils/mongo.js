@@ -51,4 +51,4 @@ class Mongo {
   }
 }
 
-module.exports = new Mongo();
+export default new Mongo();
