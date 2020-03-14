@@ -1,48 +1,45 @@
 {
-	"extends": [
-		"standard",
-		"plugin:prettier/recommended",
-        "plugin:json/recommended",
-        "plugin:import/errors",
-        "plugin:import/warnings"
-	],
-	"env": {
-		"es6": true,
-		"node": true
-	},
-	"globals": {
-        "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
-    },
-	"parserOptions": {
-		"parser": "babel-eslint",
-		"sourceType": "module",
-		"ecmaVersion": 2017
-	},
-	"rules": {
-		"no-console": "warn",
-		"semi": [
-			"error",
-			"always"
-		],
-		"max-len": [
-			"warn",
-			{
-				"code": 90,
-				"tabWidth": 2,
-				"comments": 110,
-				"ignoreComments": false,
-				"ignoreTrailingComments": true,
-				"ignoreUrls": true,
-				"ignoreStrings": false,
-				"ignoreTemplateLiterals": true,
-				"ignoreRegExpLiterals": true
-			}
-		]
-	},
-	"settings": {
-		"import/resolver": {
-			"babel-module": {}
-		}
+  "extends": [
+    "standard",
+    "plugin:prettier/recommended",
+    "plugin:json/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings"
+  ],
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+    "parser": "babel-eslint",
+    "sourceType": "module",
+    "ecmaVersion": 2017
+  },
+  "rules": {
+    "no-console": "warn",
+    "semi": ["error", "always"],
+    "max-len": [
+      "warn",
+      {
+        "code": 90,
+        "tabWidth": 2,
+        "comments": 110,
+        "ignoreComments": false,
+        "ignoreTrailingComments": true,
+        "ignoreUrls": true,
+        "ignoreStrings": false,
+        "ignoreTemplateLiterals": true,
+        "ignoreRegExpLiterals": true
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "babel-module": {}
     }
+  }
 }
