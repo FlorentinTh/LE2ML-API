@@ -42,7 +42,7 @@ APIv1.use('/v1/admin/user', adminRoutes);
 app.use('/api', APIv1);
 
 app.use((req, res, next) => {
-  const err = new APIError('API not found', httpStatus.NOT_FOUND);
+  const err = new APIError('API not found.', httpStatus.NOT_FOUND);
   next(err);
 });
 

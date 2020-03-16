@@ -12,11 +12,11 @@ const validation = {
     check('email')
       .notEmpty()
       .isEmail(),
-    check('role')
+    check('password')
       .notEmpty()
       .isString()
-      .isIn([roles.ADMIN, roles.USER]),
-    check('password')
+      .isLength({ min: 8 }),
+    check('passwordConfirm')
       .notEmpty()
       .isString()
       .isLength({ min: 8 })

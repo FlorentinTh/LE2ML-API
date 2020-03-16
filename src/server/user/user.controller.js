@@ -16,7 +16,7 @@ class UserController {
         .exec();
 
       if (!user) {
-        return next(new APIError('user not found', httpStatus.NOT_FOUND));
+        return next(new APIError('User not found.', httpStatus.NOT_FOUND));
       }
 
       res.status(httpStatus.OK).json({
@@ -37,7 +37,7 @@ class UserController {
         .exec();
 
       if (!users) {
-        return next(new APIError('cannot find all users', httpStatus.NOT_FOUND));
+        return next(new APIError('Cannot find all users.', httpStatus.NOT_FOUND));
       }
 
       res.status(httpStatus.OK).json({
@@ -67,28 +67,28 @@ class UserController {
 
       if (!user) {
         return next(
-          new APIError('user not found, cannot be updated', httpStatus.NOT_FOUND)
+          new APIError('User not found, cannot be updated.', httpStatus.NOT_FOUND)
         );
       }
 
       const isValidPassword = await user.validatePassword(body.password);
 
       if (!isValidPassword) {
-        return next(new APIError('invalid password', httpStatus.UNAUTHORIZED));
+        return next(new APIError('Invalid password.', httpStatus.UNAUTHORIZED));
       }
 
-      res.status(httpStatus.OK).json({
-        data: {
-          user: {
-            _id: user._id,
-            lastname: user.lastname,
-            firstname: user.firstname,
-            email: user.email,
-            role: user.role
-          }
-        },
-        message: 'user successfully updated'
-      });
+      if (!(body.password === body.passwordConfirm)) {
+        return next(
+          new APIError(
+            'Both new password and confirmation must be identical.',
+            httpStatus.INTERNAL_SERVER_ERROR
+          )
+        );
+      }
+
+      const token = user.generateJwt(user);
+
+      res.status(httpStatus.OK).json(user.isAuthenticated(token));
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
     }
@@ -102,7 +102,7 @@ class UserController {
 
       if (!user) {
         return next(
-          new APIError('user not found, cannot be removed', httpStatus.NOT_FOUND)
+          new APIError('User not found, cannot be removed.', httpStatus.NOT_FOUND)
         );
       }
 
@@ -110,7 +110,7 @@ class UserController {
         data: {
           user: user
         },
-        message: 'user successfully deleted'
+        message: 'User successfully deleted.'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -135,7 +135,10 @@ class UserController {
 
       if (!user) {
         return next(
-          new APIError('user not found, password cannot be changed', httpStatus.NOT_FOUND)
+          new APIError(
+            'User not found, password cannot be changed.',
+            httpStatus.NOT_FOUND
+          )
         );
       }
 
@@ -148,7 +151,7 @@ class UserController {
       if (!(body.newPassword === body.newPasswordConfirm)) {
         return next(
           new APIError(
-            'both new password and confirmation must be identical',
+            'Both new password and confirmation must be identical.',
             httpStatus.INTERNAL_SERVER_ERROR
           )
         );
@@ -159,7 +162,7 @@ class UserController {
       await user.save();
       res.status(httpStatus.OK).json({
         data: null,
-        message: 'password successfully changed'
+        message: 'Password successfully changed.'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

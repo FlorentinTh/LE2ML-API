@@ -73,7 +73,7 @@ class User extends Schema {
           token: token
         }
       },
-      message: 'user successfully authenticated'
+      message: 'User successfully authenticated.'
     };
   }
 }
