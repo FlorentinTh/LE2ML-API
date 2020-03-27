@@ -15,7 +15,7 @@ import Mongo from '@Mongo';
 
 import authRoutes from './server/auth/auth.routes';
 import userRoutes from './server/user/user.routes';
-import adminRoutes from './server/admin/admin.routes';
+import adminRoutes from './server/admin/users/admin.users.routes';
 
 const isDev = Config.getConfig().env === 'development';
 
@@ -37,8 +37,8 @@ app.use(passport.initialize());
 Mongo.run();
 
 APIv1.use('/v1', authRoutes);
-APIv1.use('/v1/user', userRoutes);
-APIv1.use('/v1/admin/user', adminRoutes);
+APIv1.use('/v1/users', userRoutes);
+APIv1.use('/v1/admin/users', adminRoutes);
 app.use('/api', APIv1);
 
 app.use((req, res, next) => {

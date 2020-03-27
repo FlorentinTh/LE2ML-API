@@ -30,28 +30,6 @@ class UserController {
     }
   }
 
-  async getUsers(req, res, next) {
-    try {
-      const users = await User.find()
-        .select(['lastname', 'firstname', 'email', 'role', 'dateCreated'])
-        .exec();
-
-      if (!users) {
-        return next(new APIError('Cannot find all users.', httpStatus.NOT_FOUND));
-      }
-
-      res.status(httpStatus.OK).json({
-        data: {
-          total: users.length,
-          users: users
-        },
-        message: 'success'
-      });
-    } catch (error) {
-      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-    }
-  }
-
   async updateUser(req, res, next) {
     const bodyErrors = validationResult(req);
 
@@ -81,36 +59,20 @@ class UserController {
         return next(
           new APIError(
             'Both new password and confirmation must be identical.',
-            httpStatus.INTERNAL_SERVER_ERROR
+            httpStatus.UNPROCESSABLE_ENTITY
           )
         );
       }
 
       const token = user.generateJwt(user);
 
-      res.status(httpStatus.OK).json(user.isAuthenticated(token));
-    } catch (error) {
-      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-    }
-  }
-
-  async removeUser(req, res, next) {
-    const id = req.params.id;
-
-    try {
-      const user = await User.remove({ _id: id }).exec();
-
-      if (!user) {
-        return next(
-          new APIError('User not found, cannot be removed.', httpStatus.NOT_FOUND)
-        );
-      }
-
       res.status(httpStatus.OK).json({
         data: {
-          user: user
+          user: {
+            token: token
+          }
         },
-        message: 'User successfully deleted.'
+        message: 'User successfully updated.'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -152,17 +114,32 @@ class UserController {
         return next(
           new APIError(
             'Both new password and confirmation must be identical.',
-            httpStatus.INTERNAL_SERVER_ERROR
+            httpStatus.UNPROCESSABLE_ENTITY
           )
         );
       }
 
-      await user.setPassword(body.newPassword);
+      if (body.currentPassword === body.newPassword) {
+        return next(
+          new APIError(
+            'New password cannot be the same as current one.',
+            httpStatus.UNPROCESSABLE_ENTITY
+          )
+        );
+      }
 
+      await user.setPassword(body.newPassword, true);
       await user.save();
+
+      const token = user.generateJwt(user);
+
       res.status(httpStatus.OK).json({
-        data: null,
-        message: 'Password successfully changed.'
+        data: {
+          user: {
+            token: token
+          }
+        },
+        message: 'Password successfully modified.'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

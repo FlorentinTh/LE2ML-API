@@ -1,4 +1,5 @@
 import { check } from 'express-validator';
+import { roles } from '../../user/roles/roles';
 
 const validation = {
   updateUser: [
@@ -14,25 +15,27 @@ const validation = {
       .notEmpty()
       .isEmail()
       .isLowercase(),
-    check('password')
+    check('role')
       .notEmpty()
       .isString()
-      .isLength({ min: 8 }),
-    check('passwordConfirm')
-      .notEmpty()
-      .isString()
-      .isLength({ min: 8 })
+      .isIn([roles.ADMIN, roles.USER])
   ],
-  changePassword: [
-    check('currentPassword')
+  updateRole: [
+    check('role')
+      .notEmpty()
+      .isString()
+      .isIn([roles.ADMIN, roles.USER])
+  ],
+  setTempPassword: [
+    check('email')
+      .notEmpty()
+      .isEmail()
+      .isLowercase(),
+    check('tempPassword')
       .notEmpty()
       .isString()
       .isLength({ min: 8 }),
-    check('newPassword')
-      .notEmpty()
-      .isString()
-      .isLength({ min: 8 }),
-    check('newPasswordConfirm')
+    check('tempPasswordConfirm')
       .notEmpty()
       .isString()
       .isLength({ min: 8 })

@@ -10,15 +10,6 @@ const router = express.Router();
 
 router
   .route('/:id')
-  .get(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(roles.ADMIN, roles.USER),
-    Authority.allowSameIdentity(),
-    UserController.getUserById
-  );
-
-router
-  .route('/:id')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(roles.ADMIN, roles.USER),

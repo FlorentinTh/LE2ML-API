@@ -75,7 +75,7 @@ class AuthController {
       ).exec();
 
       if (!updateConnection) {
-        return next(new APIError('Login failed.', httpStatus.INTERNAL_SERVER_ERROR));
+        return next(new APIError('Sign-in failed.', httpStatus.INTERNAL_SERVER_ERROR));
       }
 
       const token = user.generateJwt(user);

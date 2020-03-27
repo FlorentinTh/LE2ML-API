@@ -4,13 +4,16 @@ const validation = {
   register: [
     check('lastname')
       .notEmpty()
-      .isString(),
+      .isString()
+      .isLowercase(),
     check('firstname')
       .notEmpty()
-      .isString(),
+      .isString()
+      .isLowercase(),
     check('email')
       .notEmpty()
-      .isEmail(),
+      .isEmail()
+      .isLowercase(),
     check('password')
       .notEmpty()
       .isLength({ min: 8 }),
@@ -21,8 +24,12 @@ const validation = {
   login: [
     check('email')
       .notEmpty()
-      .isEmail(),
-    check('password').notEmpty()
+      .isEmail()
+      .isLowercase(),
+    check('password')
+      .notEmpty()
+      .isString()
+      .isLength({ min: 8 })
   ]
 };
 

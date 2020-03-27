@@ -35,6 +35,11 @@ class User extends Schema {
           default: null,
           required: false
         },
+        tmpPassword: {
+          type: Boolean,
+          default: false,
+          required: false
+        },
         hash: String,
         salt: String
       },
@@ -48,11 +53,15 @@ class User extends Schema {
     user.methods.checkRole = this.checkRole;
   }
 
-  async setPassword(password) {
+  async setPassword(password, resetTmpPassword = false) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
     this.salt = salt;
     this.hash = hash;
+
+    if (resetTmpPassword && this.tmpPassword) {
+      this.tmpPassword = false;
+    }
   }
 
   async validatePassword(password) {
