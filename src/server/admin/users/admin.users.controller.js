@@ -5,6 +5,44 @@ import User from '../../user/user.model';
 import { roles } from '../../user/roles/roles';
 
 class AdminController {
+  async searchUser(req, res, next) {
+    const q = req.query.q;
+
+    try {
+      const users = await User.find()
+        .select([
+          'lastname',
+          'firstname',
+          'email',
+          'role',
+          'dateCreated',
+          'lastConnection'
+        ])
+        .or([
+          {
+            firstname: new RegExp('^.*' + q + '.*$', 'i')
+          },
+          {
+            lastname: new RegExp('^.*' + q + '.*$', 'i')
+          }
+        ])
+        .exec();
+
+      if (!users) {
+        return next(new APIError('User is not found.', httpStatus.NOT_FOUND));
+      }
+
+      res.status(httpStatus.OK).json({
+        data: {
+          users: users
+        },
+        message: 'success'
+      });
+    } catch (error) {
+      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
+
   async getUserByEmail(req, res, next) {
     const email = req.params.email;
 
@@ -31,8 +69,20 @@ class AdminController {
   }
 
   async getUsers(req, res, next) {
+    // const pageOpts = {
+    //   page: parseInt(req.query.page, 10) || 0,
+    //   limit: parseInt(req.query.limit, 10) || 500
+    // };
+
+    const role = req.query.role || roles.USER;
+
+    if (!(role === roles.USER || role === roles.ADMIN)) {
+      return next(new APIError('Unknown role', httpStatus.BAD_REQUEST));
+    }
+
     try {
-      const users = await User.find()
+      let users = null;
+      users = await User.find()
         .select([
           'lastname',
           'firstname',
@@ -41,24 +91,31 @@ class AdminController {
           'dateCreated',
           'lastConnection'
         ])
+        .where('role')
+        .in([role])
         .exec();
+      //   users = await User.find()
+      //     .select([
+      //       'lastname',
+      //       'firstname',
+      //       'email',
+      //       'role',
+      //       'dateCreated',
+      //       'lastConnection'
+      //     ])
+      //     .where('role')
+      //     .in([role])
+      //     .skip(pageOpts.page * pageOpts.limit)
+      //     .limit(pageOpts.limit)
+      //     .exec();
 
       if (!users) {
         return next(new APIError('Cannot find all users.', httpStatus.NOT_FOUND));
       }
 
-      const adminUsers = users.filter(user => user.role === roles.ADMIN);
-      const normalUsers = users.filter(user => user.role !== roles.ADMIN);
-
       const data = {
-        admin: {
-          total: adminUsers.length,
-          users: adminUsers
-        },
-        normal: {
-          total: normalUsers.length,
-          users: normalUsers
-        }
+        total: users.length,
+        users: users
       };
 
       res.status(httpStatus.OK).json({

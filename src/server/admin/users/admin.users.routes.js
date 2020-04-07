@@ -34,6 +34,14 @@ router
   );
 
 router
+  .route('/search/user')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(roles.ADMIN),
+    AdminController.searchUser
+  );
+
+router
   .route('/:id')
   .post(
     passport.authenticate('jwt', { session: false }),
