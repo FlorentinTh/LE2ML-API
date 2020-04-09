@@ -15,7 +15,9 @@ const defaultValidationSchema = Joi.object({
     .default(27017),
   MONGO_DB: Joi.string().required(),
   MONGO_USER: Joi.string().required(),
-  MONGO_PASSWORD: Joi.string().required()
+  MONGO_PASSWORD: Joi.string().required(),
+  CERT_FILE_PATH: Joi.string().required(),
+  KEY_FILE_PATH: Joi.string().required()
 })
   .unknown()
   .required();
@@ -38,6 +40,10 @@ class Config {
         db: env.MONGO_DB,
         user: env.MONGO_USER,
         password: env.MONGO_PASSWORD
+      },
+      certs: {
+        crt: env.CERT_FILE_PATH,
+        key: env.KEY_FILE_PATH
       }
     };
   }

@@ -6,9 +6,14 @@
  * Module dependencies.
  */
 
-import http from 'http';
+// import http from 'http';
 import app from '@App';
 import logger from '@Logger';
+import path from 'path';
+import fs from 'fs';
+import spdy from 'spdy';
+
+import Config from '@Config';
 
 /**
  * Get port from environment and store in Express.
@@ -18,10 +23,26 @@ const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
+ * Load key and cert files
+ */
+const rootPath = path.resolve(path.join(__dirname, '..', '..'));
+
+const options = {
+  key: fs.readFileSync(path.resolve(rootPath, Config.getConfig().certs.key)),
+  cert: fs.readFileSync(path.resolve(rootPath, Config.getConfig().certs.crt))
+};
+
+/**
  * Create HTTP server.
  */
 
-const server = http.createServer(app);
+// const server = http.createServer(app);
+
+/**
+ * Create HTTP/2 server.
+ */
+
+const server = spdy.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
