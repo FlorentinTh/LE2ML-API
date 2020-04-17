@@ -11,7 +11,7 @@ router
   .route('/')
   .get(
     passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
     FeatureController.getFeatures
   );
 
