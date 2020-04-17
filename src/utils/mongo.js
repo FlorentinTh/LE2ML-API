@@ -8,7 +8,12 @@ mongoose.Promise = global.Promise;
 
 class Mongo {
   constructor() {
-    this.connectionString = `mongodb://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}:${config.mongo.port}/${config.mongo.db}?authSource=admin&w=1`;
+    this.connectionString = `mongodb://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}:${config.mongo.port}?authSource=admin&w=1`;
+
+    mongoose.set('useNewUrlParser', true);
+    mongoose.set('useCreateIndex', true);
+    mongoose.set('useUnifiedTopology', true);
+    mongoose.set('useFindAndModify', false);
 
     mongoose.connection.on('connected', () => {
       logger.info(`Database connected. Worker process: ${process.pid}`);
@@ -34,10 +39,6 @@ class Mongo {
   async run() {
     try {
       await mongoose.connect(this.connectionString, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
         auth: {
           authdb: 'admin'
         }

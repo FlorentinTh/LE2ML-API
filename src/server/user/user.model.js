@@ -1,8 +1,11 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Config from '@Config';
-import { roles } from './../user/roles/roles';
+import { role } from './role';
+
+const config = Config.getConfig();
+const database = mongoose.connection.useDb(config.mongo.auth_db);
 
 class User extends Schema {
   constructor() {
@@ -27,8 +30,8 @@ class User extends Schema {
         },
         role: {
           type: String,
-          enum: [roles.ADMIN, roles.USER],
-          default: roles.USER
+          enum: [role.ADMIN, role.USER],
+          default: role.USER
         },
         lastConnection: {
           type: Date,
@@ -70,7 +73,7 @@ class User extends Schema {
   }
 
   generateJwt() {
-    return jwt.sign(this.toJSON(), Config.getConfig().jwtSecret, {
+    return jwt.sign(this.toJSON(), config.jwtSecret, {
       expiresIn: '2 days'
     });
   }
@@ -87,4 +90,4 @@ class User extends Schema {
   }
 }
 
-export default model('User', new User());
+export default database.model('User', new User());

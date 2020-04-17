@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
 import APIError from '@APIError';
 import User from '../../user/user.model';
-import { roles } from '../../user/roles/roles';
+import { role } from '../../user/role';
 
 class AdminController {
   async searchUser(req, res, next) {
@@ -74,9 +74,9 @@ class AdminController {
     //   limit: parseInt(req.query.limit, 10) || 500
     // };
 
-    const role = req.query.role || roles.USER;
+    const roleParam = req.query.role || role.USER;
 
-    if (!(role === roles.USER || role === roles.ADMIN)) {
+    if (!(roleParam === role.USER || roleParam === role.ADMIN)) {
       return next(new APIError('Unknown role', httpStatus.BAD_REQUEST));
     }
 
@@ -92,7 +92,7 @@ class AdminController {
           'lastConnection'
         ])
         .where('role')
-        .in([role])
+        .in([roleParam])
         .exec();
       //   users = await User.find()
       //     .select([
@@ -138,7 +138,9 @@ class AdminController {
     const body = req.body;
 
     try {
-      const user = await User.findOneAndUpdate({ _id: id }, body, { new: true }).exec();
+      const user = await User.findOneAndUpdate({ _id: id }, body, {
+        new: true
+      }).exec();
 
       if (!user) {
         return next(

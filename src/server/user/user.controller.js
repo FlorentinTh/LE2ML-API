@@ -41,7 +41,9 @@ class UserController {
     const body = req.body;
 
     try {
-      const user = await User.findOneAndUpdate({ _id: id }, body, { new: true }).exec();
+      const user = await User.findOneAndUpdate({ _id: id }, body, {
+        new: true
+      }).exec();
 
       if (!user) {
         return next(

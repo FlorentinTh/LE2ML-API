@@ -5,6 +5,10 @@ import AuthController from './auth.controller';
 
 const router = express.Router();
 
+router.route('/hello').get((req, res, next) => {
+  res.status(200).json({ message: 'Hello World!' });
+});
+
 router.route('/register').put(validation.register, AuthController.register);
 router.route('/login').post(validation.login, AuthController.login);
 

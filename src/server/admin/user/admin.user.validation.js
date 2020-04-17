@@ -1,5 +1,5 @@
 import { check } from 'express-validator';
-import { roles } from '../../user/roles/roles';
+import { role } from '../../user/role';
 
 const validation = {
   updateUser: [
@@ -18,13 +18,13 @@ const validation = {
     check('role')
       .notEmpty()
       .isString()
-      .isIn([roles.ADMIN, roles.USER])
+      .isIn([role.ADMIN, role.USER])
   ],
   updateRole: [
     check('role')
       .notEmpty()
       .isString()
-      .isIn([roles.ADMIN, roles.USER])
+      .isIn([role.ADMIN, role.USER])
   ],
   setTempPassword: [
     check('email')

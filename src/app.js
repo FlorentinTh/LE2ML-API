@@ -15,9 +15,11 @@ import Mongo from '@Mongo';
 
 import authRoutes from './server/auth/auth.routes';
 import userRoutes from './server/user/user.routes';
-import adminUsersRoutes from './server/admin/users/admin.users.routes';
+import featuresRoutes from './server/feature/feature.routes';
+import adminUsersRoutes from './server/admin/user/admin.user.routes';
 
-const isDev = Config.getConfig().env === 'development';
+const config = Config.getConfig();
+const isDev = config.env === 'development';
 
 const app = express();
 const APIv1 = express();
@@ -38,6 +40,7 @@ Mongo.run();
 
 APIv1.use('/v1', authRoutes);
 APIv1.use('/v1/users', userRoutes);
+APIv1.use('/v1/features', featuresRoutes);
 APIv1.use('/v1/admin/users', adminUsersRoutes);
 app.use('/api', APIv1);
 
