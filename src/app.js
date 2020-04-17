@@ -15,6 +15,7 @@ import Mongo from '@Mongo';
 
 import authRoutes from './server/auth/auth.routes';
 import userRoutes from './server/user/user.routes';
+import filesRoutes from './server/file/file.routes';
 import featuresRoutes from './server/feature/feature.routes';
 import adminUsersRoutes from './server/admin/user/admin.user.routes';
 
@@ -40,6 +41,7 @@ Mongo.run();
 
 APIv1.use('/v1', authRoutes);
 APIv1.use('/v1/users', userRoutes);
+APIv1.use('/v1/files', filesRoutes);
 APIv1.use('/v1/features', featuresRoutes);
 APIv1.use('/v1/admin/users', adminUsersRoutes);
 app.use('/api', APIv1);

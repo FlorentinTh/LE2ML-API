@@ -73,7 +73,16 @@ class User extends Schema {
   }
 
   generateJwt() {
-    return jwt.sign(this.toJSON(), config.jwtSecret, {
+    const user = {
+      _id: this._id,
+      firstname: this.firstname,
+      lastname: this.lastname,
+      email: this.email,
+      role: this.role,
+      tmpPassword: this.tmpPassword
+    };
+
+    return jwt.sign(user, config.jwtSecret, {
       expiresIn: '2 days'
     });
   }
