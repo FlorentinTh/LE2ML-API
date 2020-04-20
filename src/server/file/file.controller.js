@@ -3,7 +3,9 @@ import APIError from '@APIError';
 import fileType from './fileType';
 import path from 'path';
 import { promises as fs } from 'fs';
+import Config from '@Config';
 
+const config = Config.getConfig();
 class FileController {
   async getFiles(req, res, next) {
     const type = req.query.type;
@@ -13,7 +15,7 @@ class FileController {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
 
-    const basePath = path.normalize('D:/Development/PiCluster-data');
+    const basePath = config.data.base_path;
     const fullPath = path.join(basePath, userId, type);
 
     let files;

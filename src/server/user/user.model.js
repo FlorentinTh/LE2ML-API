@@ -43,6 +43,10 @@ class User extends Schema {
           default: false,
           required: false
         },
+        isDeleted: {
+          type: Boolean,
+          default: false
+        },
         hash: String,
         salt: String
       },

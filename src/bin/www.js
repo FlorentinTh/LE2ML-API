@@ -15,6 +15,8 @@ import spdy from 'spdy';
 
 import Config from '@Config';
 
+const config = Config.getConfig();
+
 /**
  * Get port from environment and store in Express.
  */
@@ -28,8 +30,8 @@ app.set('port', port);
 const rootPath = path.resolve(path.join(__dirname, '..', '..'));
 
 const options = {
-  key: fs.readFileSync(path.resolve(rootPath, Config.getConfig().certs.key)),
-  cert: fs.readFileSync(path.resolve(rootPath, Config.getConfig().certs.crt))
+  key: fs.readFileSync(path.resolve(rootPath, config.certs.key_path)),
+  cert: fs.readFileSync(path.resolve(rootPath, config.certs.crt_path))
 };
 
 /**

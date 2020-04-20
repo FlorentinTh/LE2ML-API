@@ -1,56 +1,23 @@
 import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
+import fs from 'fs-extra';
+import path from 'path';
 import APIError from '@APIError';
 import User from '../../user/user.model';
 import { role } from '../../user/role';
+import Config from '@Config';
+
+const config = Config.getConfig();
 
 class AdminController {
-  async searchUser(req, res, next) {
-    const q = req.query.q;
-
-    try {
-      const users = await User.find()
-        .select([
-          'lastname',
-          'firstname',
-          'email',
-          'role',
-          'dateCreated',
-          'lastConnection'
-        ])
-        .or([
-          {
-            firstname: new RegExp('^.*' + q + '.*$', 'i')
-          },
-          {
-            lastname: new RegExp('^.*' + q + '.*$', 'i')
-          }
-        ])
-        .exec();
-
-      if (!users) {
-        return next(new APIError('User is not found.', httpStatus.NOT_FOUND));
-      }
-
-      res.status(httpStatus.OK).json({
-        data: {
-          users: users
-        },
-        message: 'success'
-      });
-    } catch (error) {
-      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-    }
-  }
-
   async getUserByEmail(req, res, next) {
     const email = req.params.email;
 
     try {
       const user = await User.findOne()
-        .where('email')
-        .in([email])
         .select(['lastname', 'firstname', 'email'])
+        .where({ email: email })
+        .where({ isDeleted: false })
         .exec();
 
       if (!user) {
@@ -91,8 +58,8 @@ class AdminController {
           'dateCreated',
           'lastConnection'
         ])
-        .where('role')
-        .in([roleParam])
+        .where({ role: roleParam })
+        .where({ isDeleted: false })
         .exec();
       //   users = await User.find()
       //     .select([
@@ -162,23 +129,40 @@ class AdminController {
   async removeUser(req, res, next) {
     const id = req.params.id;
 
+    let user;
     try {
-      const user = await User.findOneAndDelete({ _id: id }).exec();
+      user = await User.findOne({ _id: id }).exec();
+    } catch (error) {
+      return next(
+        new APIError(
+          'User not found, cannot be deleted.',
+          httpStatus.INTERNAL_SERVER_ERROR
+        )
+      );
+    }
 
-      if (!user) {
-        return next(
-          new APIError('User not found, cannot be removed.', httpStatus.NOT_FOUND)
-        );
-      }
+    const userDirPath = path.join(config.data.base_path, id);
+    const destination = path.join(config.data.base_path, '.deleted', id);
 
+    try {
+      await fs.move(userDirPath, destination);
+    } catch (error) {
+      return next(
+        new APIError(
+          `Unable to remove data directories`,
+          httpStatus.INTERNAL_SERVER_ERROR
+        )
+      );
+    }
+
+    try {
+      await user.update({ isDeleted: true }).exec();
       res.status(httpStatus.OK).json({
-        data: {
-          user: user
-        },
+        data: user,
         message: 'User successfully deleted.'
       });
     } catch (error) {
-      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
     }
   }
 

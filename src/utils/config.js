@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ const defaultValidationSchema = Joi.object({
   MONGO_CONF_DB: Joi.string().required(),
   MONGO_USER: Joi.string().required(),
   MONGO_PASSWORD: Joi.string().required(),
+  DATA_BASE_PATH: Joi.string().required(),
   CERT_FILE_PATH: Joi.string().required(),
   KEY_FILE_PATH: Joi.string().required()
 })
@@ -45,9 +47,12 @@ class Config {
         user: env.MONGO_USER,
         password: env.MONGO_PASSWORD
       },
+      data: {
+        base_path: path.normalize(env.DATA_BASE_PATH)
+      },
       certs: {
-        crt: env.CERT_FILE_PATH,
-        key: env.KEY_FILE_PATH
+        crt_path: path.normalize(env.CERT_FILE_PATH),
+        key_path: path.normalize(env.KEY_FILE_PATH)
       }
     };
   }

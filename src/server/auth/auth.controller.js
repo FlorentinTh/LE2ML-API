@@ -1,9 +1,12 @@
 import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
-
+import { promises as fs } from 'fs';
+import path from 'path';
 import User from '../user/user.model';
 import APIError from '@APIError';
+import Config from '@Config';
 
+const config = Config.getConfig();
 class AuthController {
   async register(req, res, next) {
     const bodyErrors = validationResult(req);
@@ -29,7 +32,20 @@ class AuthController {
     try {
       await user.setPassword(req.body.password);
     } catch (error) {
-      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    const userDirPath = path.join(config.data.base_path, user._id.toString());
+
+    try {
+      await fs.mkdir(userDirPath);
+    } catch (error) {
+      return next(
+        new APIError(
+          `Unable to create data directories`,
+          httpStatus.INTERNAL_SERVER_ERROR
+        )
+      );
     }
 
     try {
@@ -39,7 +55,7 @@ class AuthController {
         message: 'User successfully registered.'
       });
     } catch (error) {
-      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
     }
   }
 
@@ -55,8 +71,8 @@ class AuthController {
 
     try {
       const user = await User.findOne()
-        .where('email')
-        .in([email])
+        .where({ email: email })
+        .where({ isDeleted: false })
         .exec();
 
       if (!user) {
