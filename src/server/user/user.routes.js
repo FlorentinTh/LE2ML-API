@@ -1,6 +1,5 @@
 import express from 'express';
 import passport from 'passport';
-
 import UserController from './user.controller';
 import validation from './user.validation';
 import Authority from '@Authority';

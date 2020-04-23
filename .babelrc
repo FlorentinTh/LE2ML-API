@@ -7,9 +7,12 @@
       {
         "root": ["."],
         "alias": {
-          "@App": "./src/app",
+          "@Server": "./src/server",
+          "@WS": "./src/websocket",
           "@Config": "./src/utils/config",
+          "@Cache": "./src/utils/cache",
           "@Logger": "./src/utils/logger",
+          "@Redis": "./src/utils/redis",
           "@Mongo": "./src/utils/mongo",
           "@Passport": "./src/utils/passport",
           "@APIError": "./src/server/helpers/APIError",

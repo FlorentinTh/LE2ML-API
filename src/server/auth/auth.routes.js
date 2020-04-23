@@ -1,5 +1,4 @@
 import express from 'express';
-
 import validation from './auth.validation';
 import AuthController from './auth.controller';
 

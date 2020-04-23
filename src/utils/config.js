@@ -19,7 +19,14 @@ const defaultValidationSchema = Joi.object({
   MONGO_CONF_DB: Joi.string().required(),
   MONGO_USER: Joi.string().required(),
   MONGO_PASSWORD: Joi.string().required(),
+  REDIS_HOST: Joi.string().required(),
+  REDIS_PORT: Joi.number()
+    .required()
+    .default(6379),
   DATA_BASE_PATH: Joi.string().required(),
+  WS_PORT: Joi.number()
+    .required()
+    .default(8888),
   CERT_FILE_PATH: Joi.string().required(),
   KEY_FILE_PATH: Joi.string().required()
 })
@@ -47,8 +54,15 @@ class Config {
         user: env.MONGO_USER,
         password: env.MONGO_PASSWORD
       },
+      redis: {
+        host: env.REDIS_HOST,
+        port: env.REDIS_PORT
+      },
       data: {
         base_path: path.normalize(env.DATA_BASE_PATH)
+      },
+      ws: {
+        port: env.WS_PORT
       },
       certs: {
         crt_path: path.normalize(env.CERT_FILE_PATH),

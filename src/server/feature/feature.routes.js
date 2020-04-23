@@ -1,6 +1,5 @@
 import express from 'express';
 import passport from 'passport';
-
 import FeatureController from './feature.controller';
 import Authority from '@Authority';
 import { role } from '../user/role';

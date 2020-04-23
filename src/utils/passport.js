@@ -1,8 +1,6 @@
 import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-
 import httpStatus from 'http-status';
-
 import User from '../server/user/user.model';
 import APIError from '@APIError';
 import Config from '@Config';

@@ -1,6 +1,5 @@
 import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
-
 import User from '../user/user.model';
 import APIError from '@APIError';
 

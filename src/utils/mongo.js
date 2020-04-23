@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import logger from '@Logger';
+import Logger from '@Logger';
 import Config from '@Config';
 
 const config = Config.getConfig();
@@ -16,23 +16,23 @@ class Mongo {
     mongoose.set('useFindAndModify', false);
 
     mongoose.connection.on('connected', () => {
-      logger.info(`Database connected. Worker process: ${process.pid}`);
+      Logger.info(`Database connected. Worker process: ${process.pid}`);
     });
 
     mongoose.connection.on('reconnected', () => {
-      logger.info(`Database re-onnected. Worker process: ${process.pid}`);
+      Logger.info(`Database re-onnected. Worker process: ${process.pid}`);
     });
 
     mongoose.connection.on('disconnected', () => {
-      logger.info('Database disconnected');
+      Logger.info('Database disconnected');
     });
 
     mongoose.connection.on('close', () => {
-      logger.info('Database connection closed');
+      Logger.info('Database connection closed');
     });
 
     mongoose.connection.on('error', error => {
-      logger.error('Error while trying to connect to database: ' + error);
+      Logger.error('Error while trying to connect to database: ' + error);
     });
   }
 
@@ -44,7 +44,7 @@ class Mongo {
         }
       });
     } catch (error) {
-      logger.error(
+      Logger.error(
         `Connection to database failed on worker: ${process.pid}. Reason: ${error.message}`
       );
       process.exit(1);
