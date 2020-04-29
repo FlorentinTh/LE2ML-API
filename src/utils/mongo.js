@@ -36,7 +36,7 @@ class Mongo {
     });
   }
 
-  async run() {
+  async start() {
     try {
       await mongoose.connect(this.connectionString, {
         auth: {

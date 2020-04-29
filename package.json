@@ -1,7 +1,7 @@
 {
   "name": "picluster-api",
   "version": "1.0.0",
-  "description": "Repository of the API that aims at piloting the the Raspberry Pi cluster.",
+  "description": "API that aims at piloting the the Raspberry Pi cluster.",
   "main": "src/server.js",
   "scripts": {
     "lint": "eslint . --ext .js,.json",
@@ -20,12 +20,15 @@
   },
   "author": "FlorentinTh",
   "license": "Apache-2.0",
+  "pre-commit": [
+    "lint"
+  ],
   "bugs": {
     "url": "https://github.com/FlorentinTh/PiCluster-API/issues"
   },
   "homepage": "https://github.com/FlorentinTh/PiCluster-API#readme",
   "engines": {
-    "node": "10.x"
+    "node": ">=10.x <=12.x"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -44,14 +47,11 @@
     "helmet": "^3.22.0",
     "http-status": "^1.4.2",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.9",
+    "mongoose": "^5.9.10",
     "morgan": "^1.10.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "redis": "^3.0.2",
-    "socket.io": "^2.3.0",
-    "socket.io-redis": "^5.2.0",
-    "socketio-auth": "^0.1.1",
     "spdy": "^4.0.2",
     "winston": "^3.2.1"
   },
@@ -69,7 +69,7 @@
     "cross-env": "^7.0.2",
     "eslint": "^6.8.0",
     "eslint-config-node": "^4.0.0",
-    "eslint-config-prettier": "^6.10.1",
+    "eslint-config-prettier": "^6.11.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-import-resolver-babel-module": "^5.1.2",
     "eslint-plugin-import": "^2.20.2",

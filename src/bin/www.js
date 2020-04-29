@@ -1,32 +1,18 @@
 #!/usr/bin/env node
 
 /* eslint-disable no-unreachable */
-import http from 'http';
-import Server from '@Server';
+import { app, http2Server } from '@Server';
 import Logger from '@Logger';
-import path from 'path';
-import fs from 'fs';
-import spdy from 'spdy';
 import Config from '@Config';
 
 const config = Config.getConfig();
 
 const port = normalizePort(process.env.PORT || config.port);
-Server.set('port', port);
+app.set('port', port);
 
-const rootPath = path.resolve(path.join(__dirname, '..', '..'));
-
-const options = {
-  key: fs.readFileSync(path.resolve(rootPath, config.certs.key_path)),
-  cert: fs.readFileSync(path.resolve(rootPath, config.certs.crt_path))
-};
-
-// const httpServer = http.createServer(server);
-const spdyServer = spdy.createServer(options, Server);
-
-spdyServer.listen(port);
-spdyServer.on('error', onError);
-spdyServer.on('listening', onListening);
+http2Server.listen(port);
+http2Server.on('error', onError);
+http2Server.on('listening', onListening);
 
 function normalizePort(val) {
   const port = parseInt(val, 10);
@@ -60,7 +46,7 @@ function onError(error) {
 }
 
 function onListening() {
-  const addr = spdyServer.address();
+  const addr = http2Server.address();
   const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port: ' + addr.port;
 
   Logger.info(`Server listening on ${bind}`);

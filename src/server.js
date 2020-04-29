@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+import spdy from 'spdy';
 import express from 'express';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
@@ -7,7 +10,6 @@ import cors from 'cors';
 import httpStatus from 'http-status';
 import helmet from 'helmet';
 import passport from 'passport';
-import WS from '@WS';
 import Config from '@Config';
 import APIError from '@APIError';
 import '@Passport';
@@ -21,37 +23,44 @@ import adminUsersRoutes from './server/admin/user/admin.user.routes';
 const config = Config.getConfig();
 const isDev = config.env === 'development';
 
-const server = express();
+const rootPath = path.resolve(path.join(__dirname, '..'));
+const options = {
+  key: fs.readFileSync(path.resolve(rootPath, config.certs.key_path)),
+  cert: fs.readFileSync(path.resolve(rootPath, config.certs.crt_path))
+};
+
+const app = express();
 const APIv1 = express();
 
+const http2Server = spdy.createServer(options, app);
+
 if (isDev) {
-  server.use(logger('dev'));
+  app.use(logger('dev'));
 }
 
-server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: true }));
-server.use(cookieParser());
-server.use(compress());
-server.use(helmet());
-server.use(cors());
-server.use(passport.initialize());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(compress());
+app.use(helmet());
+app.use(cors());
+app.use(passport.initialize());
 
-Mongo.run();
-WS.run();
+Mongo.start();
 
 APIv1.use('/v1', authRoutes);
 APIv1.use('/v1/users', userRoutes);
 APIv1.use('/v1/files', filesRoutes);
 APIv1.use('/v1/features', featuresRoutes);
 APIv1.use('/v1/admin/users', adminUsersRoutes);
-server.use('/api', APIv1);
+app.use('/api', APIv1);
 
-server.use((req, res, next) => {
+app.use((req, res, next) => {
   const err = new APIError('API not found.', httpStatus.NOT_FOUND);
   next(err);
 });
 
-server.use((err, req, res, next) => {
+app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     status: 'error',
     code: err.status,
@@ -59,4 +68,4 @@ server.use((err, req, res, next) => {
   });
 });
 
-export default server;
+export { app, http2Server };

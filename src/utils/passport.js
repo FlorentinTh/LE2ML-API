@@ -8,7 +8,7 @@ import Config from '@Config';
 passport.use(
   new JwtStrategy(
     {
-      jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('jwt'),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('bearer'),
       secretOrKey: Config.getConfig().jwtSecret
     },
     async (payload, done) => {
