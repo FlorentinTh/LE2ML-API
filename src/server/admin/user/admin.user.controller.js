@@ -1,13 +1,10 @@
 import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
-import fs from 'fs-extra';
-import path from 'path';
 import APIError from '@APIError';
 import User from '../../user/user.model';
 import { role } from '../../user/role';
-import Config from '@Config';
-
-const config = Config.getConfig();
+import FileHelper from '../../helpers/fileHelper';
+import Logger from '@Logger';
 
 class AdminController {
   async getUserByEmail(req, res, next) {
@@ -141,15 +138,12 @@ class AdminController {
       );
     }
 
-    const userDirPath = path.join(config.data.base_path, id);
-    const destination = path.join(config.data.base_path, '.deleted', id);
-
     try {
-      await fs.move(userDirPath, destination);
+      await FileHelper.removeDataDirectories(id.toString());
     } catch (error) {
       return next(
         new APIError(
-          `Unable to remove data directories`,
+          'Unable to remove data directories',
           httpStatus.INTERNAL_SERVER_ERROR
         )
       );
@@ -157,6 +151,9 @@ class AdminController {
 
     try {
       await user.update({ isDeleted: true }).exec();
+
+      Logger.info(`User ${id} deleted`);
+
       res.status(httpStatus.OK).json({
         data: user,
         message: 'User successfully deleted.'

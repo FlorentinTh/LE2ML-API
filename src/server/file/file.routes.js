@@ -15,11 +15,29 @@ router
   );
 
 router
-  .route('/')
+  .route('/exists')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    FileController.fileExists
+  );
+
+router
+  .route('/upload')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.uploadFile
+    FileController.uploadFile,
+    FileController.uploadFileDone
+  );
+
+router
+  .route('/import/conf')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    FileController.importConfig,
+    FileController.processConfig
   );
 
 export default router;

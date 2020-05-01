@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import spdy from 'spdy';
 import express from 'express';
-import logger from 'morgan';
+import morgan from 'morgan';
+import winston from './utils/logger';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compress from 'compression';
@@ -34,9 +35,7 @@ const APIv1 = express();
 
 const http2Server = spdy.createServer(options, app);
 
-if (isDev) {
-  app.use(logger('dev'));
-}
+isDev ? app.use(morgan('dev')) : app.use(morgan('combined'), { stream: winston.stream });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -61,6 +60,15 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  winston.error(
+    `${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${
+      req.ip
+    }`
+  );
+
   res.status(err.status || 500).json({
     status: 'error',
     code: err.status,

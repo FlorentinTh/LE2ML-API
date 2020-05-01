@@ -1,12 +1,10 @@
 import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
-import { promises as fs } from 'fs';
-import path from 'path';
 import User from '../user/user.model';
 import APIError from '@APIError';
-import Config from '@Config';
+import FileHelper from '@FileHelper';
+import Logger from '@Logger';
 
-const config = Config.getConfig();
 class AuthController {
   async register(req, res, next) {
     const bodyErrors = validationResult(req);
@@ -32,31 +30,31 @@ class AuthController {
     try {
       await user.setPassword(req.body.password);
     } catch (error) {
-      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-    }
-
-    const userDirPath = path.join(config.data.base_path, user._id.toString());
-
-    try {
-      await fs.mkdir(userDirPath);
-    } catch (error) {
       return next(
-        new APIError(
-          `Unable to create data directories`,
-          httpStatus.INTERNAL_SERVER_ERROR
-        )
+        new APIError('[501] Registration failed', httpStatus.INTERNAL_SERVER_ERROR)
       );
     }
 
     try {
       await user.save();
-      res.status(httpStatus.OK).json({
-        data: null,
-        message: 'User successfully registered.'
-      });
     } catch (error) {
-      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+      return next(
+        new APIError('[502] Registration failed', httpStatus.INTERNAL_SERVER_ERROR)
+      );
     }
+
+    try {
+      await FileHelper.createDataDirectories(user._id.toString());
+    } catch (error) {
+      return next(
+        new APIError('[503] Registration failed', httpStatus.INTERNAL_SERVER_ERROR)
+      );
+    }
+
+    res.status(httpStatus.OK).json({
+      data: null,
+      message: 'User successfully registered.'
+    });
   }
 
   async login(req, res, next) {
@@ -95,6 +93,7 @@ class AuthController {
       }
 
       const token = user.generateJwt(user);
+      Logger.info(`Login of ${user._id}`);
       res.status(httpStatus.OK).json(user.isAuthenticated(token));
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

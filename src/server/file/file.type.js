@@ -1,7 +1,7 @@
 const fileType = {
   CONFIG: 'config',
-  INPUT: 'input',
-  MODEL: 'model'
+  INPUT: 'inputs',
+  MODEL: 'models'
 };
 
 export default fileType;

@@ -12,4 +12,7 @@ services:
 
   redis:
     image: 'redis:5.0'
+    command: redis-server --requirepass password
     restart: always
+    ports:
+      - 6379:6379

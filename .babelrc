@@ -8,7 +8,6 @@
         "root": ["."],
         "alias": {
           "@Server": "./src/server",
-          "@WS": "./src/websocket",
           "@Config": "./src/utils/config",
           "@Cache": "./src/utils/cache",
           "@Logger": "./src/utils/logger",
@@ -16,7 +15,8 @@
           "@Mongo": "./src/utils/mongo",
           "@Passport": "./src/utils/passport",
           "@APIError": "./src/server/helpers/APIError",
-          "@Authority": "./src/server/helpers/authority"
+          "@Authority": "./src/server/helpers/authority",
+          "@FileHelper": "./src/server/helpers/fileHelper"
         },
         "extensions": [".js", ".json"]
       }
