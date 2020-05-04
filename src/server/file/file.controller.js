@@ -201,14 +201,14 @@ class FileController {
         const validation = await FileHelper.validateJson(json);
 
         if (!validation.ok) {
-          res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
+          return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
             data: validation.errors,
             message: 'error'
           });
         }
 
         const basePath = config.data.base_path;
-        const fullPath = path.join(basePath, req.user.id, fileType.CONFIG);
+        const fullPath = path.join(basePath, req.user.id, fileType.CONFIG + '.yml');
 
         try {
           await fs.promises.writeFile(fullPath, req.file.buffer);
