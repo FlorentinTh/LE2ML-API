@@ -86,9 +86,7 @@ class User extends Schema {
       tmpPassword: this.tmpPassword
     };
 
-    return jwt.sign(user, config.jwtSecret, {
-      expiresIn: '2 days'
-    });
+    return jwt.sign(user, config.jwtSecret);
   }
 
   isAuthenticated(token) {
