@@ -220,7 +220,7 @@ class FileController {
           });
 
           res.status(httpStatus.OK).json({
-            data: null,
+            data: json,
             message: 'success'
           });
         } catch (error) {
