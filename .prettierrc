@@ -6,5 +6,5 @@
   "tabWidth": 2,
   "useTabs": false,
   "trailingComma": "none",
-  "endOfLine": "lf"
+  "endOfLine": "crlf"
 }

@@ -8,6 +8,7 @@ import AjvAsync from 'ajv-async';
 import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
+import schemaType from '../file/schema.type';
 
 const config = Config.getConfig();
 
@@ -115,26 +116,58 @@ class FileHelper {
     }
   }
 
-  static async validateJson(data) {
+  static async csvToJson(data) {
+    const lines = data.replace(/\r/g, '').split(/\n/);
+    const headers = lines[0].split(',');
+
+    const result = [];
+
+    let length = lines.length;
+    if (lines[lines.length] === undefined) {
+      length -= 1;
+    }
+
+    for (let i = 1; i < length; ++i) {
+      const obj = {};
+      const line = lines[i].split(',');
+
+      for (let j = 0; j < headers.length; ++j) {
+        const header = headers[j];
+        obj[header] = line[j];
+      }
+
+      result.push(obj);
+    }
+
+    return result;
+  }
+
+  static async validateJson(data, type) {
     if (!(typeof data === 'object')) {
       throw new Error('Expected type for argument data is Object');
+    }
+
+    if (!Object.values(schemaType).includes(type)) {
+      throw new Error('Unknown schema type');
     }
 
     const basePath = config.data.base_path;
 
     try {
       const file = await fs.promises.readFile(
-        path.resolve(basePath, config.schemas.conf)
+        path.resolve(basePath, config.schemas[type])
       );
+
       const schema = JSON.parse(file);
       const ajv = new Ajv({ allErrors: true, jsonPointers: true });
+
       AjvAsync(ajv);
       AjvFormat(ajv);
+
       const validate = ajv.compile(schema);
 
       try {
         const valid = await validate(data);
-
         const res = {
           ok: false,
           errors: null

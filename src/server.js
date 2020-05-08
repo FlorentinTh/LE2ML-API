@@ -23,8 +23,8 @@ import adminUsersRoutes from './server/admin/user/admin.user.routes';
 
 const config = Config.getConfig();
 const isDev = config.env === 'development';
-
 const rootPath = path.resolve(path.join(__dirname, '..'));
+
 const options = {
   key: fs.readFileSync(path.resolve(rootPath, config.certs.key_path)),
   cert: fs.readFileSync(path.resolve(rootPath, config.certs.crt_path))

@@ -8,6 +8,8 @@ import multer from 'multer';
 import FileHelper from '../helpers/fileHelper';
 import FileType from 'file-type';
 import hideFile from 'hidefile';
+import schemaType from './schema.type';
+import fileMime from './file.mime';
 
 const config = Config.getConfig();
 
@@ -40,7 +42,6 @@ class FileController {
     if (files.length > 0) {
       for (let i = 0; i < files.length; ++i) {
         const file = files[i];
-
         let stats;
         try {
           stats = await fs.promises.stat(path.join(fullPath, file));
@@ -79,6 +80,7 @@ class FileController {
 
     try {
       await fs.promises.access(fullPath);
+
       res.status(httpStatus.OK).json({
         data: true,
         message: `${filename} already exists`
@@ -115,14 +117,22 @@ class FileController {
           cb(null, file.originalname);
         }
       }),
-      fileFilter: (req, file, cb) => {
-        if (
-          file.mimetype === 'application/vnd.ms-excel' ||
-          file.mimetype === 'application/json'
-        ) {
-          cb(null, true);
-        } else {
+      fileFilter: async (req, file, cb) => {
+        if (!Object.values(fileMime).includes(file.mimetype)) {
           cb(null, false);
+        } else {
+          const override = req.query.override === 'true';
+
+          if (override) {
+            try {
+              await fs.promises.unlink(path.join(fullPath, file.originalname));
+            } catch (error) {
+              return next(
+                new APIError('File override failed', httpStatus.INTERNAL_SERVER_ERROR)
+              );
+            }
+          }
+          cb(null, true);
         }
       }
     });
@@ -148,6 +158,32 @@ class FileController {
       );
     }
 
+    try {
+      const file = await fs.promises.readFile(req.file.path);
+
+      let json;
+      if (req.file.mimetype === fileMime.CSV) {
+        json = await FileHelper.csvToJson(file.toString());
+      } else {
+        json = JSON.parse(file.toString());
+      }
+
+      const validation = await FileHelper.validateJson(json, schemaType.INPUT);
+
+      if (!validation.ok) {
+        await fs.promises.unlink(req.file.path);
+
+        return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
+          data: null,
+          message: 'error'
+        });
+      }
+    } catch (error) {
+      return next(
+        new APIError('File processing failed', httpStatus.UNPROCESSABLE_ENTITY)
+      );
+    }
+
     res.status(httpStatus.OK).json({
       data: req.file.filename,
       message: 'success'
@@ -158,6 +194,7 @@ class FileController {
     if (!Object.values(fileType).includes(fileType.CONFIG)) {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
+
     const uploader = multer({
       storage: multer.memoryStorage()
     });
@@ -198,7 +235,7 @@ class FileController {
       const json = await FileHelper.ymlToJson(req.file.buffer.toString());
 
       try {
-        const validation = await FileHelper.validateJson(json);
+        const validation = await FileHelper.validateJson(json, schemaType.CONFIG);
 
         if (!validation.ok) {
           return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({

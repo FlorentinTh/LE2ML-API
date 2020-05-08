@@ -64,7 +64,8 @@ class Config {
         base_path: path.normalize(env.DATA_BASE_PATH)
       },
       schemas: {
-        conf: env.CONF_SCHEMA
+        conf: env.CONF_SCHEMA,
+        input: env.INPUT_SCHEMA
       },
       certs: {
         crt_path: path.normalize(env.CERT_FILE_PATH),
