@@ -1,7 +1,7 @@
 import express from 'express';
 import passport from 'passport';
-import validation from './feature.validation';
-import FeatureController from './feature.controller';
+import AlgoController from './algo.controller';
+import validation from './algo.validation';
 import Authority from '@Authority';
 import { role } from '../user/role';
 
@@ -11,8 +11,8 @@ router
   .route('/')
   .get(
     passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN),
-    FeatureController.getFeatures
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    AlgoController.getAlgos
   );
 
 router
@@ -21,15 +21,7 @@ router
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN),
     validation.add,
-    FeatureController.addFeature
-  );
-
-router
-  .route('/:domain')
-  .get(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FeatureController.getFeaturesByDomain
+    AlgoController.addAlgo
   );
 
 export default router;

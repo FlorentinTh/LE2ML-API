@@ -15,7 +15,7 @@ const config = Config.getConfig();
 class FileHelper {
   static validationErrorsHandler(errors) {
     if (!(typeof errors === 'object')) {
-      throw new Error('expected object.');
+      throw new Error('Expected type for argument errors is Object.');
     }
 
     const errorsArray = [];

@@ -5,10 +5,10 @@ const validation = {
     check('label')
       .notEmpty()
       .isString(),
-    check('domain')
+    check('type')
       .notEmpty()
       .isString()
-      .isIn('time', 'frequential'),
+      .isIn('supervised', 'unsupervised'),
     check('enable')
       .notEmpty()
       .isBoolean(),

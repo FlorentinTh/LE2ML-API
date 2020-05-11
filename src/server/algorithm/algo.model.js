@@ -1,14 +1,14 @@
 import mongoose, { Schema } from 'mongoose';
 import Config from '@Config';
-import { domain } from './domain';
+import { type } from './type';
 
 const config = Config.getConfig();
 const database = mongoose.connection.useDb(config.mongo.conf_db);
 
-class Feature extends Schema {
+class Algorithm extends Schema {
   constructor() {
     // eslint-disable-next-line no-unused-vars
-    const feature = super(
+    const algorithm = super(
       {
         label: {
           type: String,
@@ -19,10 +19,9 @@ class Feature extends Schema {
           required: true,
           unique: true
         },
-        domain: {
+        type: {
           type: String,
-          enum: [domain.ADMIN, domain.USER],
-          default: domain.USER
+          enum: [type.SUPERVISED, type.UNSUPERVISED]
         },
         enable: {
           type: Boolean,
@@ -39,4 +38,4 @@ class Feature extends Schema {
   }
 }
 
-export default database.model('Feature', new Feature());
+export default database.model('Algorithm', new Algorithm());

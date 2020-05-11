@@ -16,7 +16,8 @@
           "@Passport": "./src/utils/passport",
           "@APIError": "./src/server/helpers/APIError",
           "@Authority": "./src/server/helpers/authority",
-          "@FileHelper": "./src/server/helpers/fileHelper"
+          "@FileHelper": "./src/server/helpers/fileHelper",
+          "@StringHelper": "./src/server/helpers/stringHelper.js"
         },
         "extensions": [".js", ".json"]
       }
