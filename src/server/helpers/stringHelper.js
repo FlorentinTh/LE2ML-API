@@ -11,7 +11,18 @@ class StringHelper {
       throw new Error('Expected values for separator are either "-" or "_".');
     }
 
-    return str.toLowerCase().replace(/\s/g, separator);
+    const spaces = str.toLowerCase().replace(/\s/g, separator);
+    let result;
+    switch (separator) {
+      case '-':
+        result = spaces.replace(/_/g, separator);
+        break;
+      case '_':
+        result = spaces.replace(/-/g, separator);
+        break;
+    }
+
+    return result;
   }
 }
 

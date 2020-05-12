@@ -33,7 +33,9 @@ class UserController {
     const bodyErrors = validationResult(req);
 
     if (!bodyErrors.isEmpty()) {
-      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
     }
 
     const id = req.params.id;
@@ -84,7 +86,9 @@ class UserController {
     const bodyErrors = validationResult(req);
 
     if (!bodyErrors.isEmpty()) {
-      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
     }
 
     const id = req.params.id;

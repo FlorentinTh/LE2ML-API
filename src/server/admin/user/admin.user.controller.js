@@ -95,7 +95,9 @@ class AdminController {
     const bodyErrors = validationResult(req);
 
     if (!bodyErrors.isEmpty()) {
-      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
     }
 
     const id = req.params.id;
@@ -126,31 +128,25 @@ class AdminController {
   async removeUser(req, res, next) {
     const id = req.params.id;
 
-    let user;
     try {
-      user = await User.findOne({ _id: id }).exec();
-    } catch (error) {
-      return next(
-        new APIError(
-          'User not found, cannot be deleted.',
-          httpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
-    }
+      const user = await User.findOneAndUpdate({ _id: id }, { isDeleted: true }).exec();
 
-    try {
-      await FileHelper.removeDataDirectories(id.toString());
-    } catch (error) {
-      return next(
-        new APIError(
-          'Unable to remove data directories',
-          httpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
-    }
+      if (!user) {
+        return next(
+          new APIError('User not found, cannot be deleted.', httpStatus.NOT_FOUND)
+        );
+      }
 
-    try {
-      await user.update({ isDeleted: true }).exec();
+      try {
+        await FileHelper.removeDataDirectories(id.toString());
+      } catch (error) {
+        return next(
+          new APIError(
+            'Unable to remove data directories',
+            httpStatus.INTERNAL_SERVER_ERROR
+          )
+        );
+      }
 
       Logger.info(`User ${id} deleted`);
 
@@ -167,7 +163,9 @@ class AdminController {
     const bodyErrors = validationResult(req);
 
     if (!bodyErrors.isEmpty()) {
-      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
     }
 
     const email = req.params.email;

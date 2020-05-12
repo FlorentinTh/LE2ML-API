@@ -23,7 +23,7 @@ class Algorithm extends Schema {
           type: String,
           enum: [type.SUPERVISED, type.UNSUPERVISED]
         },
-        enable: {
+        enabled: {
           type: Boolean,
           required: true,
           default: true
@@ -31,6 +31,10 @@ class Algorithm extends Schema {
         container: {
           type: String,
           required: true
+        },
+        isDeleted: {
+          type: Boolean,
+          default: false
         }
       },
       { versionKey: false }

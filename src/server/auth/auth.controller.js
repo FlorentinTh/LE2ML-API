@@ -10,7 +10,9 @@ class AuthController {
     const bodyErrors = validationResult(req);
 
     if (!bodyErrors.isEmpty()) {
-      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
     }
 
     if (!(req.body.password === req.body.passwordConfirm)) {
@@ -61,7 +63,9 @@ class AuthController {
     const bodyErrors = validationResult(req);
 
     if (!bodyErrors.isEmpty()) {
-      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
     }
 
     const email = req.body.email;

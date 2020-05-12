@@ -24,7 +24,7 @@ class Feature extends Schema {
           enum: [domain.ADMIN, domain.USER],
           default: domain.USER
         },
-        enable: {
+        enabled: {
           type: Boolean,
           required: true,
           default: true
@@ -32,6 +32,10 @@ class Feature extends Schema {
         container: {
           type: String,
           required: true
+        },
+        isDeleted: {
+          type: Boolean,
+          default: false
         }
       },
       { versionKey: false }

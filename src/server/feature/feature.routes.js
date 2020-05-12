@@ -20,8 +20,26 @@ router
   .put(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN),
-    validation.add,
+    validation.addFeature,
     FeatureController.addFeature
+  );
+
+router
+  .route('/:id')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN),
+    validation.updateFeature,
+    FeatureController.updateFeature
+  );
+
+router
+  .route('/state/:id')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN),
+    validation.updateState,
+    FeatureController.updateFeature
   );
 
 router
@@ -30,6 +48,14 @@ router
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     FeatureController.getFeaturesByDomain
+  );
+
+router
+  .route('/:id')
+  .delete(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN),
+    FeatureController.removeFeature
   );
 
 export default router;

@@ -4,12 +4,14 @@ import APIError from '@APIError';
 import Feature from './feature.model';
 import { domain } from './domain';
 import StringHelper from '@StringHelper';
+import Logger from '@Logger';
 
 class FeatureController {
   async getFeatures(req, res, next) {
     try {
       const features = await Feature.find()
         .select()
+        .where({ isDeleted: false })
         .exec();
 
       if (!features) {
@@ -41,6 +43,7 @@ class FeatureController {
       const features = await Feature.find()
         .select()
         .where('domain')
+        .where({ isDeleted: false })
         .in([domainParam])
         .exec();
 
@@ -68,13 +71,15 @@ class FeatureController {
     const bodyErrors = validationResult(req);
 
     if (!bodyErrors.isEmpty()) {
-      return next(new APIError(bodyErrors.array(), httpStatus.UNPROCESSABLE_ENTITY));
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
     }
 
     const feature = new Feature();
-    feature.label = req.body.label;
-    feature.domain = req.body.domain;
-    feature.enable = req.body.enable;
+    feature.label = req.body.label.toLowerCase();
+    feature.domain = req.body.domain.toLowerCase();
+    feature.enabled = req.body.enabled;
     feature.slug = StringHelper.toSlug(req.body.label, '_');
     feature.container = StringHelper.toSlug(req.body.container, '-');
 
@@ -87,9 +92,76 @@ class FeatureController {
     }
 
     res.status(httpStatus.OK).json({
-      data: null,
+      data: feature,
       message: 'Feature successfully created.'
     });
+  }
+
+  async updateFeature(req, res, next) {
+    const bodyErrors = validationResult(req);
+
+    if (!bodyErrors.isEmpty()) {
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
+    }
+
+    const id = req.params.id;
+
+    const data = {
+      label: req.body.label.toLowerCase(),
+      slug: StringHelper.toSlug(req.body.label, '_'),
+      domain: req.body.domain.toLowerCase(),
+      enabled: req.body.enabled,
+      container: StringHelper.toSlug(req.body.container, '-')
+    };
+
+    try {
+      const feature = await Feature.findOneAndUpdate({ _id: id }, data, {
+        new: true
+      }).exec();
+
+      if (!feature) {
+        return next(
+          new APIError('Feature not found, cannot be updated.', httpStatus.NOT_FOUND)
+        );
+      }
+
+      res.status(httpStatus.OK).json({
+        data: {
+          feature: feature
+        },
+        message: `Feature successfully updated.`
+      });
+    } catch (error) {
+      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
+
+  async removeFeature(req, res, next) {
+    const id = req.params.id;
+
+    try {
+      const feature = await Feature.findOneAndUpdate(
+        { _id: id },
+        { isDeleted: true }
+      ).exec();
+
+      if (!feature) {
+        return next(
+          new APIError('Feature not found, cannot be deleted.', httpStatus.NOT_FOUND)
+        );
+      }
+
+      Logger.info(`Feature ${id} deleted`);
+
+      res.status(httpStatus.OK).json({
+        data: feature,
+        message: 'Feature successfully deleted.'
+      });
+    } catch (error) {
+      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
   }
 }
 
