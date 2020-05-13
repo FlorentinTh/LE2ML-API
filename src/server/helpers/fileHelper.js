@@ -103,8 +103,8 @@ class FileHelper {
   }
 
   static async jsonToYml(data) {
-    if (!(typeof data === 'string')) {
-      throw new Error('Expected type for argument data is String');
+    if (!(typeof data === 'object')) {
+      throw new Error('Expected type for argument data is Object');
     }
 
     try {

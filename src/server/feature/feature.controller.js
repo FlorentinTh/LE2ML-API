@@ -42,8 +42,9 @@ class FeatureController {
     try {
       const features = await Feature.find()
         .select()
-        .where('domain')
+        .where({ enabled: true })
         .where({ isDeleted: false })
+        .where('domain')
         .in([domainParam])
         .exec();
 

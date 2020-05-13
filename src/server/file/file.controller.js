@@ -279,6 +279,43 @@ class FileController {
       );
     }
   }
+
+  async convertConfig(req, res, next) {
+    if (!Object.values(fileType).includes(fileType.CONFIG)) {
+      return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
+    }
+
+    const conf = req.body;
+
+    try {
+      const validation = await FileHelper.validateJson(conf, schemaType.CONFIG);
+
+      if (!validation.ok) {
+        return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
+          data: validation.errors,
+          message: 'error'
+        });
+      }
+
+      try {
+        const obj = JSON.parse(JSON.stringify(conf));
+        const yml = await FileHelper.jsonToYml(obj);
+
+        res.status(httpStatus.OK).json({
+          data: yml,
+          message: 'success'
+        });
+      } catch (error) {
+        return next(
+          new APIError('File conversion failed', httpStatus.INTERNAL_SERVER_ERROR)
+        );
+      }
+    } catch (error) {
+      return next(
+        new APIError('File validation failed', httpStatus.UNPROCESSABLE_ENTITY)
+      );
+    }
+  }
 }
 
 export default new FileController();

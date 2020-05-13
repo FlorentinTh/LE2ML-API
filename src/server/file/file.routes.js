@@ -40,4 +40,12 @@ router
     FileController.processConfig
   );
 
+router
+  .route('/convert/conf')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    FileController.convertConfig
+  );
+
 export default router;
