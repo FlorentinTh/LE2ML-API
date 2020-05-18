@@ -3,7 +3,7 @@ import passport from 'passport';
 import UserController from './user.controller';
 import validation from './user.validation';
 import Authority from '@Authority';
-import { role } from './role';
+import { role } from './user.role';
 
 const router = express.Router();
 

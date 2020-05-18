@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
 import APIError from '@APIError';
 import Feature from './feature.model';
-import { domain } from './domain';
+import { domain } from './feature.domain';
 import StringHelper from '@StringHelper';
 import Logger from '@Logger';
 

@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Config from '@Config';
-import { role } from './role';
+import { role } from './user.role';
 
 const config = Config.getConfig();
 const database = mongoose.connection.useDb(config.mongo.auth_db);

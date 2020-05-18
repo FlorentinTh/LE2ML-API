@@ -7,7 +7,6 @@ import Config from '@Config';
 import multer from 'multer';
 import FileHelper from '../helpers/fileHelper';
 import FileType from 'file-type';
-import hideFile from 'hidefile';
 import schemaType from './schema.type';
 import fileMime from './file.mime';
 
@@ -245,16 +244,15 @@ class FileController {
         }
 
         const basePath = config.data.base_path;
-        const fullPath = path.join(basePath, req.user.id, fileType.CONFIG + '.yml');
+        const fullPath = path.join(
+          basePath,
+          req.user.id,
+          'jobs',
+          fileType.CONFIG + '.yml'
+        );
 
         try {
           await fs.promises.writeFile(fullPath, req.file.buffer);
-
-          hideFile.hide(fullPath, (err, path) => {
-            if (err) {
-              throw new Error('Impossible to make file hidden');
-            }
-          });
 
           res.status(httpStatus.OK).json({
             data: json,

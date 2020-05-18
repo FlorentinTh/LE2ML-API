@@ -2,7 +2,7 @@ import express from 'express';
 import passport from 'passport';
 import FileController from './file.controller';
 import Authority from '@Authority';
-import { role } from '../user/role';
+import { role } from '../user/user.role';
 
 const router = express.Router();
 

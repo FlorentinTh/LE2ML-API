@@ -3,7 +3,7 @@ import passport from 'passport';
 import validation from './feature.validation';
 import FeatureController from './feature.controller';
 import Authority from '@Authority';
-import { role } from '../user/role';
+import { role } from '../user/user.role';
 
 const router = express.Router();
 

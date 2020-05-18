@@ -43,6 +43,7 @@ class FileHelper {
       await fs.promises.mkdir(basePath);
       await fs.promises.mkdir(path.join(basePath, 'inputs'));
       await fs.promises.mkdir(path.join(basePath, 'models'));
+      await fs.promises.mkdir(path.join(basePath, 'jobs'));
     } catch (error) {
       Logger.error(`Unable to create data directories for user ${userId}`);
       throw new Error('Unable to create data directories');

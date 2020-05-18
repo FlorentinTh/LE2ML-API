@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import Config from '@Config';
-import { type } from './type';
+import { type } from './algo.type';
 
 const config = Config.getConfig();
 const database = mongoose.connection.useDb(config.mongo.conf_db);

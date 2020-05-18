@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import Config from '@Config';
-import { domain } from './domain';
+import { domain } from './feature.domain';
 
 const config = Config.getConfig();
 const database = mongoose.connection.useDb(config.mongo.conf_db);

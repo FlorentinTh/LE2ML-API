@@ -3,7 +3,7 @@ import passport from 'passport';
 import AlgoController from './algo.controller';
 import validation from './algo.validation';
 import Authority from '@Authority';
-import { role } from '../user/role';
+import { role } from '../user/user.role';
 
 const router = express.Router();
 

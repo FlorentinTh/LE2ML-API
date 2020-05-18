@@ -1,5 +1,5 @@
 import { check } from 'express-validator';
-import { domain } from './domain';
+import { domain } from './feature.domain';
 
 const validation = {
   addFeature: [

@@ -1,5 +1,5 @@
 import { check } from 'express-validator';
-import { type } from './type';
+import { type } from './algo.type';
 
 const validation = {
   addAlgo: [
