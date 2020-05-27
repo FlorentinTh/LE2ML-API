@@ -9,6 +9,7 @@ import FileHelper from '../helpers/fileHelper';
 import FileType from 'file-type';
 import schemaType from './schema.type';
 import fileMime from './file.mime';
+import { validationResult } from 'express-validator';
 
 const config = Config.getConfig();
 
@@ -312,6 +313,97 @@ class FileController {
       return next(
         new APIError('File validation failed', httpStatus.UNPROCESSABLE_ENTITY)
       );
+    }
+  }
+
+  async renameFile(req, res, next) {
+    const bodyErrors = validationResult(req);
+
+    if (!bodyErrors.isEmpty()) {
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
+    }
+
+    const oldFilename = req.body.oldFilename;
+    const newFilename = req.body.newFilename;
+    const type = req.body.fileType;
+    const userId = req.user.id;
+    const basePath = config.data.base_path;
+
+    const oldPath = path.join(basePath, userId, type, oldFilename);
+    const newPath = path.join(basePath, userId, type, newFilename);
+
+    try {
+      await fs.promises.access(oldPath);
+
+      try {
+        await fs.promises.rename(oldPath, newPath);
+
+        res.status(httpStatus.OK).json({
+          data: {
+            file: newFilename
+          },
+          message: 'File successfully renamed.'
+        });
+      } catch (error) {
+        return next(
+          new APIError(`Impossible to rename ${oldFilename}`, httpStatus.BAD_REQUEST)
+        );
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        res.status(httpStatus.OK).json({
+          data: false,
+          message: `${oldFilename} does not exist`
+        });
+      } else {
+        return next(new APIError('File system error', httpStatus.BAD_REQUEST));
+      }
+    }
+  }
+
+  async removeFile(req, res, next) {
+    const bodyErrors = validationResult(req);
+
+    if (!bodyErrors.isEmpty()) {
+      return next(
+        new APIError('Some form inputs are not valid', httpStatus.UNPROCESSABLE_ENTITY)
+      );
+    }
+
+    const filename = req.body.filename;
+    const type = req.body.fileType;
+    const userId = req.user.id;
+    const basePath = config.data.base_path;
+
+    const fullPath = path.join(basePath, userId, type, filename);
+
+    try {
+      await fs.promises.access(fullPath);
+
+      try {
+        await fs.promises.unlink(fullPath);
+        res.status(httpStatus.OK).json({
+          data: {
+            file: filename
+          },
+          message: 'File successfully deleted.'
+        });
+      } catch (error) {
+        return next(
+          new APIError(`Impossible to delete ${filename}`, httpStatus.BAD_REQUEST)
+        );
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        res.status(httpStatus.OK).json({
+          data: false,
+          message: `${filename} does not exist`
+        });
+      } else {
+        return next(new APIError('File system error', httpStatus.BAD_REQUEST));
+      }
     }
   }
 }
