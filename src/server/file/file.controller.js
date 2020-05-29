@@ -11,6 +11,12 @@ import schemaType from './schema.type';
 import fileMime from './file.mime';
 import { validationResult } from 'express-validator';
 
+// import chain from 'stream-chain';
+// import { parser } from 'stream-csv-as-json';
+// import { stringer } from 'stream-csv-as-json/Stringer';
+// import { asObjects } from 'stream-csv-as-json/AsObjects';
+// import { streamObject } from 'stream-json/streamers/StreamObject';
+
 const config = Config.getConfig();
 
 class FileController {
@@ -158,35 +164,55 @@ class FileController {
       );
     }
 
-    try {
-      const file = await fs.promises.readFile(req.file.path);
+    let error = false;
 
+    const streamOpts = { encoding: 'utf-8' };
+    const readStream = fs.createReadStream(req.file.path, streamOpts);
+
+    readStream.on('data', async chunk => {
+      readStream.pause();
       let json;
       if (req.file.mimetype === fileMime.CSV) {
-        json = await FileHelper.csvToJson(file.toString());
+        json = await FileHelper.csvToJson(chunk);
       } else {
-        json = JSON.parse(file.toString());
+        json = chunk;
       }
 
       const validation = await FileHelper.validateJson(json, schemaType.INPUT);
 
       if (!validation.ok) {
-        await fs.promises.unlink(req.file.path);
-
-        return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
-          data: null,
-          message: 'error'
-        });
+        readStream.emit('error', new Error());
+      } else {
+        readStream.resume();
       }
-    } catch (error) {
-      return next(
-        new APIError('File processing failed', httpStatus.UNPROCESSABLE_ENTITY)
-      );
-    }
+    });
 
-    res.status(httpStatus.OK).json({
-      data: req.file.filename,
-      message: 'success'
+    readStream.on('error', err => {
+      if (err) {
+        error = true;
+        readStream.destroy();
+      }
+    });
+
+    readStream.on('close', async () => {
+      if (error) {
+        try {
+          await fs.promises.unlink(req.file.path);
+          return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
+            data: null,
+            message: 'error'
+          });
+        } catch (error) {
+          return next(
+            new APIError('File processing failed', httpStatus.UNPROCESSABLE_ENTITY)
+          );
+        }
+      }
+
+      res.status(httpStatus.OK).json({
+        data: req.file.filename,
+        message: 'success'
+      });
     });
   }
 
@@ -395,6 +421,40 @@ class FileController {
           new APIError(`Impossible to delete ${filename}`, httpStatus.BAD_REQUEST)
         );
       }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        res.status(httpStatus.OK).json({
+          data: false,
+          message: `${filename} does not exist`
+        });
+      } else {
+        return next(new APIError('File system error', httpStatus.BAD_REQUEST));
+      }
+    }
+  }
+
+  async streamDataFile(req, res, next) {
+    const filename = req.params.file;
+    const userId = req.user.id;
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, userId, fileType.INPUT, filename);
+
+    try {
+      await fs.promises.access(fullPath);
+
+      // const pipeline = new chain([
+      //   fs.createReadStream(fullPath),
+      //   parser(),
+      //   asObjects(),
+      //   streamObject()
+      // ]);
+
+      // pipeline.on('data', data => {
+      //   console.log(data);
+      // });
+
+      const readStream = fs.createReadStream(fullPath);
+      readStream.pipe(res);
     } catch (error) {
       if (error.code === 'ENOENT') {
         res.status(httpStatus.OK).json({

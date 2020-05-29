@@ -16,6 +16,14 @@ router
   );
 
 router
+  .route('/stream/:file')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    FileController.streamDataFile
+  );
+
+router
   .route('/exists')
   .get(
     passport.authenticate('jwt', { session: false }),
