@@ -9,6 +9,9 @@ import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
 import schemaType from '../file/schema.type';
+import stream from 'stream';
+import csvjson from 'csvjson';
+import JSONStream from 'jsonstream';
 
 const config = Config.getConfig();
 
@@ -41,7 +44,7 @@ class FileHelper {
 
     try {
       await fs.promises.mkdir(basePath);
-      await fs.promises.mkdir(path.join(basePath, 'inputs'));
+      await fs.promises.mkdir(path.join(basePath, 'raw'));
       await fs.promises.mkdir(path.join(basePath, 'models'));
       await fs.promises.mkdir(path.join(basePath, 'features'));
       await fs.promises.mkdir(path.join(basePath, 'jobs'));
@@ -118,30 +121,35 @@ class FileHelper {
     }
   }
 
-  static async csvToJson(data) {
-    const lines = data.replace(/\r/g, '').split(/\n/);
-    const headers = lines[0].split(',');
+  static csvStreamToJsonFile(reader, writer) {
+    const toObject = csvjson.stream.toObject();
+    const stringify = csvjson.stream.stringify(4);
+    reader
+      .pipe(toObject)
+      .pipe(stringify)
+      .pipe(writer);
+  }
 
-    const result = [];
+  static jsonStreamToCsvFile(reader, writer) {
+    let line = 0;
+    const jsonToCsv = new stream.Transform({
+      transform: function transformer(chunk, encoding, callback) {
+        line++;
+        callback(
+          null,
+          csvjson.toCSV(chunk, {
+            headers: line > 1 ? 'none' : 'key'
+          })
+        );
+      },
+      readableObjectMode: true,
+      writableObjectMode: true
+    });
 
-    let length = lines.length;
-    if (lines[lines.length] === undefined) {
-      length -= 1;
-    }
-
-    for (let i = 1; i < length; ++i) {
-      const obj = {};
-      const line = lines[i].split(',');
-
-      for (let j = 0; j < headers.length; ++j) {
-        const header = headers[j];
-        obj[header] = line[j];
-      }
-
-      result.push(obj);
-    }
-
-    return result;
+    reader
+      .pipe(JSONStream.parse('*'))
+      .pipe(jsonToCsv)
+      .pipe(writer);
   }
 
   static async validateJson(data, type) {

@@ -1,7 +1,8 @@
 const fileType = {
   CONFIG: 'config',
-  INPUT: 'inputs',
-  MODEL: 'models'
+  RAW: 'raw',
+  MODEL: 'models',
+  FEATURES: 'features'
 };
 
 export default fileType;

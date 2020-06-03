@@ -27,6 +27,7 @@ const defaultValidationSchema = Joi.object({
   REDIS_PASSWORD: Joi.string().required(),
   DATA_BASE_PATH: Joi.string().required(),
   CONF_SCHEMA: Joi.string().required(),
+  DATA_SCHEMA: Joi.string().required(),
   CERT_FILE_PATH: Joi.string().required(),
   KEY_FILE_PATH: Joi.string().required()
 })
@@ -65,7 +66,7 @@ class Config {
       },
       schemas: {
         conf: env.CONF_SCHEMA,
-        input: env.INPUT_SCHEMA
+        data: env.DATA_SCHEMA
       },
       certs: {
         crt_path: path.normalize(env.CERT_FILE_PATH),

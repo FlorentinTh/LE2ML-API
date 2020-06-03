@@ -32,12 +32,21 @@ router
   );
 
 router
+  .route('/download/:file')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    FileController.downloadFile
+  );
+
+router
   .route('/upload')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     FileController.uploadFile,
-    FileController.uploadFileDone
+    FileController.convertFile,
+    FileController.validFile
   );
 
 router

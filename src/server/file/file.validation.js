@@ -11,7 +11,7 @@ const validation = {
       .isString(),
     check('fileType')
       .notEmpty()
-      .isIn([fileType.MODEL, fileType.INPUT])
+      .isIn([fileType.MODEL, fileType.RAW, fileType.FEATURES])
   ],
   removeFile: [
     check('filename')
@@ -19,7 +19,7 @@ const validation = {
       .isString(),
     check('fileType')
       .notEmpty()
-      .isIn([fileType.MODEL, fileType.INPUT])
+      .isIn([fileType.MODEL, fileType.RAW, fileType.FEATURES])
   ]
 };
 

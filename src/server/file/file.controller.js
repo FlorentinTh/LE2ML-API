@@ -11,12 +11,6 @@ import schemaType from './schema.type';
 import fileMime from './file.mime';
 import { validationResult } from 'express-validator';
 
-// import chain from 'stream-chain';
-// import { parser } from 'stream-csv-as-json';
-// import { stringer } from 'stream-csv-as-json/Stringer';
-// import { asObjects } from 'stream-csv-as-json/AsObjects';
-// import { streamObject } from 'stream-json/streamers/StreamObject';
-
 const config = Config.getConfig();
 
 class FileController {
@@ -103,6 +97,72 @@ class FileController {
     }
   }
 
+  async downloadFile(req, res, next) {
+    const file = req.params.file;
+    const userId = req.user.id;
+    const type = req.query.type;
+    const from = req.query.from;
+    const to = req.query.to;
+
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, userId, type, file);
+    const destPath = path.join(basePath, userId, 'tmp', file.split('.')[0] + '.' + to);
+
+    try {
+      await fs.promises.access(fullPath);
+
+      if (!(from === to)) {
+        try {
+          await fs.promises.access(destPath);
+
+          res.status(httpStatus.OK).json({
+            data: new URL(
+              'http://127.0.0.1:8080/' +
+                path.join(userId, 'tmp', file.split('.')[0] + '.' + to)
+            ),
+            message: 'success'
+          });
+        } catch (error) {
+          if (error.code === 'ENOENT') {
+            const opts = { encoding: 'utf-8' };
+            const reader = fs.createReadStream(fullPath, opts);
+            const writer = fs.createWriteStream(destPath, opts);
+
+            if (from === 'csv' && to === 'json') {
+              FileHelper.csvStreamToJsonFile(reader, writer);
+            } else if (from === 'json' && to === 'csv') {
+              FileHelper.jsonStreamToCsvFile(reader, writer);
+            }
+
+            writer.on('close', () => {
+              res.status(httpStatus.OK).json({
+                data: new URL(
+                  'http://127.0.0.1:8080/' +
+                    path.join(userId, 'tmp', file.split('.')[0] + '.' + to)
+                ),
+                message: 'success'
+              });
+            });
+          }
+        }
+      } else {
+        res.status(httpStatus.OK).json({
+          data: new URL('http://127.0.0.1:8080/' + path.join(userId, type, file)),
+          message: 'success'
+        });
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        res.status(httpStatus.OK).json({
+          data: false,
+          message: `${file} does not exist`
+        });
+      } else {
+        return next(new APIError('File system error', httpStatus.BAD_REQUEST));
+      }
+    }
+  }
+
   async uploadFile(req, res, next) {
     const type = req.query.type;
 
@@ -154,7 +214,7 @@ class FileController {
     });
   }
 
-  async uploadFileDone(req, res, next) {
+  async convertFile(req, res, next) {
     if (!req.file) {
       return next(
         new APIError(
@@ -164,38 +224,61 @@ class FileController {
       );
     }
 
-    let error = false;
+    if (req.file.mimetype === fileMime.JSON) {
+      const userId = req.user.id;
+      const type = req.query.type;
+      const basePath = config.data.base_path;
+      const file = req.file.filename;
 
-    const streamOpts = { encoding: 'utf-8' };
-    const readStream = fs.createReadStream(req.file.path, streamOpts);
+      const opts = { encoding: 'utf-8' };
+      const reader = fs.createReadStream(req.file.path, opts);
 
-    readStream.on('data', async chunk => {
-      readStream.pause();
-      let json;
-      if (req.file.mimetype === fileMime.CSV) {
-        json = await FileHelper.csvToJson(chunk);
-      } else {
-        json = chunk;
+      const destPath = path.join(basePath, userId, type, `${file.split('.')[0]}.csv`);
+      const writer = fs.createWriteStream(destPath, opts);
+
+      FileHelper.jsonStreamToCsvFile(reader, writer);
+
+      reader.on('close', async () => {
+        try {
+          await fs.promises.unlink(req.file.path);
+          req.file.path = destPath;
+          req.file.mimetype = fileMime.CSV;
+
+          next();
+        } catch (error) {
+          return next(
+            new APIError('File processing failed', httpStatus.INTERNAL_SERVER_ERROR)
+          );
+        }
+      });
+    } else if (req.file.mimetype === fileMime.CSV) {
+      next();
+    }
+  }
+
+  async validFile(req, res, next) {
+    const opts = { encoding: 'utf-8' };
+    const reader = fs.createReadStream(req.file.path, opts);
+    let errorOccurs = false;
+
+    reader.on('data', chunk => {
+      reader.pause();
+
+      const firstLine = chunk
+        .toString()
+        .replace(/\r/g, '')
+        .split(/\n/)[0];
+
+      const attributes = firstLine.split(',');
+
+      if (!(attributes[attributes.length - 1] === 'label')) {
+        errorOccurs = true;
       }
-
-      const validation = await FileHelper.validateJson(json, schemaType.INPUT);
-
-      if (!validation.ok) {
-        readStream.emit('error', new Error());
-      } else {
-        readStream.resume();
-      }
+      reader.destroy();
     });
 
-    readStream.on('error', err => {
-      if (err) {
-        error = true;
-        readStream.destroy();
-      }
-    });
-
-    readStream.on('close', async () => {
-      if (error) {
+    reader.on('close', async () => {
+      if (errorOccurs) {
         try {
           await fs.promises.unlink(req.file.path);
           return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
@@ -204,11 +287,10 @@ class FileController {
           });
         } catch (error) {
           return next(
-            new APIError('File processing failed', httpStatus.UNPROCESSABLE_ENTITY)
+            new APIError('File processing failed', httpStatus.INTERNAL_SERVER_ERROR)
           );
         }
       }
-
       res.status(httpStatus.OK).json({
         data: req.file.filename,
         message: 'success'
@@ -437,22 +519,10 @@ class FileController {
     const filename = req.params.file;
     const userId = req.user.id;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, fileType.INPUT, filename);
+    const fullPath = path.join(basePath, userId, fileType.RAW, filename);
 
     try {
       await fs.promises.access(fullPath);
-
-      // const pipeline = new chain([
-      //   fs.createReadStream(fullPath),
-      //   parser(),
-      //   asObjects(),
-      //   streamObject()
-      // ]);
-
-      // pipeline.on('data', data => {
-      //   console.log(data);
-      // });
-
       const readStream = fs.createReadStream(fullPath);
       readStream.pipe(res);
     } catch (error) {
