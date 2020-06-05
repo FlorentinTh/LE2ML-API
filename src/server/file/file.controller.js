@@ -106,49 +106,54 @@ class FileController {
 
     const basePath = config.data.base_path;
     const fullPath = path.join(basePath, userId, type, file);
-    const destPath = path.join(basePath, userId, 'tmp', file.split('.')[0] + '.' + to);
+    const destPath = path.join(basePath, userId, '.tmp', file.split('.')[0] + '.' + to);
 
     try {
       await fs.promises.access(fullPath);
 
       if (!(from === to)) {
-        try {
-          await fs.promises.access(destPath);
+        const opts = { encoding: 'utf-8' };
+        const reader = fs.createReadStream(fullPath, opts);
+        const writer = fs.createWriteStream(destPath, opts);
 
-          res.status(httpStatus.OK).json({
-            data: new URL(
-              'http://127.0.0.1:8080/' +
-                path.join(userId, 'tmp', file.split('.')[0] + '.' + to)
-            ),
-            message: 'success'
-          });
-        } catch (error) {
-          if (error.code === 'ENOENT') {
-            const opts = { encoding: 'utf-8' };
-            const reader = fs.createReadStream(fullPath, opts);
-            const writer = fs.createWriteStream(destPath, opts);
+        if (from === 'csv' && to === 'json') {
+          FileHelper.csvStreamToJsonFile(reader, writer);
+        } else if (from === 'json' && to === 'csv') {
+          FileHelper.jsonStreamToCsvFile(reader, writer);
+        }
 
-            if (from === 'csv' && to === 'json') {
-              FileHelper.csvStreamToJsonFile(reader, writer);
-            } else if (from === 'json' && to === 'csv') {
-              FileHelper.jsonStreamToCsvFile(reader, writer);
+        writer.on('close', async () => {
+          FileHelper.zipFile(
+            destPath,
+            file.split('.')[0] + '.' + to,
+            path.join(userId, '.tmp'),
+            async (err, path) => {
+              if (err) {
+                return next(
+                  new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR)
+                );
+              } else {
+                await fs.promises.unlink(destPath);
+                res.status(httpStatus.OK).json({
+                  data: path,
+                  message: 'success'
+                });
+              }
             }
-
-            writer.on('close', () => {
-              res.status(httpStatus.OK).json({
-                data: new URL(
-                  'http://127.0.0.1:8080/' +
-                    path.join(userId, 'tmp', file.split('.')[0] + '.' + to)
-                ),
-                message: 'success'
-              });
+          );
+        });
+      } else {
+        FileHelper.zipFile(fullPath, file, path.join(userId, '.tmp'), (err, path) => {
+          if (err) {
+            return next(
+              new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR)
+            );
+          } else {
+            res.status(httpStatus.OK).json({
+              data: path,
+              message: 'success'
             });
           }
-        }
-      } else {
-        res.status(httpStatus.OK).json({
-          data: new URL('http://127.0.0.1:8080/' + path.join(userId, type, file)),
-          message: 'success'
         });
       }
     } catch (error) {
@@ -158,7 +163,7 @@ class FileController {
           message: `${file} does not exist`
         });
       } else {
-        return next(new APIError('File system error', httpStatus.BAD_REQUEST));
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
       }
     }
   }
