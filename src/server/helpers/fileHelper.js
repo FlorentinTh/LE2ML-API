@@ -9,11 +9,6 @@ import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
 import schemaType from '../file/schema.type';
-import stream from 'stream';
-import csvjson from 'csvjson';
-import JSONStream from 'jsonstream';
-import Archiver from 'archiver';
-import dayjs from 'dayjs';
 
 const config = Config.getConfig();
 
@@ -128,94 +123,6 @@ class FileHelper {
       Logger.error('Conversion from JSON to YML failed');
       throw new Error('Conversion failed');
     }
-  }
-
-  static csvStreamToJsonFile(reader, writer) {
-    if (!(typeof reader === 'object')) {
-      throw new Error('Expected type for argument reader is Object');
-    }
-
-    if (!(typeof writer === 'object')) {
-      throw new Error('Expected type for argument writer is Object');
-    }
-
-    const toObject = csvjson.stream.toObject();
-    const stringify = csvjson.stream.stringify(4);
-    reader
-      .pipe(toObject)
-      .pipe(stringify)
-      .pipe(writer);
-  }
-
-  static jsonStreamToCsvFile(reader, writer) {
-    if (!(typeof reader === 'object')) {
-      throw new Error('Expected type for argument reader is Object');
-    }
-
-    if (!(typeof writer === 'object')) {
-      throw new Error('Expected type for argument writer is Object');
-    }
-
-    let line = 0;
-    const jsonToCsv = new stream.Transform({
-      transform: function transformer(chunk, encoding, callback) {
-        line++;
-        callback(
-          null,
-          csvjson.toCSV(chunk, {
-            headers: line > 1 ? 'none' : 'key'
-          })
-        );
-      },
-      readableObjectMode: true,
-      writableObjectMode: true
-    });
-
-    reader
-      .pipe(JSONStream.parse('*'))
-      .pipe(jsonToCsv)
-      .pipe(writer);
-  }
-
-  static zipFile(filePath, filename, destFolder, callback) {
-    if (!(typeof filePath === 'string')) {
-      throw new Error('Expected type for argument filePath is String');
-    }
-
-    if (!(typeof filename === 'string')) {
-      throw new Error('Expected type for argument filename is String');
-    }
-
-    if (!(typeof destFolder === 'string')) {
-      throw new Error('Expected type for argument destFolder is String');
-    }
-
-    if (!(typeof callback === 'function')) {
-      throw new Error('Expected type for argument writer is Function');
-    }
-
-    const basePath = config.data.base_path;
-    const archivePath = path.join(destFolder, `${dayjs().format('YYYYMMDDHHmmss')}.zip`);
-
-    const archive = fs.createWriteStream(path.join(basePath, archivePath));
-    const archiver = Archiver('zip');
-
-    archive.on('close', () => {
-      callback(null, archivePath);
-    });
-
-    archive.on('error', err => {
-      if (err) {
-        callback(err, null);
-      }
-    });
-
-    archiver.pipe(archive);
-    archiver
-      .append(fs.createReadStream(filePath), {
-        name: filename
-      })
-      .finalize();
   }
 
   static async validateJson(data, type) {

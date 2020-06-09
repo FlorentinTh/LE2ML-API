@@ -24,7 +24,7 @@ router
   );
 
 router
-  .route('/exists')
+  .route('/exists/:file')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
@@ -37,6 +37,14 @@ router
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     FileController.downloadFile
+  );
+
+router
+  .route('/headers/:file')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    FileController.getFileHeaders
   );
 
 router
@@ -73,6 +81,24 @@ router
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     validation.renameFile,
     FileController.renameFile
+  );
+
+router
+  .route('/save/:file')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    FileController.saveFile
+  );
+
+router
+  .route('/edit/:file')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    FileController.removeAttributes,
+    FileController.renameAttributes,
+    FileController.editDone
   );
 
 router

@@ -6,10 +6,13 @@ import fs from 'fs';
 import Config from '@Config';
 import multer from 'multer';
 import FileHelper from '../helpers/fileHelper';
+import StreamHelper from '../helpers/streamHelper';
 import FileType from 'file-type';
 import schemaType from './schema.type';
 import fileMime from './file.mime';
 import { validationResult } from 'express-validator';
+import striplines from 'striplines';
+import csv from 'csv';
 
 const config = Config.getConfig();
 
@@ -73,7 +76,7 @@ class FileController {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
 
-    const filename = req.query.file;
+    const filename = req.params.file;
     const userId = req.user.id;
     const basePath = config.data.base_path;
     const fullPath = path.join(basePath, userId, type, filename);
@@ -117,13 +120,11 @@ class FileController {
         const writer = fs.createWriteStream(destPath, opts);
 
         if (from === 'csv' && to === 'json') {
-          FileHelper.csvStreamToJsonFile(reader, writer);
-        } else if (from === 'json' && to === 'csv') {
-          FileHelper.jsonStreamToCsvFile(reader, writer);
+          await StreamHelper.csvStreamToJsonFile(fullPath, reader, writer);
         }
 
         writer.on('close', async () => {
-          FileHelper.zipFile(
+          StreamHelper.zipFileStream(
             destPath,
             file.split('.')[0] + '.' + to,
             path.join(userId, '.tmp'),
@@ -143,19 +144,61 @@ class FileController {
           );
         });
       } else {
-        FileHelper.zipFile(fullPath, file, path.join(userId, '.tmp'), (err, path) => {
-          if (err) {
-            return next(
-              new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR)
-            );
-          } else {
-            res.status(httpStatus.OK).json({
-              data: path,
-              message: 'success'
-            });
+        StreamHelper.zipFileStream(
+          fullPath,
+          file,
+          path.join(userId, '.tmp'),
+          (err, path) => {
+            if (err) {
+              return next(
+                new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR)
+              );
+            } else {
+              res.status(httpStatus.OK).json({
+                data: path,
+                message: 'success'
+              });
+            }
           }
-        });
+        );
       }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        res.status(httpStatus.OK).json({
+          data: false,
+          message: `${file} does not exist`
+        });
+      } else {
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
+      }
+    }
+  }
+
+  async getFileHeaders(req, res, next) {
+    const file = req.params.file;
+    const userId = req.user.id;
+    const type = req.query.type;
+
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, userId, type, file);
+
+    try {
+      await fs.promises.access(fullPath);
+
+      const lines = await StreamHelper.getFirstLineStream(fullPath);
+
+      const attributes = lines.split(',');
+      const data = [];
+
+      for (let i = 0; i < attributes.length; ++i) {
+        const attribute = attributes[i];
+        data.push({ pos: i, label: attribute });
+      }
+
+      res.status(httpStatus.OK).json({
+        data: data,
+        message: 'success'
+      });
     } catch (error) {
       if (error.code === 'ENOENT') {
         res.status(httpStatus.OK).json({
@@ -241,7 +284,7 @@ class FileController {
       const destPath = path.join(basePath, userId, type, `${file.split('.')[0]}.csv`);
       const writer = fs.createWriteStream(destPath, opts);
 
-      FileHelper.jsonStreamToCsvFile(reader, writer);
+      StreamHelper.jsonStreamToCsvFile(reader, writer);
 
       reader.on('close', async () => {
         try {
@@ -472,6 +515,237 @@ class FileController {
         });
       } else {
         return next(new APIError('File system error', httpStatus.BAD_REQUEST));
+      }
+    }
+  }
+
+  async saveFile(req, res, next) {
+    const file = req.params.file;
+    const userId = req.user.id;
+    const type = req.query.type;
+
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, userId, type, file);
+
+    try {
+      await fs.promises.access(fullPath);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        res.status(httpStatus.OK).json({
+          data: false,
+          message: `${file} does not exist`
+        });
+      } else {
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
+      }
+    }
+  }
+
+  async removeAttributes(req, res, next) {
+    const modifications = req.body.modifications;
+
+    if (modifications === null) {
+      return next(
+        new APIError('No modifications to apply', httpStatus.UNPROCESSABLE_ENTITY)
+      );
+    }
+
+    const file = req.params.file;
+    const userId = req.user.id;
+    const type = req.query.type;
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, userId, type, file);
+
+    try {
+      await fs.promises.access(fullPath);
+
+      if (Object.values(modifications).includes('none')) {
+        const line = await StreamHelper.getFirstLineStream(fullPath);
+        const attributes = line.split(',');
+
+        const colsToRemove = [];
+
+        for (let i = 0; i < attributes.length; ++i) {
+          const attribute = attributes[i];
+          for (const [key, value] of Object.entries(modifications)) {
+            if (value === 'none' && key === attribute) {
+              colsToRemove.push(i);
+              delete modifications[key];
+            }
+          }
+        }
+
+        const opts = { encoding: 'utf-8' };
+        const input = fs.createReadStream(fullPath, opts);
+        const output = fs.createWriteStream(fullPath + '.tmp', opts);
+        input
+          .pipe(csv.parse())
+          .pipe(
+            csv.transform(record => {
+              return record.filter((value, index) => {
+                if (!colsToRemove.includes(index)) {
+                  return value;
+                }
+              });
+            })
+          )
+          .pipe(csv.stringify())
+          .pipe(output);
+
+        output.on('error', () => {
+          return next(
+            new APIError('File transform error', httpStatus.INTERNAL_SERVER_ERROR)
+          );
+        });
+
+        output.on('close', async () => {
+          next();
+        });
+      } else {
+        next();
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return next(
+          new APIError(`${file} does not exist`, httpStatus.UNPROCESSABLE_ENTITY)
+        );
+      } else {
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
+      }
+    }
+  }
+
+  async renameAttributes(req, res, next) {
+    const modifications = req.body.modifications;
+
+    if (modifications === null) {
+      return next(
+        new APIError('No modifications to apply', httpStatus.UNPROCESSABLE_ENTITY)
+      );
+    }
+
+    if (Object.keys(modifications).length === 0) {
+      next();
+    } else {
+      const file = req.params.file;
+      const userId = req.user.id;
+      const type = req.query.type;
+      const basePath = config.data.base_path;
+      const fullPath = path.join(basePath, userId, type, file);
+
+      let sourcePath;
+      let removeFile = false;
+
+      try {
+        await fs.promises.access(fullPath + '.tmp');
+        sourcePath = fullPath + '.tmp';
+        removeFile = true;
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          sourcePath = fullPath;
+        }
+      }
+
+      try {
+        const line = await StreamHelper.getFirstLineStream(sourcePath);
+        const attributes = line.split(',');
+        const attributesList = [];
+
+        for (let i = 0; i < attributes.length; ++i) {
+          const attribute = attributes[i];
+
+          if (Object.keys(modifications).includes(attribute)) {
+            const value = modifications[attribute];
+            attributesList.push(value);
+            delete modifications[attribute];
+          } else {
+            attributesList.push(attribute);
+          }
+        }
+
+        const attributesLine = attributesList.join(',');
+
+        const opts = { encoding: 'utf-8' };
+        const input = fs.createReadStream(sourcePath, opts);
+        const output = fs.createWriteStream(fullPath + '.edit.tmp', opts);
+
+        output.write(attributesLine + '\n');
+
+        input.pipe(striplines(1)).pipe(output);
+
+        output.on('error', () => {
+          return next(
+            new APIError('File transform error', httpStatus.INTERNAL_SERVER_ERROR)
+          );
+        });
+
+        output.on('close', async () => {
+          if (removeFile) {
+            await fs.promises.unlink(sourcePath);
+          }
+          await fs.promises.rename(fullPath + '.edit.tmp', sourcePath + '.tmp');
+          next();
+        });
+      } catch (error) {
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
+      }
+    }
+  }
+
+  async editDone(req, res, next) {
+    const modifications = req.body.modifications;
+
+    if (!(Object.keys(modifications).length === 0)) {
+      return next(
+        new APIError(
+          'All modifications were not applied',
+          httpStatus.UNPROCESSABLE_ENTITY
+        )
+      );
+    }
+
+    const file = req.params.file;
+    const userId = req.user.id;
+    const type = req.query.type;
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, userId, type, file);
+
+    try {
+      await fs.promises.access(fullPath + '.tmp');
+
+      const override = req.query.override;
+      const newFilename = req.body.newFilename;
+
+      if (override && newFilename === null) {
+        await fs.promises.unlink(fullPath);
+        await fs.promises.rename(fullPath + '.tmp', fullPath);
+
+        res.status(httpStatus.OK).json({
+          data: {
+            file: file
+          },
+          message: 'File successfully modified.'
+        });
+      } else {
+        await fs.promises.rename(
+          fullPath + '.tmp',
+          path.join(basePath, userId, type, newFilename)
+        );
+
+        res.status(httpStatus.OK).json({
+          data: {
+            file: newFilename
+          },
+          message: 'New file successfully created.'
+        });
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return next(
+          new APIError(`${file} does not exist`, httpStatus.UNPROCESSABLE_ENTITY)
+        );
+      } else {
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
       }
     }
   }
