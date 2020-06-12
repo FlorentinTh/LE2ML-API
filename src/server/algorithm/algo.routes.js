@@ -16,6 +16,14 @@ router
   );
 
 router
+  .route('/params/conf/:file')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    AlgoController.getParamsConf
+  );
+
+router
   .route('/')
   .put(
     passport.authenticate('jwt', { session: false }),

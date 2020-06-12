@@ -84,14 +84,6 @@ router
   );
 
 router
-  .route('/save/:file')
-  .post(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.saveFile
-  );
-
-router
   .route('/edit/:file')
   .post(
     passport.authenticate('jwt', { session: false }),

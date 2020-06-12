@@ -1,6 +1,7 @@
 const schemaType = {
   CONFIG: 'conf',
-  DATA: 'data'
+  DATA: 'data',
+  ALGO: 'algo'
 };
 
 export default schemaType;

@@ -16,8 +16,7 @@ class Algorithm extends Schema {
         },
         slug: {
           type: String,
-          required: true,
-          unique: true
+          required: true
         },
         type: {
           type: String,
@@ -32,6 +31,10 @@ class Algorithm extends Schema {
           type: String,
           required: true
         },
+        config: {
+          type: String,
+          default: null
+        },
         isDeleted: {
           type: Boolean,
           default: false
@@ -39,6 +42,8 @@ class Algorithm extends Schema {
       },
       { versionKey: false }
     );
+
+    algorithm.index({ slug: 1, container: 1 }, { unique: true });
   }
 }
 

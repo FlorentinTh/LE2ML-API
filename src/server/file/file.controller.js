@@ -13,6 +13,7 @@ import fileMime from './file.mime';
 import { validationResult } from 'express-validator';
 import striplines from 'striplines';
 import csv from 'csv';
+import AlgoController from '../algorithm/algo.controller';
 
 const config = Config.getConfig();
 
@@ -120,6 +121,7 @@ class FileController {
         const writer = fs.createWriteStream(destPath, opts);
 
         if (from === 'csv' && to === 'json') {
+          req.setTimeout(15 * 60 * 1000);
           await StreamHelper.csvStreamToJsonFile(fullPath, reader, writer);
         }
 
@@ -273,6 +275,7 @@ class FileController {
     }
 
     if (req.file.mimetype === fileMime.JSON) {
+      req.setTimeout(15 * 60 * 1000);
       const userId = req.user.id;
       const type = req.query.type;
       const basePath = config.data.base_path;
@@ -347,6 +350,8 @@ class FileController {
   }
 
   async importConfig(req, res, next) {
+    const algo = req.query.algo;
+
     if (!Object.values(fileType).includes(fileType.CONFIG)) {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
@@ -355,7 +360,12 @@ class FileController {
       storage: multer.memoryStorage()
     });
 
-    const uploadConfig = uploader.single('config');
+    let uploadConfig;
+    if (!(algo === undefined)) {
+      uploadConfig = uploader.single(algo);
+    } else {
+      uploadConfig = uploader.single('config');
+    }
 
     uploadConfig(req, res, err => {
       if (err) {
@@ -387,11 +397,23 @@ class FileController {
       );
     }
 
+    const algo = req.query.algo;
+
     try {
-      const json = await FileHelper.ymlToJson(req.file.buffer.toString());
+      let json;
+      if (!(algo === undefined)) {
+        json = JSON.parse(req.file.buffer.toString());
+      } else {
+        json = await FileHelper.ymlToJson(req.file.buffer.toString());
+      }
 
       try {
-        const validation = await FileHelper.validateJson(json, schemaType.CONFIG);
+        let validation;
+        if (!(algo === undefined)) {
+          validation = await FileHelper.validateJson(json, schemaType.ALGO);
+        } else {
+          validation = await FileHelper.validateJson(json, schemaType.CONFIG);
+        }
 
         if (!validation.ok) {
           return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
@@ -401,20 +423,38 @@ class FileController {
         }
 
         const basePath = config.data.base_path;
-        const fullPath = path.join(
-          basePath,
-          req.user.id,
-          'jobs',
-          fileType.CONFIG + '.yml'
-        );
+        let fullPath;
+        if (!(algo === undefined)) {
+          fullPath = path.join(basePath, '.app-data', 'algorithms', algo + '.json');
+        } else {
+          fullPath = path.join(basePath, req.user.id, 'jobs', fileType.CONFIG + '.yml');
+        }
 
         try {
           await fs.promises.writeFile(fullPath, req.file.buffer);
 
-          res.status(httpStatus.OK).json({
-            data: json,
-            message: 'success'
-          });
+          if (!(algo === undefined)) {
+            const update = await AlgoController.updateAlgoConf(algo, algo + '.json');
+
+            if (update.ok) {
+              res.status(httpStatus.OK).json({
+                data: {
+                  algo: update.data,
+                  file: algo + '.json'
+                },
+                message: 'File successfully imported'
+              });
+            } else {
+              return next(
+                new APIError('Updating database failed', httpStatus.INTERNAL_SERVER_ERROR)
+              );
+            }
+          } else {
+            res.status(httpStatus.OK).json({
+              data: json,
+              message: 'Configuration successfully imported'
+            });
+          }
         } catch (error) {
           return next(
             new APIError(
@@ -519,29 +559,8 @@ class FileController {
     }
   }
 
-  async saveFile(req, res, next) {
-    const file = req.params.file;
-    const userId = req.user.id;
-    const type = req.query.type;
-
-    const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, type, file);
-
-    try {
-      await fs.promises.access(fullPath);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        res.status(httpStatus.OK).json({
-          data: false,
-          message: `${file} does not exist`
-        });
-      } else {
-        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
-      }
-    }
-  }
-
   async removeAttributes(req, res, next) {
+    req.setTimeout(15 * 60 * 1000);
     const modifications = req.body.modifications;
 
     if (modifications === null) {

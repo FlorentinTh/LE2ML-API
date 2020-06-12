@@ -3,8 +3,12 @@ import APIError from '@APIError';
 import { validationResult } from 'express-validator';
 import Algorithm from './algo.model';
 import StringHelper from '@StringHelper';
+import Config from '@Config';
 import Logger from '@Logger';
+import path from 'path';
+import fs from 'fs';
 
+const config = Config.getConfig();
 class AlgoController {
   async getAlgos(req, res, next) {
     try {
@@ -28,6 +32,29 @@ class AlgoController {
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
+
+  async getParamsConf(req, res, next) {
+    const file = req.params.file;
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, '.app-data', 'algorithms', file);
+
+    try {
+      await fs.promises.access(fullPath);
+      const test = await fs.promises.readFile(fullPath);
+      const json = JSON.parse(test.toString());
+
+      res.status(httpStatus.OK).json({
+        data: json,
+        message: 'success'
+      });
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return next(new APIError('File does not exists', httpStatus.NOT_FOUND));
+      } else {
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
+      }
     }
   }
 
@@ -99,6 +126,35 @@ class AlgoController {
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
+
+  async updateAlgoConf(algo, filename) {
+    const data = {
+      config: filename
+    };
+
+    try {
+      const algorithm = await Algorithm.findOneAndUpdate({ slug: algo }, data, {
+        new: true
+      }).exec();
+
+      if (!algorithm) {
+        return {
+          ok: false,
+          data: null
+        };
+      }
+
+      return {
+        ok: true,
+        data: algorithm
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        data: null
+      };
     }
   }
 
