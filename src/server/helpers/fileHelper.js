@@ -172,6 +172,46 @@ class FileHelper {
       throw new Error('JSON schema not found');
     }
   }
+
+  static async removeAlgoFiles(slug, container) {
+    const basePath = config.data.base_path;
+    const confPath = path.join(
+      basePath,
+      '.app-data',
+      'algorithms',
+      container,
+      slug + '.json'
+    );
+    const deletePath = path.join(
+      basePath,
+      '.app-data',
+      'algorithms',
+      container,
+      '.deleted'
+    );
+
+    try {
+      await fs.promises.access(confPath);
+
+      try {
+        await fs.promises.access(deletePath);
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          await fs.promises.mkdir(deletePath);
+        } else {
+          Logger.error(`Unable to create deleted directory under: ${deletePath}`);
+          throw new Error('Unable to remove files');
+        }
+      }
+
+      await fse.move(confPath, path.join(deletePath, slug + '.json'));
+    } catch (error) {
+      if (!(error.code === 'ENOENT')) {
+        Logger.error(`Unable to remove files for algorithm ${container}.${slug}`);
+        throw new Error('Unable to remove files');
+      }
+    }
+  }
 }
 
 export default FileHelper;

@@ -7,6 +7,7 @@ import Config from '@Config';
 import Logger from '@Logger';
 import path from 'path';
 import fs from 'fs';
+import FileHelper from '../helpers/fileHelper';
 
 const config = Config.getConfig();
 class AlgoController {
@@ -37,8 +38,9 @@ class AlgoController {
 
   async getParamsConf(req, res, next) {
     const file = req.params.file;
+    const container = req.query.container;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, '.app-data', 'algorithms', file);
+    const fullPath = path.join(basePath, '.app-data', 'algorithms', container, file);
 
     try {
       await fs.promises.access(fullPath);
@@ -129,13 +131,13 @@ class AlgoController {
     }
   }
 
-  async updateAlgoConf(algo, filename) {
+  async updateAlgoConf(id, filename) {
     const data = {
       config: filename
     };
 
     try {
-      const algorithm = await Algorithm.findOneAndUpdate({ slug: algo }, data, {
+      const algorithm = await Algorithm.findOneAndUpdate({ _id: id }, data, {
         new: true
       }).exec();
 
@@ -164,7 +166,7 @@ class AlgoController {
     try {
       const algo = await Algorithm.findOneAndUpdate(
         { _id: id },
-        { isDeleted: true }
+        { isDeleted: true, enabled: false }
       ).exec();
 
       if (!algo) {
@@ -172,6 +174,8 @@ class AlgoController {
           new APIError('Algorithm not found, cannot be deleted.', httpStatus.NOT_FOUND)
         );
       }
+
+      FileHelper.removeAlgoFiles(algo.slug, algo.container);
 
       Logger.info(`Algorithm ${id} deleted`);
 

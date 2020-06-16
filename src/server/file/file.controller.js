@@ -351,6 +351,7 @@ class FileController {
 
   async importConfig(req, res, next) {
     const algo = req.query.algo;
+    const container = req.query.container;
 
     if (!Object.values(fileType).includes(fileType.CONFIG)) {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
@@ -362,7 +363,7 @@ class FileController {
 
     let uploadConfig;
     if (!(algo === undefined)) {
-      uploadConfig = uploader.single(algo);
+      uploadConfig = uploader.single(container + '.' + algo);
     } else {
       uploadConfig = uploader.single('config');
     }
@@ -422,19 +423,35 @@ class FileController {
           });
         }
 
+        const container = req.query.container;
         const basePath = config.data.base_path;
+        let folderPath;
         let fullPath;
         if (!(algo === undefined)) {
-          fullPath = path.join(basePath, '.app-data', 'algorithms', algo + '.json');
+          folderPath = path.join(basePath, '.app-data', 'algorithms', container);
+          fullPath = path.join(folderPath, algo + '.json');
         } else {
-          fullPath = path.join(basePath, req.user.id, 'jobs', fileType.CONFIG + '.yml');
+          folderPath = path.join(basePath, req.user.id, 'jobs');
+          fullPath = path.join(folderPath, fileType.CONFIG + '.yml');
+        }
+
+        try {
+          await fs.promises.mkdir(folderPath, { recursive: true });
+        } catch (error) {
+          return next(
+            new APIError(
+              'Saving configuration file failed',
+              httpStatus.INTERNAL_SERVER_ERROR
+            )
+          );
         }
 
         try {
           await fs.promises.writeFile(fullPath, req.file.buffer);
 
           if (!(algo === undefined)) {
-            const update = await AlgoController.updateAlgoConf(algo, algo + '.json');
+            const id = req.query.id;
+            const update = await AlgoController.updateAlgoConf(id, algo + '.json');
 
             if (update.ok) {
               res.status(httpStatus.OK).json({
