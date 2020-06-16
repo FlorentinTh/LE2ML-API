@@ -125,7 +125,7 @@ class FileHelper {
     }
   }
 
-  static async validateJson(data, type) {
+  static async validateJson(data, version, type) {
     if (!(typeof data === 'object')) {
       throw new Error('Expected type for argument data is Object');
     }
@@ -135,11 +135,21 @@ class FileHelper {
     }
 
     const basePath = config.data.base_path;
+    let fullPath;
+    if (!(version === undefined)) {
+      fullPath = path.resolve(
+        basePath,
+        '.app-data',
+        'schemas',
+        'v' + version,
+        config.schemas[type]
+      );
+    } else {
+      fullPath = path.resolve(basePath, '.app-data', 'schemas', config.schemas[type]);
+    }
 
     try {
-      const file = await fs.promises.readFile(
-        path.resolve(basePath, config.schemas[type])
-      );
+      const file = await fs.promises.readFile(fullPath);
 
       const schema = JSON.parse(file);
       const ajv = new Ajv({ allErrors: true, jsonPointers: true });

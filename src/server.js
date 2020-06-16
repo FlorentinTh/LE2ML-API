@@ -21,6 +21,7 @@ import filesRoutes from './server/file/file.routes';
 import featuresRoutes from './server/feature/feature.routes';
 import algosRoutes from './server/algorithm/algo.routes';
 import windowsRoutes from './server/window/window.routes';
+import jobsRoutes from './server/job/job.routes';
 import adminUsersRoutes from './server/admin/user/admin.user.routes';
 
 const config = Config.getConfig();
@@ -55,6 +56,7 @@ APIv1.use('/v1/files', filesRoutes);
 APIv1.use('/v1/features', featuresRoutes);
 APIv1.use('/v1/algos', algosRoutes);
 APIv1.use('/v1/windows/', windowsRoutes);
+APIv1.use('/v1/jobs/', jobsRoutes);
 APIv1.use('/v1/admin/users', adminUsersRoutes);
 app.use('/api', APIv1);
 

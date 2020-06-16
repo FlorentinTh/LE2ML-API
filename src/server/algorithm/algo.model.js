@@ -20,7 +20,8 @@ class Algorithm extends Schema {
         },
         type: {
           type: String,
-          enum: [type.SUPERVISED, type.UNSUPERVISED]
+          enum: [type.SUPERVISED, type.UNSUPERVISED],
+          required: true
         },
         enabled: {
           type: Boolean,

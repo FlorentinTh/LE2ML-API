@@ -408,12 +408,14 @@ class FileController {
         json = await FileHelper.ymlToJson(req.file.buffer.toString());
       }
 
+      const version = req.query.v;
+
       try {
         let validation;
         if (!(algo === undefined)) {
-          validation = await FileHelper.validateJson(json, schemaType.ALGO);
+          validation = await FileHelper.validateJson(json, version, schemaType.ALGO);
         } else {
-          validation = await FileHelper.validateJson(json, schemaType.CONFIG);
+          validation = await FileHelper.validateJson(json, version, schemaType.CONFIG);
         }
 
         if (!validation.ok) {
@@ -431,8 +433,10 @@ class FileController {
           folderPath = path.join(basePath, '.app-data', 'algorithms', container);
           fullPath = path.join(folderPath, algo + '.json');
         } else {
-          folderPath = path.join(basePath, req.user.id, 'jobs');
-          fullPath = path.join(folderPath, fileType.CONFIG + '.yml');
+          return res.status(httpStatus.OK).json({
+            data: json,
+            message: 'Configuration successfully imported'
+          });
         }
 
         try {
@@ -466,11 +470,6 @@ class FileController {
                 new APIError('Updating database failed', httpStatus.INTERNAL_SERVER_ERROR)
               );
             }
-          } else {
-            res.status(httpStatus.OK).json({
-              data: json,
-              message: 'Configuration successfully imported'
-            });
           }
         } catch (error) {
           return next(
@@ -498,9 +497,10 @@ class FileController {
     }
 
     const conf = req.body;
+    const version = req.query.v;
 
     try {
-      const validation = await FileHelper.validateJson(conf, schemaType.CONFIG);
+      const validation = await FileHelper.validateJson(conf, version, schemaType.CONFIG);
 
       if (!validation.ok) {
         return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
