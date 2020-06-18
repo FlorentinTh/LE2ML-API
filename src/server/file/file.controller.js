@@ -410,16 +410,14 @@ class FileController {
 
       let version = req.query.v;
 
+      if (version === undefined) {
+        version = json.version;
+      }
+
+      const schema = algo === undefined ? schemaType.CONFIG : schemaType.ALGO;
+
       try {
-        let validation;
-        if (!(algo === undefined)) {
-          validation = await FileHelper.validateJson(json, version, schemaType.ALGO);
-        } else {
-          if (version === undefined) {
-            version = json.version;
-          }
-          validation = await FileHelper.validateJson(json, version, schemaType.CONFIG);
-        }
+        const validation = await FileHelper.validateJson(json, version, schema);
 
         if (!validation.ok) {
           return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
