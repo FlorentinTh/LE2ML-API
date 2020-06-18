@@ -415,12 +415,10 @@ class FileController {
         if (!(algo === undefined)) {
           validation = await FileHelper.validateJson(json, version, schemaType.ALGO);
         } else {
-          if (!(version === undefined)) {
-            validation = await FileHelper.validateJson(json, version, schemaType.CONFIG);
-          } else {
+          if (version === undefined) {
             version = json.version;
-            validation = await FileHelper.validateJson(json, version, schemaType.CONFIG);
           }
+          validation = await FileHelper.validateJson(json, version, schemaType.CONFIG);
         }
 
         if (!validation.ok) {
