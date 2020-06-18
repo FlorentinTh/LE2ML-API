@@ -408,14 +408,19 @@ class FileController {
         json = await FileHelper.ymlToJson(req.file.buffer.toString());
       }
 
-      const version = req.query.v;
+      let version = req.query.v;
 
       try {
         let validation;
         if (!(algo === undefined)) {
           validation = await FileHelper.validateJson(json, version, schemaType.ALGO);
         } else {
-          validation = await FileHelper.validateJson(json, version, schemaType.CONFIG);
+          if (!(version === undefined)) {
+            validation = await FileHelper.validateJson(json, version, schemaType.CONFIG);
+          } else {
+            version = json.version;
+            validation = await FileHelper.validateJson(json, version, schemaType.CONFIG);
+          }
         }
 
         if (!validation.ok) {
