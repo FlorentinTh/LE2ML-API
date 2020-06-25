@@ -14,7 +14,6 @@ import { validationResult } from 'express-validator';
 import striplines from 'striplines';
 import csv from 'csv';
 import AlgoController from '../algorithm/algo.controller';
-
 const config = Config.getConfig();
 
 class FileController {
@@ -834,13 +833,64 @@ class FileController {
   async streamDataFile(req, res, next) {
     const filename = req.params.file;
     const userId = req.user.id;
+    const fileType = req.query.type;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, fileType.RAW, filename);
+    const fullPath = path.join(basePath, userId, fileType, filename);
+    const tempPath = path.join(basePath, userId, fileType, '.' + filename + '.tmp');
+
+    const att = req.query.att;
+
+    const line = await StreamHelper.getFirstLineStream(fullPath);
+    const attributes = line.split(',');
 
     try {
       await fs.promises.access(fullPath);
-      const readStream = fs.createReadStream(fullPath);
-      readStream.pipe(res);
+
+      let attIndex;
+
+      for (let i = 0; i < attributes.length; ++i) {
+        if (att === attributes[i]) {
+          attIndex = i;
+        }
+      }
+
+      const opts = { encoding: 'utf-8' };
+      const input = fs.createReadStream(fullPath, opts);
+      const output = fs.createWriteStream(tempPath, opts);
+
+      input
+        .pipe(csv.parse())
+        .pipe(
+          csv.transform(record => {
+            return record.filter((value, index) => {
+              if (attIndex === index) {
+                return value;
+              }
+            });
+          })
+        )
+        .pipe(csv.stringify())
+        .pipe(output);
+
+      output.on('close', async () => {
+        if (att === 'label') {
+          StreamHelper.getBarChartData(tempPath).then(data => {
+            res.write(data);
+            res.end();
+          });
+        } else {
+          const fileStream = fs.createReadStream(tempPath, {
+            encoding: 'utf-8'
+          });
+          fileStream.on('data', chunk => {
+            res.write(chunk);
+          });
+          fileStream.on('close', async () => {
+            await fs.promises.unlink(tempPath);
+            res.end();
+          });
+        }
+      });
     } catch (error) {
       if (error.code === 'ENOENT') {
         res.status(httpStatus.OK).json({
@@ -848,7 +898,7 @@ class FileController {
           message: `${filename} does not exist`
         });
       } else {
-        return next(new APIError('File system error', httpStatus.BAD_REQUEST));
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
       }
     }
   }

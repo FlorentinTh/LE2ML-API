@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import readline from 'readline';
 import path from 'path';
 import Config from '@Config';
+import LineByLineReader from 'line-by-line';
 
 const config = Config.getConfig();
 
@@ -151,6 +152,41 @@ class StreamHelper {
         count++;
       });
       lineReader.on('close', () => resolve(count));
+    });
+  }
+
+  static getBarChartData(path) {
+    const output = {};
+    let counter = 0;
+
+    const lr = new LineByLineReader(path);
+    return new Promise((resolve, reject) => {
+      lr.on('error', error => {
+        reject(error);
+      });
+
+      lr.on('line', line => {
+        lr.pause();
+
+        if (!(line === 'label')) {
+          if (!(output[line] === undefined)) {
+            output[line] = ++counter;
+          } else {
+            counter = 0;
+            output[line] = ++counter;
+          }
+        }
+        lr.resume();
+      });
+
+      lr.on('end', async () => {
+        try {
+          await fs.promises.unlink(path);
+        } catch (error) {
+          reject(error);
+        }
+        resolve(JSON.stringify(output));
+      });
     });
   }
 }

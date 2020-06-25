@@ -16,7 +16,7 @@ router
   );
 
 router
-  .route('/stream/:file')
+  .route('/stream/data/:file')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
