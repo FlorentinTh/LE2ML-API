@@ -6,7 +6,7 @@ import morgan from 'morgan';
 import winston from './utils/logger';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-import compress from 'compression';
+import compression from 'compression';
 import cors from 'cors';
 import httpStatus from 'http-status';
 import helmet from 'helmet';
@@ -36,14 +36,14 @@ const options = {
 const app = express();
 const APIv1 = express();
 
-const http2Server = spdy.createServer(options, app);
+const appServer = spdy.createServer(options, app);
 
 isDev ? app.use(morgan('dev')) : app.use(morgan('combined'), { stream: winston.stream });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(compress());
+app.use(compression());
 app.use(helmet());
 app.use(cors());
 app.use(passport.initialize());
@@ -82,4 +82,4 @@ app.use((err, req, res, next) => {
   });
 });
 
-export { app, http2Server };
+export { app, appServer };

@@ -9,10 +9,43 @@ import fs from 'fs';
 import path from 'path';
 import FileHelper from '../helpers/fileHelper';
 import schemaType from '../file/schema.type';
+import { Types } from 'mongoose';
 
 const config = Config.getConfig();
 
 class JobController {
+  async getJobs(req, res, next) {}
+
+  async getJobByUser(req, res, next) {
+    const jobState = req.query.state;
+
+    if (!Object.values(state).includes(jobState)) {
+      return next(new APIError('Unknown job state', httpStatus.BAD_REQUEST));
+    }
+
+    const userId = req.user.id;
+
+    try {
+      const jobs = await Job.find()
+        .select()
+        .where({ user: userId, state: jobState })
+        .exec();
+
+      if (!jobs) {
+        return next(new APIError('Cannot find all jobs.', httpStatus.NOT_FOUND));
+      }
+
+      res.status(httpStatus.OK).json({
+        data: {
+          jobs: jobs
+        },
+        message: 'success'
+      });
+    } catch (error) {
+      next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+  }
+
   async startJob(req, res, next) {
     const bodyErrors = validationResult(req);
 
@@ -23,9 +56,12 @@ class JobController {
     }
 
     const job = new Job();
+
+    const userId = req.user.id;
     job.label = req.body.label.toLowerCase();
     job.slug = StringHelper.toSlug(req.body.label, '_');
     job.state = state.STARTED;
+    job.user = Types.ObjectId(userId);
 
     const version = req.query.v;
 

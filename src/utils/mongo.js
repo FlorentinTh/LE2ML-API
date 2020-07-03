@@ -8,19 +8,20 @@ mongoose.Promise = global.Promise;
 
 class Mongo {
   constructor() {
-    this.connectionString = `mongodb://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}:${config.mongo.port}?authSource=admin&w=1`;
+    // ?authSource=admin&replicaSet=Cluster-shard-0&w=1
+    this.connectionString = `mongodb+srv://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}/test?retryWrites=true&w=majority`;
 
     mongoose.set('useNewUrlParser', true);
     mongoose.set('useCreateIndex', true);
     mongoose.set('useUnifiedTopology', true);
     mongoose.set('useFindAndModify', false);
 
-    mongoose.connection.on('connected', () => {
-      Logger.info(`Database connected. Worker process: ${process.pid}`);
-    });
-
     mongoose.connection.on('reconnected', () => {
       Logger.info(`Database re-onnected. Worker process: ${process.pid}`);
+    });
+
+    mongoose.connection.on('connected', () => {
+      Logger.info(`Database connected. Worker process: ${process.pid}`);
     });
 
     mongoose.connection.on('disconnected', () => {
@@ -39,9 +40,9 @@ class Mongo {
   async start() {
     try {
       await mongoose.connect(this.connectionString, {
-        auth: {
-          authdb: 'admin'
-        }
+        // auth: {
+        //   authdb: 'admin'
+        // }
       });
     } catch (error) {
       Logger.error(

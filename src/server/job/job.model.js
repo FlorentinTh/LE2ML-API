@@ -18,10 +18,22 @@ class Job extends Schema {
           type: String,
           required: true
         },
+        user: {
+          type: mongoose.ObjectId,
+          required: true
+        },
         state: {
           type: String,
           enum: [state.STARTED, state.RUNNING, state.COMPLETED, state.CANCELED],
           required: true
+        },
+        startedOn: {
+          type: Date,
+          default: Date.now
+        },
+        completedOn: {
+          type: Date,
+          default: null
         }
       },
       { versionKey: false }

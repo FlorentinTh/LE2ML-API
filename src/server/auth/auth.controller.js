@@ -98,6 +98,7 @@ class AuthController {
 
       const token = user.generateJwt(user);
       Logger.info(`Login of ${user._id}`);
+
       res.status(httpStatus.OK).json(user.isAuthenticated(token));
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /* eslint-disable no-unreachable */
-import { app, http2Server } from '@Server';
+import { app, appServer } from '@Server';
 import Logger from '@Logger';
 import Config from '@Config';
 
@@ -10,9 +10,9 @@ const config = Config.getConfig();
 const port = normalizePort(process.env.PORT || config.port);
 app.set('port', port);
 
-http2Server.listen(port);
-http2Server.on('error', onError);
-http2Server.on('listening', onListening);
+appServer.listen(port);
+appServer.on('error', onError);
+appServer.on('listening', onListening);
 
 function normalizePort(val) {
   const port = parseInt(val, 10);
@@ -46,7 +46,7 @@ function onError(error) {
 }
 
 function onListening() {
-  const addr = http2Server.address();
+  const addr = appServer.address();
   const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port: ' + addr.port;
 
   Logger.info(`Server listening on ${bind}`);

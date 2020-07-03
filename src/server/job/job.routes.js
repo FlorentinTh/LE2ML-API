@@ -8,6 +8,22 @@ import { role } from '../user/user.role';
 const router = express.Router();
 
 router
+  .route('/')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    JobController.getJobs
+  );
+
+router
+  .route('/user')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    JobController.getJobByUser
+  );
+
+router
   .route('/start')
   .post(
     passport.authenticate('jwt', { session: false }),
