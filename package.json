@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "ajv": "^6.12.2",
+    "ajv": "^6.12.3",
     "ajv-async": "^1.0.1",
     "ajv-formats": "^1.4.1",
     "archiver": "^4.0.1",
