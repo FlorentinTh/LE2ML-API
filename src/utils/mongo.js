@@ -8,7 +8,6 @@ mongoose.Promise = global.Promise;
 
 class Mongo {
   constructor() {
-    // ?authSource=admin&replicaSet=Cluster-shard-0&w=1
     this.connectionString = `mongodb+srv://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}/test?retryWrites=true&w=majority`;
 
     mongoose.set('useNewUrlParser', true);

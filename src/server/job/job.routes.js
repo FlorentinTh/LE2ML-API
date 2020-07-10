@@ -23,13 +23,47 @@ router
     JobController.getJobByUser
   );
 
+router.route('/logs').get();
+
+router.route('/changes').get();
+
 router
-  .route('/start')
+  .route('/')
+  .put(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    validation.start,
+    JobController.startJob
+  );
+
+router.route('/:id').post(Authority.allowOnlyTrustedApp(), JobController.updateJobTask);
+
+router
+  .route('/complete/:id')
+  .post(Authority.allowOnlyTrustedApp(), JobController.completeJob);
+
+router
+  .route('/cancel/:id')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    validation.startJob,
-    JobController.startJob
+    JobController.cancelJob
+  );
+
+router
+  .route('/restart/:id')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    JobController.restartJob
+  );
+
+router
+  .route('/:id')
+  .delete(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    JobController.removeJob
   );
 
 export default router;

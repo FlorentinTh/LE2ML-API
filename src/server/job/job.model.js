@@ -34,6 +34,18 @@ class Job extends Schema {
         completedOn: {
           type: Date,
           default: null
+        },
+        tasks: {
+          type: Object,
+          required: true
+        },
+        isDeleted: {
+          type: Boolean,
+          default: false
+        },
+        containers: {
+          type: Array,
+          default: []
         }
       },
       { versionKey: false }
@@ -41,4 +53,10 @@ class Job extends Schema {
   }
 }
 
-export default database.model('Job', new Job());
+const EventJob = database.model('Job', new Job(), 'jobs');
+
+EventJob.watch().on('change', event => {
+  // console.log(event);
+});
+
+export default EventJob;

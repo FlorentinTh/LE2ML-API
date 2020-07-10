@@ -1,7 +1,7 @@
 import { check } from 'express-validator';
 
 const validation = {
-  startJob: [
+  start: [
     check('label')
       .notEmpty()
       .isString()

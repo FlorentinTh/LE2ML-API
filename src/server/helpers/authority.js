@@ -1,5 +1,6 @@
 import APIError from '@APIError';
 import httpStatus from 'http-status';
+import App from '../app/app.model';
 
 class Authority {
   static allowSameIdentity() {
@@ -23,6 +24,46 @@ class Authority {
       }
 
       next();
+    };
+  }
+
+  static allowOnlyTrustedApp() {
+    return async (req, res, next) => {
+      const key = req.headers.app_key;
+
+      try {
+        const apps = await App.find()
+          .select()
+          .exec();
+
+        if (!apps) {
+          return next(new APIError('No matching key found', httpStatus.UNAUTHORIZED));
+        }
+
+        let validKey;
+        for (let i = 0; i < apps.length; ++i) {
+          const appKey = new App(apps[i]);
+          const isValidKey = await appKey.validateKey(key);
+
+          if (isValidKey) {
+            validKey = appKey;
+            break;
+          }
+        }
+
+        if (validKey === undefined) {
+          return next(new APIError('No matching key found', httpStatus.UNAUTHORIZED));
+        }
+
+        next();
+      } catch (error) {
+        next(
+          new APIError(
+            'Error occurs while trying to validate app key',
+            httpStatus.UNAUTHORIZED
+          )
+        );
+      }
     };
   }
 }

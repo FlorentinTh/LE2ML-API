@@ -16,6 +16,7 @@ import APIError from '@APIError';
 import '@Passport';
 import Mongo from '@Mongo';
 import authRoutes from './server/auth/auth.routes';
+import appRoutes from './server/app/app.routes';
 import userRoutes from './server/user/user.routes';
 import filesRoutes from './server/file/file.routes';
 import featuresRoutes from './server/feature/feature.routes';
@@ -51,6 +52,7 @@ app.use(passport.initialize());
 Mongo.start();
 
 APIv1.use('/v1', authRoutes);
+APIv1.use('/v1/apps', appRoutes);
 APIv1.use('/v1/users', userRoutes);
 APIv1.use('/v1/files', filesRoutes);
 APIv1.use('/v1/features', featuresRoutes);

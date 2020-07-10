@@ -4,7 +4,6 @@ import path from 'path';
 import yaml from 'js-yaml';
 import Ajv from 'ajv';
 import AjvFormat from 'ajv-formats';
-import AjvAsync from 'ajv-async';
 import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
@@ -45,6 +44,7 @@ class FileHelper {
       await fs.promises.mkdir(path.join(basePath, 'models'));
       await fs.promises.mkdir(path.join(basePath, 'features'));
       await fs.promises.mkdir(path.join(basePath, 'jobs'));
+      await fs.promises.mkdir(path.join(basePath, 'jobs', '.deleted'));
       await fs.promises.mkdir(path.join(basePath, 'tmp'));
       hideFile.hide(path.join(basePath, 'tmp'), (err, path) => {
         if (err) {
@@ -58,14 +58,30 @@ class FileHelper {
     }
   }
 
-  static async removeDataDirectories(userId) {
+  static async removeDataDirectories(userId, jobId = null) {
     if (!(typeof userId === 'string')) {
       throw new Error('Expected type for argument userId is String');
     }
 
-    const basePath = path.join(config.data.base_path, userId);
-    const deletedPath = path.join(config.data.base_path, '.deleted');
-    const destination = path.join(deletedPath, userId);
+    if (!(jobId === null)) {
+      if (!(typeof jobId === 'string')) {
+        throw new Error('Expected type for argument jobId is String');
+      }
+    }
+
+    let basePath;
+    let deletedPath;
+    let destination;
+
+    if (jobId === null) {
+      basePath = path.join(config.data.base_path, userId);
+      deletedPath = path.join(config.data.base_path, '.deleted');
+      destination = path.join(deletedPath, userId);
+    } else {
+      basePath = path.join(config.data.base_path, userId, 'jobs', jobId);
+      deletedPath = path.join(config.data.base_path, userId, 'jobs', '.deleted');
+      destination = path.join(deletedPath, jobId);
+    }
 
     try {
       await fs.promises.access(deletedPath);
@@ -73,7 +89,11 @@ class FileHelper {
       try {
         await fse.move(basePath, destination);
       } catch (error) {
-        Logger.error(`Unable to remove data directories for user ${userId}`);
+        Logger.error(
+          'Unable to remove data directories for ' + jobId === null
+            ? 'user ' + userId
+            : 'job ' + jobId
+        );
         throw new Error('Unable to remove data directories');
       }
     } catch (error) {
@@ -82,16 +102,24 @@ class FileHelper {
           await fs.promises.mkdir(deletedPath);
           hideFile.hide(deletedPath, (err, path) => {
             if (err) {
-              Logger.error(`Unable to create deleted directory`);
+              Logger.error(`Unable to create .deleted directory`);
               throw new Error('Unable to remove data directories');
             }
           });
         } catch (error) {
-          Logger.error(`Unable to remove data directories for user ${userId}`);
+          Logger.error(
+            'Unable to remove data directories for ' + jobId === null
+              ? 'user ' + userId
+              : 'job ' + jobId
+          );
           throw new Error('Unable to remove data directories');
         }
       } else {
-        Logger.error(`Unable to remove data directories for user ${userId}`);
+        Logger.error(
+          'Unable to remove data directories for ' + jobId === null
+            ? 'user ' + userId
+            : 'job ' + jobId
+        );
         throw new Error('Unable to remove data directories');
       }
     }
@@ -152,12 +180,15 @@ class FileHelper {
       const file = await fs.promises.readFile(fullPath);
 
       const schema = JSON.parse(file);
-      const ajv = new Ajv({ allErrors: true, jsonPointers: true });
+      const ajv = new Ajv({
+        allErrors: true,
+        jsonPointers: true,
+        loadSchema: async uri => {}
+      });
 
-      AjvAsync(ajv);
       AjvFormat(ajv);
 
-      const validate = ajv.compile(schema);
+      const validate = await ajv.compileAsync(schema);
 
       try {
         const valid = await validate(data);

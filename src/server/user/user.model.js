@@ -57,7 +57,6 @@ class User extends Schema {
     user.methods.validatePassword = this.validatePassword;
     user.methods.generateJwt = this.generateJwt;
     user.methods.isAuthenticated = this.isAuthenticated;
-    user.methods.checkRole = this.checkRole;
   }
 
   async setPassword(password, resetTmpPassword = false) {
