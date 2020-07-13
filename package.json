@@ -34,7 +34,7 @@
     "@hapi/joi": "^17.1.1",
     "ajv": "^6.12.3",
     "ajv-formats": "^1.4.1",
-    "archiver": "^4.0.1",
+    "archiver": "^4.0.2",
     "bcrypt": "^5.0.0",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
