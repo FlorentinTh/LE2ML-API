@@ -20,9 +20,9 @@
   },
   "author": "FlorentinTh",
   "license": "Apache-2.0",
-  // "pre-commit": [
-  //   "lint"
-  // ],
+  "pre-commit": [
+    "lint"
+  ],
   "bugs": {
     "url": "https://github.com/FlorentinTh/PiCluster-API/issues"
   },
@@ -34,7 +34,7 @@
     "@hapi/joi": "^17.1.1",
     "ajv": "^6.12.3",
     "ajv-formats": "^1.4.1",
-    "archiver": "^4.0.1",
+    "archiver": "^4.0.2",
     "bcrypt": "^5.0.0",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
@@ -57,7 +57,7 @@
     "jsonstream": "^1.0.3",
     "jsonwebtoken": "^8.5.1",
     "line-by-line": "^0.1.6",
-    "mongoose": "^5.9.22",
+    "mongoose": "^5.9.24",
     "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "papaparse": "^5.2.0",
