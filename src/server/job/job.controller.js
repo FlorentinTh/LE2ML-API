@@ -4,7 +4,7 @@ import EventJob from './job.model';
 import Config from '@Config';
 import { validationResult } from 'express-validator';
 import StringHelper from '@StringHelper';
-import { state } from './job.state';
+import { JobState } from './job.state';
 import fs from 'fs';
 import path from 'path';
 import FileHelper from '../helpers/fileHelper';
@@ -20,7 +20,7 @@ class JobController {
   async getJobByUser(req, res, next) {
     const jobState = req.query.state;
 
-    if (!Object.values(state).includes(jobState)) {
+    if (!Object.values(JobState).includes(jobState)) {
       return next(new APIError('Unknown job state', httpStatus.BAD_REQUEST));
     }
 
@@ -28,9 +28,9 @@ class JobController {
 
     const or = [];
 
-    if (jobState === state.STARTED) {
-      or.push({ state: jobState }, { state: state.CANCELED });
-    } else if (jobState === state.COMPLETED) {
+    if (jobState === JobState.STARTED) {
+      or.push({ state: jobState }, { state: JobState.CANCELED });
+    } else if (jobState === JobState.COMPLETED) {
       or.push({ state: jobState });
     }
 
@@ -58,7 +58,31 @@ class JobController {
 
   async getJobLogs(req, res, next) {}
 
-  async streamJobChanges(req, res, next) {}
+  async streamJobChanges(req, res, next) {
+    req.socket.setTimeout(0);
+    req.socket.setNoDelay(true);
+    req.socket.setKeepAlive(true);
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Accel-Buffering', 'no');
+
+    if (req.httpVersion !== '2.0') {
+      res.setHeader('Connection', 'keep-alive');
+    }
+
+    const watch = EventJob.watch();
+
+    watch.on('change', event => {
+      const job = event.fullDocument;
+      if (job.user.toString() === req.user.id) {
+        res.write('data: ' + JSON.stringify(event.fullDocument) + '\n\n');
+        res.flush();
+        res.end();
+      }
+    });
+  }
 
   async startJob(req, res, next) {
     const bodyErrors = validationResult(req);
@@ -74,7 +98,7 @@ class JobController {
     const userId = req.user.id;
     job.label = req.body.label.toLowerCase();
     job.slug = StringHelper.toSlug(req.body.label, '_');
-    job.state = state.STARTED;
+    job.state = JobState.STARTED;
     job.user = Types.ObjectId(userId);
 
     const version = req.query.v;
@@ -161,7 +185,7 @@ class JobController {
   async completeJob(req, res, next) {
     const id = req.params.id;
     const data = {
-      state: state.COMPLETED,
+      state: JobState.COMPLETED,
       completedOn: Date.now()
     };
 
@@ -190,7 +214,7 @@ class JobController {
   async cancelJob(req, res, next) {
     const id = req.params.id;
     const data = {
-      state: state.CANCELED
+      state: JobState.CANCELED
     };
 
     try {
@@ -225,7 +249,7 @@ class JobController {
   async restartJob(req, res, next) {
     const id = req.params.id;
     const data = {
-      state: state.STARTED
+      state: JobState.STARTED
     };
 
     try {

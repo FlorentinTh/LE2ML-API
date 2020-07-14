@@ -1,3 +1,5 @@
+import { TaskState } from '../../job/job.state';
+
 class V1 {
   constructor(config = null) {
     this.config = config;
@@ -6,13 +8,13 @@ class V1 {
   getTasks() {
     const tasks = {};
     if (this.config.windowing.enable) {
-      Object.assign(tasks, { windowing: 'init' });
+      Object.assign(tasks, { windowing: TaskState.QUEUED });
     } else {
       Object.assign(tasks, { windowing: null });
     }
 
     if (!(this.config.features === undefined) && this.config.features.length > 0) {
-      Object.assign(tasks, { features: 'init' });
+      Object.assign(tasks, { features: TaskState.QUEUED });
     } else {
       Object.assign(tasks, { features: null });
     }
@@ -21,7 +23,7 @@ class V1 {
       (this.config.process === 'train' || this.config.process === 'test') &&
       !(this.config.process === 'none')
     ) {
-      Object.assign(tasks, { learning: 'init' });
+      Object.assign(tasks, { learning: TaskState.QUEUED });
     } else {
       Object.assign(tasks, { learning: null });
     }

@@ -25,7 +25,13 @@ router
 
 router.route('/logs').get();
 
-router.route('/changes').get();
+router
+  .route('/changes')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    JobController.streamJobChanges
+  );
 
 router
   .route('/')

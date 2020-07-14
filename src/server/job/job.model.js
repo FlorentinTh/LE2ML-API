@@ -1,9 +1,13 @@
 import mongoose, { Schema } from 'mongoose';
 import Config from '@Config';
-import { state } from './job.state';
+import { JobState } from './job.state';
+
+import redis from 'redis';
 
 const config = Config.getConfig();
 const database = mongoose.connection.useDb(config.mongo.event_db);
+
+const publisher = redis.createClient();
 
 class Job extends Schema {
   constructor() {
@@ -24,7 +28,7 @@ class Job extends Schema {
         },
         state: {
           type: String,
-          enum: [state.STARTED, state.RUNNING, state.COMPLETED, state.CANCELED],
+          enum: [JobState.STARTED, JobState.COMPLETED, JobState.CANCELED],
           required: true
         },
         startedOn: {
@@ -56,7 +60,7 @@ class Job extends Schema {
 const EventJob = database.model('Job', new Job(), 'jobs');
 
 EventJob.watch().on('change', event => {
-  // console.log(event);
+  publisher.publish('job-events', JSON.stringify(event));
 });
 
 export default EventJob;
