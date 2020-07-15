@@ -70,7 +70,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.4",
+    "@babel/cli": "^7.10.5",
     "@babel/core": "^7.10.4",
     "@babel/node": "^7.10.4",
     "@babel/plugin-transform-regenerator": "^7.10.4",
