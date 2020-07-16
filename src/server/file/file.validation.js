@@ -1,5 +1,5 @@
 import { check } from 'express-validator';
-import fileType from './file.type';
+import { FileType } from './file.enums';
 
 const validation = {
   renameFile: [
@@ -11,7 +11,7 @@ const validation = {
       .isString(),
     check('fileType')
       .notEmpty()
-      .isIn([fileType.MODEL, fileType.RAW, fileType.FEATURES])
+      .isIn([FileType.MODEL, FileType.RAW, FileType.FEATURES])
   ],
   removeFile: [
     check('filename')
@@ -19,7 +19,7 @@ const validation = {
       .isString(),
     check('fileType')
       .notEmpty()
-      .isIn([fileType.MODEL, fileType.RAW, fileType.FEATURES])
+      .isIn([FileType.MODEL, FileType.RAW, FileType.FEATURES])
   ]
 };
 

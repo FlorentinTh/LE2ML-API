@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import Config from '@Config';
-import { domain } from './feature.domain';
+import { FeatureDomain } from './feature.enums';
 
 const config = Config.getConfig();
 const database = mongoose.connection.useDb(config.mongo.conf_db);
@@ -21,8 +21,8 @@ class Feature extends Schema {
         },
         domain: {
           type: String,
-          enum: [domain.ADMIN, domain.USER],
-          default: domain.USER
+          enum: [FeatureDomain.ADMIN, FeatureDomain.USER],
+          default: FeatureDomain.USER
         },
         enabled: {
           type: Boolean,

@@ -14,10 +14,12 @@
           "@Redis": "./src/utils/redis",
           "@Mongo": "./src/utils/mongo",
           "@Passport": "./src/utils/passport",
-          "@APIError": "./src/server/helpers/APIError",
+          "@Configuration": "./src/server/configuration/configuration",
+          "@APIError": "./src/server/helpers/api.error",
           "@Authority": "./src/server/helpers/authority",
-          "@FileHelper": "./src/server/helpers/fileHelper",
-          "@StringHelper": "./src/server/helpers/stringHelper.js"
+          "@FileHelper": "./src/server/helpers/file.helper",
+          "@StreamHelper": "./src/server/helpers/stream.helper.js",
+          "@StringHelper": "./src/server/helpers/string.helper.js"
         },
         "extensions": [".js", ".json"]
       }

@@ -1,5 +1,5 @@
 import { check } from 'express-validator';
-import { role } from '../../user/user.role';
+import { role } from '../user.role';
 
 const validation = {
   updateUser: [

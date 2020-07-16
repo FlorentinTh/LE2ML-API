@@ -1,10 +1,10 @@
 import express from 'express';
 import passport from 'passport';
 import AdminController from './admin.user.controller';
-import UserController from '../../user/user.controller';
+import UserController from '../user.controller';
 import validation from './admin.user.validation';
 import Authority from '@Authority';
-import { role } from '../../user/user.role';
+import { role } from '../user.role';
 
 const router = express.Router();
 

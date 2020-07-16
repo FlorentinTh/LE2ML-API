@@ -8,14 +8,6 @@ import { role } from '../user/user.role';
 const router = express.Router();
 
 router
-  .route('/')
-  .get(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    JobController.getJobs
-  );
-
-router
   .route('/user')
   .get(
     passport.authenticate('jwt', { session: false }),
@@ -23,14 +15,28 @@ router
     JobController.getJobByUser
   );
 
-router.route('/logs').get();
+router
+  .route('/log/entries')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN),
+    JobController.getJobLogEntries
+  );
 
 router
   .route('/changes')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    JobController.streamJobChanges
+    JobController.getJobChanges
+  );
+
+router
+  .route('/admin/changes')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN),
+    JobController.getAdminJobChanges
   );
 
 router

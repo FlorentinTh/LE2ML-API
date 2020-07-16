@@ -6,6 +6,15 @@ class Configuration {
     this.version = config === null ? null : config.version;
   }
 
+  getProp(prop) {
+    switch (this.version) {
+      case '1':
+        return new V1(this.config).getProp(prop);
+      default:
+        throw new Error(`Version ${this.version} of configuration is not supported yet.`);
+    }
+  }
+
   getTasks() {
     switch (this.version) {
       case '1':

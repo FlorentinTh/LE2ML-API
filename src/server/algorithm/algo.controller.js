@@ -7,7 +7,7 @@ import Config from '@Config';
 import Logger from '@Logger';
 import path from 'path';
 import fs from 'fs';
-import FileHelper from '../helpers/fileHelper';
+import FileHelper from '@FileHelper';
 
 const config = Config.getConfig();
 class AlgoController {

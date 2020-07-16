@@ -1,4 +1,4 @@
-export const type = {
+export const AlgoType = {
   SUPERVISED: 'supervised',
   UNSUPERVISED: 'unsupervised'
 };

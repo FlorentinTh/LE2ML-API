@@ -1,15 +1,13 @@
 import httpStatus from 'http-status';
 import APIError from '@APIError';
-import fileType from './file.type';
 import path from 'path';
 import fs from 'fs';
 import Config from '@Config';
 import multer from 'multer';
-import FileHelper from '../helpers/fileHelper';
-import StreamHelper from '../helpers/streamHelper';
-import FileType from 'file-type';
-import schemaType from './schema.type';
-import fileMime from './file.mime';
+import FileHelper from '@FileHelper';
+import StreamHelper from '@StreamHelper';
+import fileType from 'file-type';
+import { FileType, SchemaType, FileMime } from './file.enums';
 import { validationResult } from 'express-validator';
 import striplines from 'striplines';
 import csv from 'csv';
@@ -20,7 +18,7 @@ class FileController {
   async getFiles(req, res, next) {
     const type = req.query.type;
 
-    if (!Object.values(fileType).includes(type)) {
+    if (!Object.values(FileType).includes(type)) {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
 
@@ -72,7 +70,7 @@ class FileController {
   async fileExists(req, res, next) {
     const type = req.query.type;
 
-    if (!Object.values(fileType).includes(type)) {
+    if (!Object.values(FileType).includes(type)) {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
 
@@ -101,6 +99,7 @@ class FileController {
   }
 
   async downloadFile(req, res, next) {
+    req.setTimeout(0);
     const file = req.params.file;
     const userId = req.user.id;
     const type = req.query.type;
@@ -120,7 +119,6 @@ class FileController {
         const writer = fs.createWriteStream(destPath, opts);
 
         if (from === 'csv' && to === 'json') {
-          req.setTimeout(15 * 60 * 1000);
           await StreamHelper.csvStreamToJsonFile(fullPath, reader, writer);
         }
 
@@ -215,7 +213,7 @@ class FileController {
   async uploadFile(req, res, next) {
     const type = req.query.type;
 
-    if (!Object.values(fileType).includes(type)) {
+    if (!Object.values(FileType).includes(type)) {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
 
@@ -233,7 +231,7 @@ class FileController {
         }
       }),
       fileFilter: async (req, file, cb) => {
-        if (!Object.values(fileMime).includes(file.mimetype)) {
+        if (!Object.values(FileMime).includes(file.mimetype)) {
           cb(null, false);
         } else {
           const override = req.query.override === 'true';
@@ -264,6 +262,8 @@ class FileController {
   }
 
   async convertFile(req, res, next) {
+    req.setTimeout(0);
+
     if (!req.file) {
       return next(
         new APIError(
@@ -273,8 +273,7 @@ class FileController {
       );
     }
 
-    if (req.file.mimetype === fileMime.JSON) {
-      req.setTimeout(15 * 60 * 1000);
+    if (req.file.mimetype === FileMime.JSON) {
       const userId = req.user.id;
       const type = req.query.type;
       const basePath = config.data.base_path;
@@ -292,7 +291,7 @@ class FileController {
         try {
           await fs.promises.unlink(req.file.path);
           req.file.path = destPath;
-          req.file.mimetype = fileMime.CSV;
+          req.file.mimetype = FileMime.CSV;
 
           next();
         } catch (error) {
@@ -301,7 +300,7 @@ class FileController {
           );
         }
       });
-    } else if (req.file.mimetype === fileMime.CSV) {
+    } else if (req.file.mimetype === FileMime.CSV) {
       next();
     }
   }
@@ -352,7 +351,7 @@ class FileController {
     const algo = req.query.algo;
     const container = req.query.container;
 
-    if (!Object.values(fileType).includes(fileType.CONFIG)) {
+    if (!Object.values(FileType).includes(FileType.CONFIG)) {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
 
@@ -384,7 +383,7 @@ class FileController {
     }
 
     try {
-      const type = await FileType.fromBuffer(req.file.buffer);
+      const type = await fileType.fromBuffer(req.file.buffer);
 
       if (!(type === undefined)) {
         return next(
@@ -413,7 +412,7 @@ class FileController {
         version = json.version;
       }
 
-      const schema = algo === undefined ? schemaType.CONFIG : schemaType.ALGO;
+      const schema = algo === undefined ? SchemaType.CONFIG : SchemaType.ALGO;
 
       try {
         const validation = await FileHelper.validateJson(json, version, schema);
@@ -492,7 +491,7 @@ class FileController {
   }
 
   async convertConfig(req, res, next) {
-    if (!Object.values(fileType).includes(fileType.CONFIG)) {
+    if (!Object.values(FileType).includes(FileType.CONFIG)) {
       return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
     }
 
@@ -500,7 +499,7 @@ class FileController {
     const version = req.query.v;
 
     try {
-      const validation = await FileHelper.validateJson(conf, version, schemaType.CONFIG);
+      const validation = await FileHelper.validateJson(conf, version, SchemaType.CONFIG);
 
       if (!validation.ok) {
         return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
@@ -577,7 +576,8 @@ class FileController {
   }
 
   async removeAttributes(req, res, next) {
-    req.setTimeout(15 * 60 * 1000);
+    req.setTimeout(0);
+
     const modifications = req.body.modifications;
 
     if (modifications === null) {

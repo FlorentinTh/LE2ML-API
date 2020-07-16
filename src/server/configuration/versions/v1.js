@@ -1,8 +1,15 @@
-import { TaskState } from '../../job/job.state';
+import { TaskState } from '../../job/job.enums';
 
 class V1 {
   constructor(config = null) {
     this.config = config;
+  }
+
+  getProp(prop) {
+    if (!(typeof prop === 'string')) {
+      throw new Error('Expected type for argument prop is String.');
+    }
+    return this.config[prop];
   }
 
   getTasks() {

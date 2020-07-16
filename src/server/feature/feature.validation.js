@@ -1,5 +1,5 @@
 import { check } from 'express-validator';
-import { domain } from './feature.domain';
+import { FeatureDomain } from './feature.enums';
 
 const validation = {
   addFeature: [
@@ -9,7 +9,7 @@ const validation = {
     check('domain')
       .notEmpty()
       .isString()
-      .isIn([domain.TIME, domain.FREQ]),
+      .isIn([FeatureDomain.TIME, FeatureDomain.FREQ]),
     check('enabled')
       .notEmpty()
       .isBoolean(),
@@ -24,7 +24,7 @@ const validation = {
     check('domain')
       .notEmpty()
       .isString()
-      .isIn([domain.TIME, domain.FREQ]),
+      .isIn([FeatureDomain.TIME, FeatureDomain.FREQ]),
     check('enabled')
       .notEmpty()
       .isBoolean(),

@@ -7,7 +7,7 @@ import AjvFormat from 'ajv-formats';
 import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
-import schemaType from '../file/schema.type';
+import { SchemaType } from '../file/file.enums';
 
 const config = Config.getConfig();
 
@@ -158,7 +158,7 @@ class FileHelper {
       throw new Error('Expected type for argument data is Object');
     }
 
-    if (!Object.values(schemaType).includes(type)) {
+    if (!Object.values(SchemaType).includes(type)) {
       throw new Error('Unknown schema type');
     }
 
@@ -251,6 +251,40 @@ class FileHelper {
         Logger.error(`Unable to remove files for algorithm ${container}.${slug}`);
         throw new Error('Unable to remove files');
       }
+    }
+  }
+
+  static async writeToJobsLog(data) {
+    if (!(typeof data === 'object')) {
+      throw new Error('Expected type for argument data is Object');
+    }
+
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, '.app-data', 'jobs.log');
+
+    try {
+      await fs.promises.access(fullPath);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        let fileHandle;
+        try {
+          fileHandle = await fs.promises.open(fullPath, 'w');
+        } finally {
+          if (!(fileHandle === undefined)) {
+            await fileHandle.close();
+          }
+        }
+      } else {
+        Logger.error(`Unable to access jobs log file under: ${fullPath}`);
+        throw new Error('Unable to access jobs log file');
+      }
+    }
+
+    try {
+      await fs.promises.appendFile(fullPath, JSON.stringify(data) + '\n', 'utf-8');
+    } catch (error) {
+      Logger.error(`Unable to write into jobs log file`);
+      throw new Error('Unable to write into jobs log file');
     }
   }
 }

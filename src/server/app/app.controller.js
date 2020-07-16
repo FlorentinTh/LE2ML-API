@@ -1,7 +1,6 @@
 import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
 import App from './app.model';
-import User from '../user/user.model';
 import { Types } from 'mongoose';
 import APIError from '@APIError';
 import Logger from '@Logger';
@@ -18,30 +17,20 @@ class AppController {
         return next(new APIError('Cannot find all app keys.', httpStatus.NOT_FOUND));
       }
 
-      const result = [];
+      const results = [];
 
       for (let i = 0; i < appKeys.length; ++i) {
-        const user = await User.findOne({ _id: appKeys[i].user });
+        const user = await appKeys[i].getUserDetails(appKeys[i].user);
+        const appKeyObj = appKeys[i].toObject();
+        appKeyObj.user = user;
 
-        if (user) {
-          result.push({
-            _id: appKeys[i].id,
-            name: appKeys[i].name,
-            description: appKeys[i].description,
-            dateCreated: appKeys[i].dateCreated,
-            user: {
-              firstname: user.firstname,
-              lastname: user.lastname,
-              email: user.email
-            }
-          });
-        }
+        results.push(appKeyObj);
       }
 
       const data = {
-        total: result.length,
+        total: results.length,
         app: {
-          keys: result
+          keys: results
         }
       };
 

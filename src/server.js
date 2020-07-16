@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import spdy from 'spdy';
+// import spdy from 'spdy';
+import https from 'https';
 import express from 'express';
 import morgan from 'morgan';
 import winston from './utils/logger';
@@ -23,7 +24,7 @@ import featuresRoutes from './server/feature/feature.routes';
 import algosRoutes from './server/algorithm/algo.routes';
 import windowsRoutes from './server/window/window.routes';
 import jobsRoutes from './server/job/job.routes';
-import adminUsersRoutes from './server/admin/user/admin.user.routes';
+import adminUsersRoutes from './server/user/admin/admin.user.routes';
 
 const config = Config.getConfig();
 const isDev = config.env === 'development';
@@ -37,7 +38,8 @@ const options = {
 const app = express();
 const APIv1 = express();
 
-const appServer = spdy.createServer(options, app);
+const appServer = https.createServer(options, app);
+// const appServer = spdy.createServer(options, app);
 
 isDev ? app.use(morgan('dev')) : app.use(morgan('combined'), { stream: winston.stream });
 

@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { v1 as uuidv1 } from 'uuid';
 import Config from '@Config';
+import User from '../user/user.model';
 
 const config = Config.getConfig();
 
@@ -36,6 +37,7 @@ class App extends Schema {
 
     app.methods.generateKey = this.generateKey;
     app.methods.validateKey = this.validateKey;
+    app.methods.getUserDetails = this.getUserDetails;
   }
 
   async generateKey() {
@@ -50,6 +52,18 @@ class App extends Schema {
   async validateKey(key) {
     const hash = await bcrypt.compare(key, this.hash);
     return (this.hash = hash);
+  }
+
+  async getUserDetails(userId) {
+    const user = await User.findOne({ _id: userId });
+
+    if (user) {
+      return {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email
+      };
+    }
   }
 }
 

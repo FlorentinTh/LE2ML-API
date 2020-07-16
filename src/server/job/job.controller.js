@@ -4,19 +4,19 @@ import EventJob from './job.model';
 import Config from '@Config';
 import { validationResult } from 'express-validator';
 import StringHelper from '@StringHelper';
-import { JobState } from './job.state';
+import { JobState, JobProcess } from './job.enums';
 import fs from 'fs';
 import path from 'path';
-import FileHelper from '../helpers/fileHelper';
-import schemaType from '../file/schema.type';
+import FileHelper from '@FileHelper';
+import { SchemaType } from '../file/file.enums';
 import { Types } from 'mongoose';
-import Configuration from '../configuaration/configuration';
+import Configuration from '@Configuration';
+import LineByLineReader from 'line-by-line';
+import dayjs from 'dayjs';
 
 const config = Config.getConfig();
 
 class JobController {
-  async getJobs(req, res, next) {}
-
   async getJobByUser(req, res, next) {
     const jobState = req.query.state;
 
@@ -56,9 +56,33 @@ class JobController {
     }
   }
 
-  async getJobLogs(req, res, next) {}
+  async getJobLogEntries(req, res, next) {
+    const basePath = config.data.base_path;
+    const fullPath = path.join(basePath, '.app-data', 'jobs.log');
 
-  async streamJobChanges(req, res, next) {
+    try {
+      await fs.promises.access(fullPath);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return res.end();
+      } else {
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
+      }
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+
+    const lineReader = new LineByLineReader(fullPath);
+    lineReader.on('line', line => {
+      res.write(line + '\n');
+    });
+
+    lineReader.once('end', line => {
+      res.end();
+    });
+  }
+
+  async getJobChanges(req, res, next) {
     req.socket.setTimeout(0);
     req.socket.setNoDelay(true);
     req.socket.setKeepAlive(true);
@@ -74,11 +98,115 @@ class JobController {
 
     const watch = EventJob.watch();
 
-    watch.on('change', event => {
-      const job = event.fullDocument;
-      if (job.user.toString() === req.user.id) {
-        res.write('data: ' + JSON.stringify(event.fullDocument) + '\n\n');
+    watch.on('change', async event => {
+      if (!res.finished) {
+        let job;
+        if (event.operationType === 'update') {
+          const jobId = event.documentKey._id;
+          try {
+            job = await EventJob.findOne()
+              .where('_id')
+              .in([jobId])
+              .exec();
+          } catch (error) {
+            return next(new APIError('Cannot find job', httpStatus.NOT_FOUND));
+          }
+        } else if (event.operationType === 'insert') {
+          job = event.fullDocument;
+        }
+
+        if (job.user.toString() === req.user.id) {
+          res.write('data: ' + JSON.stringify(job) + '\n\n');
+        }
+
         res.flush();
+      }
+    });
+
+    req.on('close', () => {
+      if (!res.finished) {
+        res.end();
+      }
+    });
+  }
+
+  async getAdminJobChanges(req, res, next) {
+    req.socket.setTimeout(0);
+    req.socket.setNoDelay(true);
+    req.socket.setKeepAlive(true);
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Accel-Buffering', 'no');
+
+    if (req.httpVersion !== '2.0') {
+      res.setHeader('Connection', 'keep-alive');
+    }
+
+    const watch = EventJob.watch();
+
+    watch.on('change', async event => {
+      if (!res.finished) {
+        let job;
+        if (event.operationType === 'update') {
+          const jobId = event.documentKey._id;
+          try {
+            job = await EventJob.findOne()
+              .where('_id')
+              .in([jobId])
+              .exec();
+          } catch (error) {
+            return next(new APIError('Cannot find job', httpStatus.NOT_FOUND));
+          }
+        } else if (event.operationType === 'insert') {
+          job = event.fullDocument;
+        }
+
+        const user = await job.getUserDetails(job.user);
+        const jobObj = job.toObject();
+        jobObj.user = user;
+
+        let action;
+        if (event.operationType === 'update') {
+          const state = event.updateDescription.updatedFields.state;
+          if (!(state === undefined)) {
+            if (state === 'started') {
+              action = 'restarted';
+            } else {
+              action = state;
+            }
+          } else {
+            const isDeleted = event.updateDescription.updatedFields.isDeleted;
+
+            const tasks = event.updateDescription.updatedFields.tasks;
+
+            if (!(isDeleted === undefined)) {
+              action = 'deleted';
+            } else if (!(tasks === undefined)) {
+              action = 'updated';
+            }
+          }
+        } else if (event.operationType === 'insert') {
+          action = 'started';
+        }
+
+        res.write(
+          'data: ' +
+            JSON.stringify({
+              action: action,
+              date: dayjs().format('DD-MM-YYYY HH:mm'),
+              job: jobObj
+            }) +
+            '\n\n'
+        );
+
+        res.flush();
+      }
+    });
+
+    req.on('close', () => {
+      if (!res.finished) {
         res.end();
       }
     });
@@ -105,7 +233,7 @@ class JobController {
 
     try {
       const conf = req.body.conf;
-      const validation = await FileHelper.validateJson(conf, version, schemaType.CONFIG);
+      const validation = await FileHelper.validateJson(conf, version, SchemaType.CONFIG);
 
       if (!validation.ok) {
         return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
@@ -114,8 +242,23 @@ class JobController {
         });
       }
 
-      const tasks = new Configuration(conf).getTasks();
-      job.tasks = tasks;
+      const configuration = new Configuration(conf);
+      job.tasks = configuration.getTasks();
+      job.pipeline = configuration.getProp('pipeline');
+
+      const process = configuration.getProp('process');
+
+      switch (process) {
+        case 'train':
+          job.process = JobProcess.TRAINING;
+          break;
+        case 'test':
+          job.process = JobProcess.TESTING;
+          break;
+        default:
+          job.process = JobProcess.NONE;
+          break;
+      }
 
       const newJob = await job.save();
       const basePath = config.data.base_path;
@@ -137,9 +280,25 @@ class JobController {
        *
        */
 
+      const user = await newJob.getUserDetails(newJob.user);
+      const jobObj = job.toObject();
+      jobObj.user = user;
+
+      try {
+        await FileHelper.writeToJobsLog({
+          action: 'started',
+          date: dayjs().format('DD-MM-YYYY HH:mm'),
+          job: jobObj
+        });
+      } catch (error) {
+        return next(
+          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
+        );
+      }
+
       res.status(httpStatus.OK).json({
         data: {
-          job: newJob
+          job: jobObj
         },
         message: 'Job successfully started'
       });
@@ -161,9 +320,13 @@ class JobController {
     };
 
     try {
-      const job = await EventJob.findOneAndUpdate({ _id: id }, data, {
-        new: true
-      }).exec();
+      const job = await EventJob.findOneAndUpdate(
+        { _id: id, state: { $ne: JobState.COMPLETED } },
+        data,
+        {
+          new: true
+        }
+      ).exec();
 
       if (!job) {
         return next(
@@ -171,9 +334,25 @@ class JobController {
         );
       }
 
+      const user = await job.getUserDetails(job.user);
+      const jobObj = job.toObject();
+      jobObj.user = user;
+
+      try {
+        await FileHelper.writeToJobsLog({
+          action: 'updated',
+          date: dayjs().format('DD-MM-YYYY HH:mm'),
+          job: jobObj
+        });
+      } catch (error) {
+        return next(
+          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
+        );
+      }
+
       res.status(httpStatus.OK).json({
         data: {
-          job: job
+          job: jobObj
         },
         message: `Job successfully updated.`
       });
@@ -200,9 +379,25 @@ class JobController {
         );
       }
 
+      const user = await job.getUserDetails(job.user);
+      const jobObj = job.toObject();
+      jobObj.user = user;
+
+      try {
+        await FileHelper.writeToJobsLog({
+          action: 'completed',
+          date: dayjs().format('DD-MM-YYYY HH:mm'),
+          job: jobObj
+        });
+      } catch (error) {
+        return next(
+          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
+        );
+      }
+
       res.status(httpStatus.OK).json({
         data: {
-          job: job
+          job: jobObj
         },
         message: `Job successfully completed.`
       });
@@ -218,9 +413,13 @@ class JobController {
     };
 
     try {
-      const job = await EventJob.findOneAndUpdate({ _id: id }, data, {
-        new: true
-      }).exec();
+      const job = await EventJob.findOneAndUpdate(
+        { _id: id, state: { $ne: JobState.COMPLETED } },
+        data,
+        {
+          new: true
+        }
+      ).exec();
 
       if (!job) {
         return next(
@@ -235,9 +434,25 @@ class JobController {
        *
        */
 
+      const user = await job.getUserDetails(job.user);
+      const jobObj = job.toObject();
+      jobObj.user = user;
+
+      try {
+        await FileHelper.writeToJobsLog({
+          action: 'canceled',
+          date: dayjs().format('DD-MM-YYYY HH:mm'),
+          job: jobObj
+        });
+      } catch (error) {
+        return next(
+          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
+        );
+      }
+
       res.status(httpStatus.OK).json({
         data: {
-          job: job
+          job: jobObj
         },
         message: `Job successfully canceled.`
       });
@@ -267,7 +482,7 @@ class JobController {
       const validation = await FileHelper.validateJson(
         conf,
         conf.version,
-        schemaType.CONFIG
+        SchemaType.CONFIG
       );
 
       if (!validation.ok) {
@@ -277,16 +492,20 @@ class JobController {
         });
       }
 
-      const tasks = new Configuration(conf).getTasks();
-      data.tasks = tasks;
+      const configuration = new Configuration(conf);
+      data.tasks = configuration.getTasks();
     } catch (error) {
       return next(new APIError('Failed to start job.', httpStatus.INTERNAL_SERVER_ERROR));
     }
 
     try {
-      const job = await EventJob.findOneAndUpdate({ _id: id }, data, {
-        new: true
-      }).exec();
+      const job = await EventJob.findOneAndUpdate(
+        { _id: id, state: { $ne: JobState.STARTED } },
+        data,
+        {
+          new: true
+        }
+      ).exec();
 
       if (!job) {
         return next(
@@ -294,9 +513,25 @@ class JobController {
         );
       }
 
+      const user = await job.getUserDetails(job.user);
+      const jobObj = job.toObject();
+      jobObj.user = user;
+
+      try {
+        await FileHelper.writeToJobsLog({
+          action: 'restarted',
+          date: dayjs().format('DD-MM-YYYY HH:mm'),
+          job: jobObj
+        });
+      } catch (error) {
+        return next(
+          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
+        );
+      }
+
       res.status(httpStatus.OK).json({
         data: {
-          job: job
+          job: jobObj
         },
         message: `Job successfully started.`
       });
@@ -312,9 +547,13 @@ class JobController {
     };
 
     try {
-      const job = await EventJob.findOneAndUpdate({ _id: id }, data, {
-        new: true
-      }).exec();
+      const job = await EventJob.findOneAndUpdate(
+        { _id: id, state: { $ne: JobState.STARTED } },
+        data,
+        {
+          new: true
+        }
+      ).exec();
 
       if (!job) {
         return next(
@@ -330,6 +569,22 @@ class JobController {
             'Unable to remove data directories',
             httpStatus.INTERNAL_SERVER_ERROR
           )
+        );
+      }
+
+      const user = await job.getUserDetails(job.user);
+      const jobObj = job.toObject();
+      jobObj.user = user;
+
+      try {
+        await FileHelper.writeToJobsLog({
+          action: 'deleted',
+          date: dayjs().format('DD-MM-YYYY HH:mm'),
+          job: jobObj
+        });
+      } catch (error) {
+        return next(
+          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
         );
       }
 

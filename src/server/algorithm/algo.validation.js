@@ -1,5 +1,5 @@
 import { check } from 'express-validator';
-import { type } from './algo.type';
+import { AlgoType } from './algo.enums';
 
 const validation = {
   addAlgo: [
@@ -9,7 +9,7 @@ const validation = {
     check('type')
       .notEmpty()
       .isString()
-      .isIn([type.SUPERVISED, type.UNSUPERVISED]),
+      .isIn([AlgoType.SUPERVISED, AlgoType.UNSUPERVISED]),
     check('enabled')
       .notEmpty()
       .isBoolean(),
@@ -24,7 +24,7 @@ const validation = {
     check('type')
       .notEmpty()
       .isString()
-      .isIn([type.SUPERVISED, type.UNSUPERVISED]),
+      .isIn([AlgoType.SUPERVISED, AlgoType.UNSUPERVISED]),
     check('enabled')
       .notEmpty()
       .isBoolean(),

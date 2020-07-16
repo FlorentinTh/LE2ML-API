@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
 import APIError from '@APIError';
 import Feature from './feature.model';
-import { domain } from './feature.domain';
+import { FeatureDomain } from './feature.enums';
 import StringHelper from '@StringHelper';
 import Logger from '@Logger';
 
@@ -35,7 +35,7 @@ class FeatureController {
   async getFeaturesByDomain(req, res, next) {
     const domainParam = req.params.domain;
 
-    if (!(domainParam === domain.TIME || domainParam === domain.FREQ)) {
+    if (!(domainParam === FeatureDomain.TIME || domainParam === FeatureDomain.FREQ)) {
       return next(new APIError('Unknown domain', httpStatus.BAD_REQUEST));
     }
 

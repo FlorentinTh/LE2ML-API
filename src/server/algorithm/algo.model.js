@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import Config from '@Config';
-import { type } from './algo.type';
+import { AlgoType } from './algo.enums';
 
 const config = Config.getConfig();
 const database = mongoose.connection.useDb(config.mongo.conf_db);
@@ -20,7 +20,7 @@ class Algorithm extends Schema {
         },
         type: {
           type: String,
-          enum: [type.SUPERVISED, type.UNSUPERVISED],
+          enum: [AlgoType.SUPERVISED, AlgoType.UNSUPERVISED],
           required: true
         },
         enabled: {

@@ -1,9 +1,9 @@
 import httpStatus from 'http-status';
 import { validationResult } from 'express-validator';
 import APIError from '@APIError';
-import User from '../../user/user.model';
-import { role } from '../../user/user.role';
-import FileHelper from '../../helpers/fileHelper';
+import User from '../user.model';
+import { role } from '../user.role';
+import FileHelper from '@FileHelper';
 import Logger from '@Logger';
 
 class AdminController {

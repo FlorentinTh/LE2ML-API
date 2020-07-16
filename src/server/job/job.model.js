@@ -1,13 +1,10 @@
 import mongoose, { Schema } from 'mongoose';
 import Config from '@Config';
-import { JobState } from './job.state';
-
-import redis from 'redis';
+import { JobState, JobPipeline, JobProcess } from './job.enums';
+import User from '../user/user.model';
 
 const config = Config.getConfig();
 const database = mongoose.connection.useDb(config.mongo.event_db);
-
-const publisher = redis.createClient();
 
 class Job extends Schema {
   constructor() {
@@ -39,28 +36,48 @@ class Job extends Schema {
           type: Date,
           default: null
         },
+        pipeline: {
+          type: String,
+          enum: [JobPipeline.ML, JobPipeline.DL],
+          required: true
+        },
+        process: {
+          type: String,
+          enum: [JobProcess.TRAINING, JobProcess.TESTING, JobProcess.NONE],
+          required: true
+        },
         tasks: {
           type: Object,
           required: true
         },
-        isDeleted: {
-          type: Boolean,
-          default: false
-        },
         containers: {
           type: Array,
           default: []
+        },
+        isDeleted: {
+          type: Boolean,
+          default: false
         }
       },
       { versionKey: false }
     );
+
+    job.methods.getUserDetails = this.getUserDetails;
+  }
+
+  async getUserDetails(userId) {
+    const user = await User.findOne({ _id: userId });
+
+    if (user) {
+      return {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email
+      };
+    }
   }
 }
 
 const EventJob = database.model('Job', new Job(), 'jobs');
-
-EventJob.watch().on('change', event => {
-  publisher.publish('job-events', JSON.stringify(event));
-});
 
 export default EventJob;
