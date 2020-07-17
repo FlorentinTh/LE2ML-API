@@ -27,6 +27,11 @@ class Window extends Schema {
           type: String,
           required: true
         },
+        default: {
+          type: Boolean,
+          required: true,
+          default: false
+        },
         isDeleted: {
           type: Boolean,
           default: false
