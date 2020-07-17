@@ -2,7 +2,7 @@
 
 [![GitHub Release](https://img.shields.io/github/release/FlorentinTh/PiCluster-API?style=flat-square)](https://github.com/FlorentinTh/PiCluster-API/releases) [![GitHub](https://img.shields.io/github/license/FlorentinTh/PiCluster-API?style=flat-square)](https://github.com/FlorentinTh/PiCluster-API/blob/master/LICENSE)
 
-Repository of the API that aims at piloting the the Raspberry Pi cluster.
+Repository of the API for the PiCluster project.
 
 ## Authors
 

@@ -1,7 +1,7 @@
 {
   "name": "picluster-api",
   "version": "1.0.0",
-  "description": "API that aims at piloting the the Raspberry Pi cluster.",
+  "description": "API for the PiCluster project",
   "main": "src/server.js",
   "scripts": {
     "lint": "eslint . --ext .js,.json",
