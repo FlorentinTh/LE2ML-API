@@ -80,6 +80,7 @@ class FeatureController {
     const feature = new Feature();
     feature.label = req.body.label.toLowerCase();
     feature.domain = req.body.domain.toLowerCase();
+    feature.source = req.body.source.toLowerCase();
     feature.enabled = req.body.enabled;
     feature.slug = StringHelper.toSlug(req.body.label, '_');
     feature.container = StringHelper.toSlug(req.body.container, '-');

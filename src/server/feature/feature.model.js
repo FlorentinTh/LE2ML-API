@@ -24,6 +24,10 @@ class Feature extends Schema {
           enum: [FeatureDomain.ADMIN, FeatureDomain.USER],
           default: FeatureDomain.USER
         },
+        source: {
+          type: String,
+          required: true
+        },
         enabled: {
           type: Boolean,
           required: true,
