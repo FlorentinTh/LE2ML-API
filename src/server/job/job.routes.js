@@ -55,6 +55,10 @@ router
   .post(Authority.allowOnlyTrustedApp(), JobController.completeJob);
 
 router
+  .route('/task/error/:id')
+  .post(Authority.allowOnlyTrustedApp(), JobController.failTask);
+
+router
   .route('/cancel/:id')
   .post(
     passport.authenticate('jwt', { session: false }),

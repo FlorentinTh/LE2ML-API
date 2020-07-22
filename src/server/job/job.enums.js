@@ -1,14 +1,16 @@
 export const JobState = {
   STARTED: 'started',
   COMPLETED: 'completed',
-  CANCELED: 'canceled'
+  CANCELED: 'canceled',
+  ERROR: 'error'
 };
 
 export const TaskState = {
   QUEUED: 'queued',
   STARTED: 'started',
   COMPLETED: 'completed',
-  CANCELED: 'canceled'
+  CANCELED: 'canceled',
+  FAILED: 'failed'
 };
 
 export const JobPipeline = {
