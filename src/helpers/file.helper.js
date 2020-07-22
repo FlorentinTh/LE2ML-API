@@ -7,7 +7,7 @@ import AjvFormat from 'ajv-formats';
 import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
-import { SchemaType } from '../file/file.enums';
+import { SchemaType } from '../server/file/file.enums';
 
 const config = Config.getConfig();
 

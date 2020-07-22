@@ -1,6 +1,6 @@
 import APIError from '@APIError';
 import httpStatus from 'http-status';
-import App from '../app/app.model';
+import App from '../server/app/app.model';
 
 class Authority {
   static allowSameIdentity() {
@@ -29,7 +29,7 @@ class Authority {
 
   static allowOnlyTrustedApp() {
     return async (req, res, next) => {
-      const key = req.headers.app_key;
+      const key = req.headers['app-key'];
 
       try {
         const apps = await App.find()
