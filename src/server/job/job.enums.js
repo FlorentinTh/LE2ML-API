@@ -5,14 +5,6 @@ export const JobState = {
   ERROR: 'error'
 };
 
-export const TaskState = {
-  QUEUED: 'queued',
-  STARTED: 'started',
-  COMPLETED: 'completed',
-  CANCELED: 'canceled',
-  FAILED: 'failed'
-};
-
 export const JobPipeline = {
   ML: 'machine_learning',
   DL: 'deep_learning'

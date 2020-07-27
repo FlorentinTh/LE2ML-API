@@ -1,4 +1,4 @@
-import { TaskState } from '../../job/job.enums';
+import { TaskState } from '../../job/task/task.enum';
 
 class V1 {
   constructor(config = null) {

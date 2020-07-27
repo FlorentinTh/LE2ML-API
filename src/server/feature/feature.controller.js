@@ -8,10 +8,11 @@ import Logger from '@Logger';
 
 class FeatureController {
   async getFeatures(req, res, next) {
+    const source = req.query.source;
     try {
       const features = await Feature.find()
         .select()
-        .where({ isDeleted: false })
+        .where({ isDeleted: false, source: source })
         .exec();
 
       if (!features) {

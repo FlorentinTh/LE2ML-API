@@ -48,13 +48,13 @@ router
   );
 
 router
-  .route('/upload')
+  .route('/upload/inertial')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.uploadFile,
-    FileController.convertFile,
-    FileController.validFile
+    FileController.uploadInertialFile,
+    FileController.convertInertialFile,
+    FileController.validInertialFile
   );
 
 router

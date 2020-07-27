@@ -48,15 +48,11 @@ router
     JobController.startJob
   );
 
-router.route('/:id').post(Authority.allowOnlyTrustedApp(), JobController.updateJobTask);
+router.route('/:id').post(Authority.allowOnlyTrustedApp(), JobController.updateJob);
 
 router
   .route('/complete/:id')
   .post(Authority.allowOnlyTrustedApp(), JobController.completeJob);
-
-router
-  .route('/task/error/:id')
-  .post(Authority.allowOnlyTrustedApp(), JobController.failTask);
 
 router
   .route('/cancel/:id')

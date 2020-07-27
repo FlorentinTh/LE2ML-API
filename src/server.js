@@ -17,13 +17,15 @@ import APIError from '@APIError';
 import '@Passport';
 import Mongo from '@Mongo';
 import authRoutes from './server/auth/auth.routes';
-import appRoutes from './server/app/app.routes';
-import userRoutes from './server/user/user.routes';
+import appsRoutes from './server/app/app.routes';
+import usersRoutes from './server/user/user.routes';
 import filesRoutes from './server/file/file.routes';
+import dataSourcesRoutes from './server/data-source/data-source.routes';
 import featuresRoutes from './server/feature/feature.routes';
 import algosRoutes from './server/algorithm/algo.routes';
 import windowsRoutes from './server/window/window.routes';
 import jobsRoutes from './server/job/job.routes';
+import tasksRoutes from './server/job/task/task.routes';
 import adminUsersRoutes from './server/user/admin/admin.user.routes';
 
 const config = Config.getConfig();
@@ -54,13 +56,15 @@ app.use(passport.initialize());
 Mongo.start();
 
 APIv1.use('/v1', authRoutes);
-APIv1.use('/v1/apps', appRoutes);
-APIv1.use('/v1/users', userRoutes);
+APIv1.use('/v1/apps', appsRoutes);
+APIv1.use('/v1/users', usersRoutes);
 APIv1.use('/v1/files', filesRoutes);
+APIv1.use('/v1/sources', dataSourcesRoutes);
 APIv1.use('/v1/features', featuresRoutes);
 APIv1.use('/v1/algos', algosRoutes);
-APIv1.use('/v1/windows/', windowsRoutes);
-APIv1.use('/v1/jobs/', jobsRoutes);
+APIv1.use('/v1/windows', windowsRoutes);
+APIv1.use('/v1/jobs', jobsRoutes);
+APIv1.use('/v1/jobs', tasksRoutes);
 APIv1.use('/v1/admin/users', adminUsersRoutes);
 app.use('/api', APIv1);
 

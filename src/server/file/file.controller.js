@@ -23,19 +23,18 @@ class FileController {
     }
 
     const userId = req.user.id;
+    const source = req.query.source;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, type);
+    const fullPath = path.join(basePath, userId, 'data', source, type);
 
     let files;
     try {
       files = await fs.promises.readdir(fullPath);
     } catch (error) {
-      return next(
-        new APIError(
-          'Unable to access to the directory',
-          httpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
+      return res.status(httpStatus.OK).json({
+        data: [],
+        message: 'success'
+      });
     }
 
     const data = [];
@@ -76,8 +75,9 @@ class FileController {
 
     const filename = req.params.file;
     const userId = req.user.id;
+    const source = req.query.source;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, type, filename);
+    const fullPath = path.join(basePath, userId, 'data', source, type, filename);
 
     try {
       await fs.promises.access(fullPath);
@@ -102,12 +102,13 @@ class FileController {
     req.setTimeout(0);
     const file = req.params.file;
     const userId = req.user.id;
+    const source = req.query.source;
     const type = req.query.type;
     const from = req.query.from;
     const to = req.query.to;
 
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, type, file);
+    const fullPath = path.join(basePath, userId, 'data', source, type, file);
     const destPath = path.join(basePath, userId, '.tmp', file.split('.')[0] + '.' + to);
 
     try {
@@ -176,10 +177,11 @@ class FileController {
   async getFileHeaders(req, res, next) {
     const file = req.params.file;
     const userId = req.user.id;
+    const source = req.query.source;
     const type = req.query.type;
 
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, type, file);
+    const fullPath = path.join(basePath, userId, 'data', source, type, file);
 
     try {
       await fs.promises.access(fullPath);
@@ -210,7 +212,7 @@ class FileController {
     }
   }
 
-  async uploadFile(req, res, next) {
+  async uploadInertialFile(req, res, next) {
     const type = req.query.type;
 
     if (!Object.values(FileType).includes(type)) {
@@ -219,7 +221,17 @@ class FileController {
 
     const userId = req.user.id;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, type);
+    const fullPath = path.join(basePath, userId, 'data', 'inertial', type);
+
+    try {
+      await fs.promises.access(fullPath);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        await fs.promises.mkdir(fullPath, { recursive: true, mode: 755 });
+      } else {
+        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
+      }
+    }
 
     const uploader = multer({
       storage: multer.diskStorage({
@@ -261,7 +273,7 @@ class FileController {
     });
   }
 
-  async convertFile(req, res, next) {
+  async convertInertialFile(req, res, next) {
     req.setTimeout(0);
 
     if (!req.file) {
@@ -282,7 +294,14 @@ class FileController {
       const opts = { encoding: 'utf-8' };
       const reader = fs.createReadStream(req.file.path, opts);
 
-      const destPath = path.join(basePath, userId, type, `${file.split('.')[0]}.csv`);
+      const destPath = path.join(
+        basePath,
+        userId,
+        'data',
+        'inertial',
+        type,
+        `${file.split('.')[0]}.csv`
+      );
       const writer = fs.createWriteStream(destPath, opts);
 
       StreamHelper.jsonStreamToCsvFile(reader, writer);
@@ -305,7 +324,7 @@ class FileController {
     }
   }
 
-  async validFile(req, res, next) {
+  async validInertialFile(req, res, next) {
     const opts = { encoding: 'utf-8' };
     const reader = fs.createReadStream(req.file.path, opts);
     let errorOccurs = false;
@@ -541,10 +560,11 @@ class FileController {
     const newFilename = req.body.newFilename;
     const type = req.body.fileType;
     const userId = req.user.id;
+    const source = req.query.source;
     const basePath = config.data.base_path;
 
-    const oldPath = path.join(basePath, userId, type, oldFilename);
-    const newPath = path.join(basePath, userId, type, newFilename);
+    const oldPath = path.join(basePath, userId, 'data', source, type, oldFilename);
+    const newPath = path.join(basePath, userId, 'data', source, type, newFilename);
 
     try {
       await fs.promises.access(oldPath);
@@ -589,8 +609,9 @@ class FileController {
     const file = req.params.file;
     const userId = req.user.id;
     const type = req.query.type;
+    const source = req.query.source;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, type, file);
+    const fullPath = path.join(basePath, userId, 'data', source, type, file);
 
     try {
       await fs.promises.access(fullPath);
@@ -666,8 +687,9 @@ class FileController {
       const file = req.params.file;
       const userId = req.user.id;
       const type = req.query.type;
+      const source = req.query.source;
       const basePath = config.data.base_path;
-      const fullPath = path.join(basePath, userId, type, file);
+      const fullPath = path.join(basePath, userId, 'data', source, type, file);
 
       let sourcePath;
       let removeFile = false;
@@ -719,7 +741,8 @@ class FileController {
           if (removeFile) {
             await fs.promises.unlink(sourcePath);
           }
-          await fs.promises.rename(fullPath + '.edit.tmp', sourcePath + '.tmp');
+          await fs.promises.rename(fullPath + '.edit.tmp', fullPath + '.tmp');
+
           next();
         });
       } catch (error) {
@@ -743,8 +766,9 @@ class FileController {
     const file = req.params.file;
     const userId = req.user.id;
     const type = req.query.type;
+    const source = req.query.source;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, type, file);
+    const fullPath = path.join(basePath, userId, 'data', source, type, file);
 
     try {
       await fs.promises.access(fullPath + '.tmp');
@@ -765,7 +789,7 @@ class FileController {
       } else {
         await fs.promises.rename(
           fullPath + '.tmp',
-          path.join(basePath, userId, type, newFilename)
+          path.join(basePath, userId, 'data', source, type, newFilename)
         );
 
         res.status(httpStatus.OK).json({
@@ -798,9 +822,10 @@ class FileController {
     const filename = req.body.filename;
     const type = req.body.fileType;
     const userId = req.user.id;
+    const source = req.query.source;
     const basePath = config.data.base_path;
 
-    const fullPath = path.join(basePath, userId, type, filename);
+    const fullPath = path.join(basePath, userId, 'data', source, type, filename);
 
     try {
       await fs.promises.access(fullPath);
@@ -833,10 +858,18 @@ class FileController {
   async streamDataFile(req, res, next) {
     const filename = req.params.file;
     const userId = req.user.id;
+    const source = req.query.source;
     const fileType = req.query.type;
     const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, fileType, filename);
-    const tempPath = path.join(basePath, userId, fileType, '.' + filename + '.tmp');
+    const fullPath = path.join(basePath, userId, 'data', source, fileType, filename);
+    const tempPath = path.join(
+      basePath,
+      userId,
+      'data',
+      source,
+      fileType,
+      '.' + filename + '.tmp'
+    );
 
     const att = req.query.att;
 

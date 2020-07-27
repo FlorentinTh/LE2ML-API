@@ -8,6 +8,7 @@ import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
 import { SchemaType } from '../server/file/file.enums';
+import DataSource from '../server/data-source/data-source.model';
 
 const config = Config.getConfig();
 
@@ -38,13 +39,26 @@ class FileHelper {
 
     const basePath = path.join(config.data.base_path, userId);
 
+    let sources;
+    try {
+      sources = await DataSource.find().exec();
+    } catch (error) {
+      Logger.error(`Unable to fetch data sources for user ${userId}`);
+      throw new Error('Unable to fetch data sources');
+    }
+
     try {
       await fs.promises.mkdir(basePath);
-      await fs.promises.mkdir(path.join(basePath, 'raw'));
-      await fs.promises.mkdir(path.join(basePath, 'models'));
-      await fs.promises.mkdir(path.join(basePath, 'features'));
       await fs.promises.mkdir(path.join(basePath, 'jobs'));
+
       await fs.promises.mkdir(path.join(basePath, 'jobs', '.deleted'));
+      hideFile.hide(path.join(basePath, 'jobs', '.deleted'), (err, path) => {
+        if (err) {
+          Logger.error(`Unable to create data directories for user ${userId}`);
+          throw new Error('Unable to create data directories');
+        }
+      });
+
       await fs.promises.mkdir(path.join(basePath, 'tmp'));
       hideFile.hide(path.join(basePath, 'tmp'), (err, path) => {
         if (err) {
@@ -52,6 +66,18 @@ class FileHelper {
           throw new Error('Unable to create data directories');
         }
       });
+
+      await fs.promises.mkdir(path.join(basePath, 'data'));
+
+      if (sources) {
+        for (let i = 0; i < sources.length; ++i) {
+          const sourcePath = path.join(basePath, 'data', sources[i].slug);
+          await fs.promises.mkdir(sourcePath);
+          await fs.promises.mkdir(path.join(sourcePath, 'raw'));
+          await fs.promises.mkdir(path.join(sourcePath, 'features'));
+          await fs.promises.mkdir(path.join(sourcePath, 'models'));
+        }
+      }
     } catch (error) {
       Logger.error(`Unable to create data directories for user ${userId}`);
       throw new Error('Unable to create data directories');

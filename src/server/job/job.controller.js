@@ -4,7 +4,7 @@ import EventJob from './job.model';
 import Config from '@Config';
 import { validationResult } from 'express-validator';
 import StringHelper from '@StringHelper';
-import { JobState, JobProcess, TaskState } from './job.enums';
+import { JobState, JobProcess } from './job.enums';
 import fs from 'fs';
 import path from 'path';
 import FileHelper from '@FileHelper';
@@ -13,6 +13,7 @@ import { Types } from 'mongoose';
 import Configuration from '@Configuration';
 import LineByLineReader from 'line-by-line';
 import dayjs from 'dayjs';
+import JobLogsHelper from './logs/logs.helper';
 
 const config = Config.getConfig();
 
@@ -108,10 +109,7 @@ class JobController {
         if (event.operationType === 'update') {
           const jobId = event.documentKey._id;
           try {
-            job = await EventJob.findOne()
-              .where('_id')
-              .in([jobId])
-              .exec();
+            job = await EventJob.findOne({ _id: jobId }).exec();
           } catch (error) {
             return next(new APIError('Cannot find job', httpStatus.NOT_FOUND));
           }
@@ -284,21 +282,7 @@ class JobController {
        *
        */
 
-      const user = await newJob.getUserDetails(newJob.user);
-      const jobObj = job.toObject();
-      jobObj.user = user;
-
-      try {
-        await FileHelper.writeToJobsLog({
-          action: 'started',
-          date: dayjs().format('DD-MM-YYYY HH:mm'),
-          job: jobObj
-        });
-      } catch (error) {
-        return next(
-          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
+      const jobObj = await JobLogsHelper.writeEntry(job, 'started');
 
       res.status(httpStatus.OK).json({
         data: {
@@ -311,7 +295,7 @@ class JobController {
     }
   }
 
-  async updateJobTask(req, res, next) {
+  async updateJob(req, res, next) {
     const id = req.params.id;
 
     const body = req.body;
@@ -338,21 +322,7 @@ class JobController {
         );
       }
 
-      const user = await job.getUserDetails(job.user);
-      const jobObj = job.toObject();
-      jobObj.user = user;
-
-      try {
-        await FileHelper.writeToJobsLog({
-          action: 'updated',
-          date: dayjs().format('DD-MM-YYYY HH:mm'),
-          job: jobObj
-        });
-      } catch (error) {
-        return next(
-          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
+      const jobObj = await JobLogsHelper(job, 'updated');
 
       res.status(httpStatus.OK).json({
         data: {
@@ -383,77 +353,7 @@ class JobController {
         );
       }
 
-      const user = await job.getUserDetails(job.user);
-      const jobObj = job.toObject();
-      jobObj.user = user;
-
-      try {
-        await FileHelper.writeToJobsLog({
-          action: 'completed',
-          date: dayjs().format('DD-MM-YYYY HH:mm'),
-          job: jobObj
-        });
-      } catch (error) {
-        return next(
-          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
-
-      res.status(httpStatus.OK).json({
-        data: {
-          job: jobObj
-        },
-        message: `Job successfully completed.`
-      });
-    } catch (error) {
-      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-    }
-  }
-
-  async failTask(req, res, next) {
-    const id = req.params.id;
-    const task = req.query.task;
-
-    const data = {
-      state: JobState.ERROR,
-      completedOn: Date.now()
-    };
-
-    try {
-      let job = await EventJob.findOne({ _id: id }).exec();
-
-      if (!job) {
-        return next(
-          new APIError('Job not found, cannot be completed.', httpStatus.NOT_FOUND)
-        );
-      }
-
-      data.tasks = job.tasks;
-      data.tasks[task] = TaskState.FAILED;
-
-      job = await EventJob.findOneAndUpdate({ _id: id }, data, { new: true }).exec();
-
-      if (!job) {
-        return next(
-          new APIError('Job cannot be updated.', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
-
-      const user = await job.getUserDetails(job.user);
-      const jobObj = job.toObject();
-      jobObj.user = user;
-
-      try {
-        await FileHelper.writeToJobsLog({
-          action: 'completed',
-          date: dayjs().format('DD-MM-YYYY HH:mm'),
-          job: jobObj
-        });
-      } catch (error) {
-        return next(
-          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
+      const jobObj = await JobLogsHelper.writeEntry(job, 'completed');
 
       res.status(httpStatus.OK).json({
         data: {
@@ -494,21 +394,7 @@ class JobController {
        *
        */
 
-      const user = await job.getUserDetails(job.user);
-      const jobObj = job.toObject();
-      jobObj.user = user;
-
-      try {
-        await FileHelper.writeToJobsLog({
-          action: 'canceled',
-          date: dayjs().format('DD-MM-YYYY HH:mm'),
-          job: jobObj
-        });
-      } catch (error) {
-        return next(
-          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
+      const jobObj = await JobLogsHelper.writeEntry(job, 'canceled');
 
       res.status(httpStatus.OK).json({
         data: {
@@ -573,21 +459,7 @@ class JobController {
         );
       }
 
-      const user = await job.getUserDetails(job.user);
-      const jobObj = job.toObject();
-      jobObj.user = user;
-
-      try {
-        await FileHelper.writeToJobsLog({
-          action: 'restarted',
-          date: dayjs().format('DD-MM-YYYY HH:mm'),
-          job: jobObj
-        });
-      } catch (error) {
-        return next(
-          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
+      const jobObj = await JobLogsHelper.writeEntry(job, 'restarted');
 
       res.status(httpStatus.OK).json({
         data: {
@@ -632,21 +504,7 @@ class JobController {
         );
       }
 
-      const user = await job.getUserDetails(job.user);
-      const jobObj = job.toObject();
-      jobObj.user = user;
-
-      try {
-        await FileHelper.writeToJobsLog({
-          action: 'deleted',
-          date: dayjs().format('DD-MM-YYYY HH:mm'),
-          job: jobObj
-        });
-      } catch (error) {
-        return next(
-          new APIError('Job log failed to write.', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
+      await JobLogsHelper.writeEntry(job, 'deleted');
 
       res.status(httpStatus.OK).json({
         data: {
