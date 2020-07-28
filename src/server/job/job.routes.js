@@ -1,6 +1,7 @@
 import express from 'express';
 import passport from 'passport';
 import JobController from './job.controller';
+import TaskController from './task/task.controller';
 import validation from './job.validation';
 import Authority from '@Authority';
 import { role } from '../user/user.role';
@@ -45,14 +46,9 @@ router
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     validation.start,
-    JobController.startJob
+    JobController.startJob,
+    TaskController.startTask
   );
-
-router.route('/:id').post(Authority.allowOnlyTrustedApp(), JobController.updateJob);
-
-router
-  .route('/complete/:id')
-  .post(Authority.allowOnlyTrustedApp(), JobController.completeJob);
 
 router
   .route('/cancel/:id')
@@ -67,7 +63,8 @@ router
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    JobController.restartJob
+    JobController.restartJob,
+    TaskController.startTask
   );
 
 router

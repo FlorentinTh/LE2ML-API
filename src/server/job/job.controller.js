@@ -14,6 +14,7 @@ import Configuration from '@Configuration';
 import LineByLineReader from 'line-by-line';
 import dayjs from 'dayjs';
 import JobLogsHelper from './logs/logs.helper';
+import { TaskState } from './task/task.enums';
 
 const config = Config.getConfig();
 
@@ -245,11 +246,11 @@ class JobController {
       }
 
       const configuration = new Configuration(conf);
-      job.tasks = configuration.getTasks();
+      job.tasks = configuration.setTasks();
+      job.containers = configuration.setContainers();
       job.pipeline = configuration.getProp('pipeline');
 
       const process = configuration.getProp('process');
-
       switch (process) {
         case 'train':
           job.process = JobProcess.TRAINING;
@@ -273,77 +274,26 @@ class JobController {
         JSON.stringify(conf, null, 2)
       );
 
-      /**
-       *
-       * Start container
-       * Store container ID
-       * Update given task in callback when started.
-       * End request in callback
-       *
-       */
+      await JobLogsHelper.writeEntry(job, 'started');
 
-      const jobObj = await JobLogsHelper.writeEntry(job, 'started');
+      req.origin = 'start';
+      req.job = job;
 
-      res.status(httpStatus.OK).json({
-        data: {
-          job: jobObj
-        },
-        message: 'Job successfully started'
-      });
+      next();
     } catch (error) {
       return next(new APIError('Failed to start job.', httpStatus.INTERNAL_SERVER_ERROR));
     }
   }
 
-  async updateJob(req, res, next) {
-    const id = req.params.id;
-
-    const body = req.body;
-    const data = {
-      tasks: {
-        windowing: body.windowing === undefined ? null : body.windowing,
-        features: body.features === undefined ? null : body.features,
-        learning: body.learning === undefined ? null : body.learning
-      }
-    };
-
-    try {
-      const job = await EventJob.findOneAndUpdate(
-        { _id: id, state: { $ne: JobState.COMPLETED } },
-        data,
-        {
-          new: true
-        }
-      ).exec();
-
-      if (!job) {
-        return next(
-          new APIError('Job not found, cannot be updated.', httpStatus.NOT_FOUND)
-        );
-      }
-
-      const jobObj = await JobLogsHelper(job, 'updated');
-
-      res.status(httpStatus.OK).json({
-        data: {
-          job: jobObj
-        },
-        message: `Job successfully updated.`
-      });
-    } catch (error) {
-      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-    }
-  }
-
   async completeJob(req, res, next) {
-    const id = req.params.id;
+    let job = req.job;
     const data = {
       state: JobState.COMPLETED,
       completedOn: Date.now()
     };
 
     try {
-      const job = await EventJob.findOneAndUpdate({ _id: id }, data, {
+      job = await EventJob.findOneAndUpdate({ _id: job._id }, data, {
         new: true
       }).exec();
 
@@ -368,50 +318,115 @@ class JobController {
 
   async cancelJob(req, res, next) {
     const id = req.params.id;
+
+    let job;
+    try {
+      job = await EventJob.findOne({ _id: id }).exec();
+    } catch (error) {
+      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    if (!job) {
+      return next(new APIError('Job not found', httpStatus.NOT_FOUND));
+    }
+
     const data = {
-      state: JobState.CANCELED
+      state: JobState.CANCELED,
+      containers: {}
     };
 
+    const tasks = job.tasks;
+    data.tasks = tasks;
+
+    const tasksKeys = Object.keys(tasks);
+    for (let i = 0; i < tasksKeys.length; ++i) {
+      const task = tasksKeys[i];
+      const state = tasks[task];
+
+      if (!(state === TaskState.FAILED) && !(state === TaskState.COMPLETED)) {
+        tasks[task] = TaskState.CANCELED;
+      }
+    }
+
+    const jobContainers = job.containers;
+    const jobContainersKeys = Object.keys(job.containers);
+
+    for (let i = 0; i < jobContainersKeys.length; ++i) {
+      const task = jobContainersKeys[i];
+      const containers = jobContainers[task];
+
+      for (let j = 0; j < containers.length; ++j) {
+        const container = containers[j];
+
+        if (container.started) {
+          // // stop container
+          container.started = false;
+        }
+      }
+    }
+
+    Object.assign(data.containers, jobContainers);
+
     try {
-      const job = await EventJob.findOneAndUpdate(
+      job = await EventJob.findOneAndUpdate(
         { _id: id, state: { $ne: JobState.COMPLETED } },
         data,
         {
           new: true
         }
       ).exec();
-
-      if (!job) {
-        return next(
-          new APIError('Job not found, cannot be canceled.', httpStatus.NOT_FOUND)
-        );
-      }
-
-      /**
-       *
-       * get all container IDs
-       * stop 'em if not already stopped
-       *
-       */
-
-      const jobObj = await JobLogsHelper.writeEntry(job, 'canceled');
-
-      res.status(httpStatus.OK).json({
-        data: {
-          job: jobObj
-        },
-        message: `Job successfully canceled.`
-      });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
     }
+
+    if (!job) {
+      return next(new APIError('Job cannot be canceled.', httpStatus.NOT_FOUND));
+    }
+
+    const jobObj = await JobLogsHelper.writeEntry(job, 'canceled');
+
+    res.status(httpStatus.OK).json({
+      data: {
+        job: jobObj
+      },
+      message: `Job successfully canceled.`
+    });
   }
 
   async restartJob(req, res, next) {
     const id = req.params.id;
+
+    let job;
+    try {
+      job = await EventJob.findOne({ _id: id }).exec();
+    } catch (error) {
+      return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    if (!job) {
+      return next(new APIError('Job not found', httpStatus.NOT_FOUND));
+    }
+
     const data = {
-      state: JobState.STARTED
+      state: JobState.STARTED,
+      containers: {}
     };
+
+    const jobContainers = job.containers;
+    const jobContainersKeys = Object.keys(job.containers);
+
+    for (let i = 0; i < jobContainersKeys.length; ++i) {
+      const task = jobContainersKeys[i];
+      const containers = jobContainers[task];
+
+      for (let j = 0; j < containers.length; ++j) {
+        const container = containers[j];
+        container.id = null;
+        container.started = null;
+      }
+    }
+
+    Object.assign(data.containers, jobContainers);
 
     try {
       const userId = req.user.id;
@@ -439,37 +454,34 @@ class JobController {
       }
 
       const configuration = new Configuration(conf);
-      data.tasks = configuration.getTasks();
+      data.tasks = configuration.setTasks();
     } catch (error) {
       return next(new APIError('Failed to start job.', httpStatus.INTERNAL_SERVER_ERROR));
     }
 
     try {
-      const job = await EventJob.findOneAndUpdate(
+      job = await EventJob.findOneAndUpdate(
         { _id: id, state: { $ne: JobState.STARTED } },
         data,
         {
           new: true
         }
       ).exec();
-
-      if (!job) {
-        return next(
-          new APIError('Job not found, cannot be started.', httpStatus.NOT_FOUND)
-        );
-      }
-
-      const jobObj = await JobLogsHelper.writeEntry(job, 'restarted');
-
-      res.status(httpStatus.OK).json({
-        data: {
-          job: jobObj
-        },
-        message: `Job successfully started.`
-      });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
     }
+
+    if (!job) {
+      return next(
+        new APIError('Job not found, cannot be started.', httpStatus.NOT_FOUND)
+      );
+    }
+
+    await JobLogsHelper.writeEntry(job, 'restarted');
+
+    req.origin = 'restart';
+    req.job = job;
+    next();
   }
 
   async removeJob(req, res, next) {

@@ -15,10 +15,19 @@ class Configuration {
     }
   }
 
-  getTasks() {
+  setTasks() {
     switch (this.version) {
       case '1':
-        return new V1(this.config).getTasks();
+        return new V1(this.config).setTasks();
+      default:
+        throw new Error(`Version ${this.version} of configuration is not supported yet.`);
+    }
+  }
+
+  setContainers() {
+    switch (this.version) {
+      case '1':
+        return new V1(this.config).setContainers();
       default:
         throw new Error(`Version ${this.version} of configuration is not supported yet.`);
     }
