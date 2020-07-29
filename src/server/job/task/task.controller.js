@@ -98,7 +98,10 @@ class TaskController {
     }
 
     if (job.tasks[body.task] === body.state) {
-      res.status(httpStatus.CONFLICT);
+      return res.status(httpStatus.CONFLICT).json({
+        data: null,
+        message: 'Task was already completed'
+      });
     }
 
     const data = {
