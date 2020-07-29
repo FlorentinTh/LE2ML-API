@@ -97,6 +97,10 @@ class TaskController {
       );
     }
 
+    if (job.tasks[body.task] === body.state) {
+      res.status(httpStatus.CONFLICT);
+    }
+
     const data = {
       tasks: {},
       containers: {}
