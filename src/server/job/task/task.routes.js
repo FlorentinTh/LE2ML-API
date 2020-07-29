@@ -1,4 +1,5 @@
 import express from 'express';
+import JobController from '../job.controller';
 import TaskController from './task.controller';
 import validation from './task.validation';
 import Authority from '@Authority';
@@ -11,7 +12,8 @@ router
     Authority.allowOnlyTrustedApp(),
     validation.update,
     TaskController.completeTask,
-    TaskController.startTask
+    TaskController.startTask,
+    JobController.completeJob
   );
 
 router

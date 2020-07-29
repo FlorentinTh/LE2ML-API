@@ -23,7 +23,7 @@ class TaskController {
     }
 
     if (Object.keys(nextTask).length === 0) {
-      if (req.origin === 'update') {
+      if (req.origin === 'complete') {
         return next();
       } else {
         return next(
@@ -97,21 +97,12 @@ class TaskController {
       );
     }
 
-    if (job.tasks[body.task] === body.state) {
-      return res.status(httpStatus.CONFLICT).json({
-        data: null,
-        message: 'Task was already completed'
-      });
-    }
-
     const data = {
       tasks: {},
       containers: {}
     };
 
     const input = {};
-    input[body.task] = body.state;
-    Object.assign(data.tasks, job.tasks, input);
 
     const taskContainers = job.containers[body.task];
     let isOtherContainerRunning = false;
@@ -125,10 +116,22 @@ class TaskController {
       if (body.task === TasksList.FEATURES) {
         if (taskContainer.started !== null && taskContainer.started === true) {
           isOtherContainerRunning = true;
+          break;
         }
       }
     }
 
+    if (!isOtherContainerRunning) {
+      if (job.tasks[body.task] === body.state) {
+        return res.status(httpStatus.CONFLICT).json({
+          data: null,
+          message: 'Task was already completed'
+        });
+      }
+
+      input[body.task] = body.state;
+    }
+    Object.assign(data.tasks, job.tasks, input);
     Object.assign(job.containers[body.task], taskContainers);
     Object.assign(data.containers, job.containers);
 
@@ -157,7 +160,7 @@ class TaskController {
           message: 'success'
         });
       } else {
-        req.origin = 'update';
+        req.origin = 'complete';
         req.job = job;
         next();
       }
