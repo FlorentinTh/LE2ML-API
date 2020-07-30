@@ -15,6 +15,7 @@ import LineByLineReader from 'line-by-line';
 import dayjs from 'dayjs';
 import JobLogsHelper from './logs/logs.helper';
 import { TaskState } from './task/task.enums';
+import ContainerHelper from './container/container.helper';
 
 const config = Config.getConfig();
 
@@ -274,6 +275,16 @@ class JobController {
         JSON.stringify(conf, null, 2)
       );
 
+      const input = configuration.getProp('input');
+      if (Object.keys(input)[0] === 'file') {
+        const dataSource = configuration.getProp('source');
+        const type = input.file.type;
+        const filename = input.file.filename;
+        const source = path.join(basePath, userId, 'data', dataSource, type, filename);
+        const dest = path.join(basePath, userId, 'jobs', newJob._id.toString(), filename);
+        await fs.promises.copyFile(source, dest);
+      }
+
       await JobLogsHelper.writeEntry(job, 'started');
 
       req.origin = 'start';
@@ -359,7 +370,11 @@ class JobController {
         const container = containers[j];
 
         if (container.started) {
-          // // stop container
+          try {
+            await ContainerHelper.stopContainer(container.id);
+          } catch (error) {
+            return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+          }
           container.started = false;
         }
       }

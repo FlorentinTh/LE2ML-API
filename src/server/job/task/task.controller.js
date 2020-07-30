@@ -5,7 +5,7 @@ import { JobState } from '../job.enums';
 import { TaskState, TasksList } from './task.enums';
 import JobLogsHelper from '../logs/logs.helper';
 import { validationResult } from 'express-validator';
-
+import ContainerHelper from '../container/container.helper';
 class TaskController {
   async startTask(req, res, next) {
     let job = req.job;
@@ -37,9 +37,20 @@ class TaskController {
 
     for (let i = 0; i < taskContainers.length; ++i) {
       const taskContainer = taskContainers[i];
-      // // start container, set ID
-      // taskContainer.id = ;
-      taskContainer.started = true;
+
+      try {
+        const container = await ContainerHelper.startContainer(
+          taskContainer.name,
+          taskContainer.token,
+          job._id.toString(),
+          job.user.toString()
+        );
+
+        taskContainer.started = true;
+        taskContainer.id = container;
+      } catch (error) {
+        return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+      }
     }
 
     const data = {
@@ -211,7 +222,11 @@ class TaskController {
     const taskContainers = job.containers[task];
     for (let i = 0; i < taskContainers.length; ++i) {
       const taskContainer = taskContainers[i];
-      // // stop container
+      try {
+        await ContainerHelper.stopContainer(taskContainer.id);
+      } catch (error) {
+        return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+      }
       taskContainer.started = false;
     }
 
