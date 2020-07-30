@@ -33,7 +33,7 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "ajv": "^6.12.3",
-    "ajv-formats": "^1.4.1",
+    "ajv-formats-draft2019": "^1.4.3",
     "archiver": "^5.0.0",
     "bcrypt": "^5.0.0",
     "bluebird": "^3.7.2",
@@ -44,6 +44,7 @@
     "csv": "^5.3.2",
     "csvjson": "^5.1.0",
     "dayjs": "^1.8.31",
+    "dockerode": "^3.2.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-redis-cache": "^1.1.3",

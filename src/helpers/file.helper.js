@@ -3,7 +3,7 @@ import fse from 'fs-extra';
 import path from 'path';
 import yaml from 'js-yaml';
 import Ajv from 'ajv';
-import AjvFormat from 'ajv-formats';
+import AjvFormat from 'ajv-formats-draft2019';
 import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
