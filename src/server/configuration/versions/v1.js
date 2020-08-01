@@ -7,9 +7,6 @@ class V1 {
   }
 
   getProp(prop) {
-    if (!(typeof prop === 'string')) {
-      throw new Error('Expected type for argument prop is String.');
-    }
     return this.config[prop];
   }
 

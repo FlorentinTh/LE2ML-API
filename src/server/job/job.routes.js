@@ -17,27 +17,11 @@ router
   );
 
 router
-  .route('/log/entries')
-  .get(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN),
-    JobController.getJobLogEntries
-  );
-
-router
   .route('/changes')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     JobController.getJobChanges
-  );
-
-router
-  .route('/admin/changes')
-  .get(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN),
-    JobController.getAdminJobChanges
   );
 
 router
@@ -51,7 +35,7 @@ router
   );
 
 router
-  .route('/cancel/:id')
+  .route('/:id/cancel')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
@@ -59,7 +43,7 @@ router
   );
 
 router
-  .route('/restart/:id')
+  .route('/:id/restart')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),

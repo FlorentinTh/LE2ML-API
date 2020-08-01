@@ -17,7 +17,9 @@
           "@Mongo": "./src/utils/mongo",
           "@Passport": "./src/utils/passport",
           "@Configuration": "./src/server/configuration/configuration",
+          "@ContainerHelper": "./src/helpers/container.helper",
           "@FileHelper": "./src/helpers/file.helper",
+          "@JobLogsHelper": "./src/helpers/job.logs.helper.js",
           "@StreamHelper": "./src/helpers/stream.helper.js",
           "@StringHelper": "./src/helpers/string.helper.js"
         },

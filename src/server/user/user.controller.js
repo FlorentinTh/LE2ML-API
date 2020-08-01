@@ -15,7 +15,7 @@ class UserController {
         .exec();
 
       if (!user) {
-        return next(new APIError('User not found.', httpStatus.NOT_FOUND));
+        return next(new APIError('User not found', httpStatus.NOT_FOUND));
       }
 
       res.status(httpStatus.OK).json({
@@ -48,7 +48,7 @@ class UserController {
 
       if (!user) {
         return next(
-          new APIError('User not found, cannot be updated.', httpStatus.NOT_FOUND)
+          new APIError('User not found, cannot be updated', httpStatus.NOT_FOUND)
         );
       }
 
@@ -61,7 +61,7 @@ class UserController {
       if (!(body.password === body.passwordConfirm)) {
         return next(
           new APIError(
-            'Both new password and confirmation must be identical.',
+            'Both new password and confirmation must be identical',
             httpStatus.UNPROCESSABLE_ENTITY
           )
         );
@@ -75,7 +75,7 @@ class UserController {
             token: token
           }
         },
-        message: 'User successfully updated.'
+        message: 'User successfully updated'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -102,10 +102,7 @@ class UserController {
 
       if (!user) {
         return next(
-          new APIError(
-            'User not found, password cannot be changed.',
-            httpStatus.NOT_FOUND
-          )
+          new APIError('User not found, password cannot be changed', httpStatus.NOT_FOUND)
         );
       }
 
@@ -118,7 +115,7 @@ class UserController {
       if (!(body.newPassword === body.newPasswordConfirm)) {
         return next(
           new APIError(
-            'Both new password and confirmation must be identical.',
+            'Both new password and confirmation must be identical',
             httpStatus.UNPROCESSABLE_ENTITY
           )
         );
@@ -127,7 +124,7 @@ class UserController {
       if (body.currentPassword === body.newPassword) {
         return next(
           new APIError(
-            'New password cannot be the same as current one.',
+            'New password cannot be the same as current one',
             httpStatus.UNPROCESSABLE_ENTITY
           )
         );
@@ -144,7 +141,7 @@ class UserController {
             token: token
           }
         },
-        message: 'Password successfully modified.'
+        message: 'Password successfully modified'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

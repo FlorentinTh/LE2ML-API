@@ -1,30 +1,26 @@
 import express from 'express';
 import passport from 'passport';
-import UserController from './user.controller';
-import validation from './user.validation';
 import Authority from '@Authority';
-import { role } from './user.role';
+import { role } from '../../user/user.role';
+import ConfController from './conf.controller';
 
 const router = express.Router();
 
 router
-  .route('/:id')
+  .route('/conf/import')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    Authority.allowSameIdentity(),
-    validation.updateUser,
-    UserController.updateUser
+    ConfController.importConfig,
+    ConfController.processConfig
   );
 
 router
-  .route('/:id/password/')
+  .route('/conf/convert')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    Authority.allowSameIdentity(),
-    validation.changePassword,
-    UserController.changePassword
+    ConfController.convertConfig
   );
 
 export default router;

@@ -7,7 +7,7 @@ import AjvFormat from 'ajv-formats-draft2019';
 import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
-import { SchemaType } from '../server/file/file.enums';
+import { SchemaType } from '../server/file/conf/conf.enums';
 import DataSource from '../server/data-source/data-source.model';
 
 const config = Config.getConfig();
@@ -15,7 +15,7 @@ const config = Config.getConfig();
 class FileHelper {
   static validationErrorsHandler(errors) {
     if (!(typeof errors === 'object')) {
-      throw new Error('Expected type for argument errors is Object.');
+      throw new Error('Expected type for argument errors is Object');
     }
 
     const errorsArray = [];

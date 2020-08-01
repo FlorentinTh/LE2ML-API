@@ -42,15 +42,6 @@ router
   );
 
 router
-  .route('/state/:id')
-  .post(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN),
-    validation.updateState,
-    AlgoController.updateAlgo
-  );
-
-router
   .route('/:id')
   .delete(
     passport.authenticate('jwt', { session: false }),

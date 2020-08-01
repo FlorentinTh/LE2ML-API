@@ -19,7 +19,7 @@ class AlgoController {
         .exec();
 
       if (!algos) {
-        return next(new APIError('Cannot find all algorithms.', httpStatus.NOT_FOUND));
+        return next(new APIError('Cannot find all algorithms', httpStatus.NOT_FOUND));
       }
 
       const data = {
@@ -86,7 +86,7 @@ class AlgoController {
 
     res.status(httpStatus.OK).json({
       data: algo,
-      message: 'Algorithm successfully created.'
+      message: 'Algorithm successfully created'
     });
   }
 
@@ -116,7 +116,7 @@ class AlgoController {
 
       if (!algo) {
         return next(
-          new APIError('Algorithm not found, cannot be updated.', httpStatus.NOT_FOUND)
+          new APIError('Algorithm not found, cannot be updated', httpStatus.NOT_FOUND)
         );
       }
 
@@ -124,7 +124,7 @@ class AlgoController {
         data: {
           algo: algo
         },
-        message: `Algorithm successfully updated.`
+        message: `Algorithm successfully updated`
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -171,7 +171,7 @@ class AlgoController {
 
       if (!algo) {
         return next(
-          new APIError('Algorithm not found, cannot be deleted.', httpStatus.NOT_FOUND)
+          new APIError('Algorithm not found, cannot be deleted', httpStatus.NOT_FOUND)
         );
       }
 
@@ -181,7 +181,7 @@ class AlgoController {
 
       res.status(httpStatus.OK).json({
         data: algo,
-        message: 'Algorithm successfully deleted.'
+        message: 'Algorithm successfully deleted'
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

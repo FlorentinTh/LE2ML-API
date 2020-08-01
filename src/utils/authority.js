@@ -6,7 +6,7 @@ class Authority {
   static allowSameIdentity() {
     return (req, res, next) => {
       if (!(req.params.id === req.user.id)) {
-        return next(new APIError('User not authorized.', httpStatus.UNAUTHORIZED));
+        return next(new APIError('User not authorized', httpStatus.UNAUTHORIZED));
       }
 
       next();
@@ -19,7 +19,7 @@ class Authority {
 
       if (!hasRole) {
         return next(
-          new APIError('User does not have sufficient privileges.', httpStatus.FORBIDDEN)
+          new APIError('User does not have sufficient privileges', httpStatus.FORBIDDEN)
         );
       }
 

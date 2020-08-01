@@ -42,7 +42,7 @@ router
   );
 
 router
-  .route('/role/:id')
+  .route('/:id/role')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN),

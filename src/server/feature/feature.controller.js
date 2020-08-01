@@ -16,7 +16,7 @@ class FeatureController {
         .exec();
 
       if (!features) {
-        return next(new APIError('Cannot find all features.', httpStatus.NOT_FOUND));
+        return next(new APIError('Cannot find all features', httpStatus.NOT_FOUND));
       }
 
       const data = {
@@ -50,9 +50,7 @@ class FeatureController {
         .exec();
 
       if (!features) {
-        return next(
-          new APIError('Cannot find requested features.', httpStatus.NOT_FOUND)
-        );
+        return next(new APIError('Cannot find requested features', httpStatus.NOT_FOUND));
       }
 
       const data = {
@@ -96,7 +94,7 @@ class FeatureController {
 
     res.status(httpStatus.OK).json({
       data: feature,
-      message: 'Feature successfully created.'
+      message: 'Feature successfully created'
     });
   }
 
@@ -126,7 +124,7 @@ class FeatureController {
 
       if (!feature) {
         return next(
-          new APIError('Feature not found, cannot be updated.', httpStatus.NOT_FOUND)
+          new APIError('Feature not found, cannot be updated', httpStatus.NOT_FOUND)
         );
       }
 
@@ -134,7 +132,7 @@ class FeatureController {
         data: {
           feature: feature
         },
-        message: `Feature successfully updated.`
+        message: `Feature successfully updated`
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -152,7 +150,7 @@ class FeatureController {
 
       if (!feature) {
         return next(
-          new APIError('Feature not found, cannot be deleted.', httpStatus.NOT_FOUND)
+          new APIError('Feature not found, cannot be deleted', httpStatus.NOT_FOUND)
         );
       }
 
@@ -160,7 +158,7 @@ class FeatureController {
 
       res.status(httpStatus.OK).json({
         data: feature,
-        message: 'Feature successfully deleted.'
+        message: 'Feature successfully deleted'
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

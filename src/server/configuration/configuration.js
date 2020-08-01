@@ -7,11 +7,15 @@ class Configuration {
   }
 
   getProp(prop) {
+    if (!(typeof prop === 'string')) {
+      throw new Error('Expected type for argument prop is String');
+    }
+
     switch (this.version) {
       case '1':
         return new V1(this.config).getProp(prop);
       default:
-        throw new Error(`Version ${this.version} of configuration is not supported yet.`);
+        throw new Error(`Version ${this.version} of configuration is not supported yet`);
     }
   }
 
@@ -20,7 +24,7 @@ class Configuration {
       case '1':
         return new V1(this.config).setTasks();
       default:
-        throw new Error(`Version ${this.version} of configuration is not supported yet.`);
+        throw new Error(`Version ${this.version} of configuration is not supported yet`);
     }
   }
 
@@ -29,7 +33,7 @@ class Configuration {
       case '1':
         return new V1(this.config).setContainers();
       default:
-        throw new Error(`Version ${this.version} of configuration is not supported yet.`);
+        throw new Error(`Version ${this.version} of configuration is not supported yet`);
     }
   }
 }

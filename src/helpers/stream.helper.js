@@ -35,7 +35,7 @@ class StreamHelper {
       header: true,
       step: function(results) {
         if (counter === nbLines - 2) {
-          writer.write(JSON.stringify(results.data, null, 4));
+          writer.write(JSON.stringify(results.data), null, 4);
         } else {
           writer.write(JSON.stringify(results.data, null, 4) + ',\r\n');
         }

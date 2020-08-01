@@ -3,18 +3,14 @@ import APIError from '@APIError';
 import path from 'path';
 import fs from 'fs';
 import Config from '@Config';
-import multer from 'multer';
-import FileHelper from '@FileHelper';
 import StreamHelper from '@StreamHelper';
-import fileType from 'file-type';
-import { FileType, SchemaType, FileMime } from './file.enums';
+import { FileType } from '../file.enums';
 import { validationResult } from 'express-validator';
 import striplines from 'striplines';
 import csv from 'csv';
-import AlgoController from '../algorithm/algo.controller';
 const config = Config.getConfig();
 
-class FileController {
+class DataController {
   async getFiles(req, res, next) {
     const type = req.query.type;
 
@@ -66,7 +62,7 @@ class FileController {
     });
   }
 
-  async fileExists(req, res, next) {
+  async isFileExists(req, res, next) {
     const type = req.query.type;
 
     if (!Object.values(FileType).includes(type)) {
@@ -209,341 +205,6 @@ class FileController {
       } else {
         return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
       }
-    }
-  }
-
-  async uploadInertialFile(req, res, next) {
-    const type = req.query.type;
-
-    if (!Object.values(FileType).includes(type)) {
-      return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
-    }
-
-    const userId = req.user.id;
-    const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, userId, 'data', 'inertial', type);
-
-    try {
-      await fs.promises.access(fullPath);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        await fs.promises.mkdir(fullPath, { recursive: true, mode: 755 });
-      } else {
-        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
-      }
-    }
-
-    const uploader = multer({
-      storage: multer.diskStorage({
-        destination: (req, file, cb) => {
-          cb(null, fullPath);
-        },
-        filename: (req, file, cb) => {
-          cb(null, file.originalname);
-        }
-      }),
-      fileFilter: async (req, file, cb) => {
-        if (!Object.values(FileMime).includes(file.mimetype)) {
-          cb(null, false);
-        } else {
-          const override = req.query.override === 'true';
-
-          if (override) {
-            try {
-              await fs.promises.unlink(path.join(fullPath, file.originalname));
-            } catch (error) {
-              return next(
-                new APIError('File override failed', httpStatus.INTERNAL_SERVER_ERROR)
-              );
-            }
-          }
-          cb(null, true);
-        }
-      }
-    });
-
-    const uploadFile = uploader.single('file-input');
-
-    uploadFile(req, res, err => {
-      if (err) {
-        return next(new APIError('File upload failed', httpStatus.UNPROCESSABLE_ENTITY));
-      }
-
-      next();
-    });
-  }
-
-  async convertInertialFile(req, res, next) {
-    req.setTimeout(0);
-
-    if (!req.file) {
-      return next(
-        new APIError(
-          'File upload failed, only JSON and CSV files are allowed',
-          httpStatus.UNPROCESSABLE_ENTITY
-        )
-      );
-    }
-
-    if (req.file.mimetype === FileMime.JSON) {
-      const userId = req.user.id;
-      const type = req.query.type;
-      const basePath = config.data.base_path;
-      const file = req.file.filename;
-
-      const opts = { encoding: 'utf-8' };
-      const reader = fs.createReadStream(req.file.path, opts);
-
-      const destPath = path.join(
-        basePath,
-        userId,
-        'data',
-        'inertial',
-        type,
-        `${file.split('.')[0]}.csv`
-      );
-      const writer = fs.createWriteStream(destPath, opts);
-
-      StreamHelper.jsonStreamToCsvFile(reader, writer);
-
-      reader.on('close', async () => {
-        try {
-          await fs.promises.unlink(req.file.path);
-          req.file.path = destPath;
-          req.file.mimetype = FileMime.CSV;
-
-          next();
-        } catch (error) {
-          return next(
-            new APIError('File processing failed', httpStatus.INTERNAL_SERVER_ERROR)
-          );
-        }
-      });
-    } else if (req.file.mimetype === FileMime.CSV) {
-      next();
-    }
-  }
-
-  async validInertialFile(req, res, next) {
-    const opts = { encoding: 'utf-8' };
-    const reader = fs.createReadStream(req.file.path, opts);
-    let errorOccurs = false;
-
-    reader.on('data', chunk => {
-      reader.pause();
-
-      const firstLine = chunk
-        .toString()
-        .replace(/\r/g, '')
-        .split(/\n/)[0];
-
-      const attributes = firstLine.split(',');
-
-      if (!(attributes[attributes.length - 1] === 'label')) {
-        errorOccurs = true;
-      }
-      reader.destroy();
-    });
-
-    reader.on('close', async () => {
-      if (errorOccurs) {
-        try {
-          await fs.promises.unlink(req.file.path);
-          return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
-            data: null,
-            message: 'error'
-          });
-        } catch (error) {
-          return next(
-            new APIError('File processing failed', httpStatus.INTERNAL_SERVER_ERROR)
-          );
-        }
-      }
-      res.status(httpStatus.OK).json({
-        data: req.file.filename,
-        message: 'success'
-      });
-    });
-  }
-
-  async importConfig(req, res, next) {
-    const algo = req.query.algo;
-    const container = req.query.container;
-
-    if (!Object.values(FileType).includes(FileType.CONFIG)) {
-      return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
-    }
-
-    const uploader = multer({
-      storage: multer.memoryStorage()
-    });
-
-    let uploadConfig;
-    if (!(algo === undefined)) {
-      uploadConfig = uploader.single(container + '.' + algo);
-    } else {
-      uploadConfig = uploader.single('config');
-    }
-
-    uploadConfig(req, res, err => {
-      if (err) {
-        return next(
-          new APIError('Config import failed', httpStatus.UNPROCESSABLE_ENTITY)
-        );
-      }
-
-      next();
-    });
-  }
-
-  async processConfig(req, res, next) {
-    if (!req.file) {
-      return next(new APIError('Config import failed', httpStatus.UNPROCESSABLE_ENTITY));
-    }
-
-    try {
-      const type = await fileType.fromBuffer(req.file.buffer);
-
-      if (!(type === undefined)) {
-        return next(
-          new APIError('Not supported type of file', httpStatus.UNSUPPORTED_MEDIA_TYPE)
-        );
-      }
-    } catch (error) {
-      return next(
-        new APIError('Fail to check type of file', httpStatus.UNSUPPORTED_MEDIA_TYPE)
-      );
-    }
-
-    const algo = req.query.algo;
-
-    try {
-      let json;
-      if (!(algo === undefined)) {
-        json = JSON.parse(req.file.buffer.toString());
-      } else {
-        json = await FileHelper.ymlToJson(req.file.buffer.toString());
-      }
-
-      let version = req.query.v;
-
-      if (version === undefined) {
-        version = json.version;
-      }
-
-      const schema = algo === undefined ? SchemaType.CONFIG : SchemaType.ALGO;
-
-      try {
-        const validation = await FileHelper.validateJson(json, version, schema);
-
-        if (!validation.ok) {
-          return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
-            data: validation.errors,
-            message: 'error'
-          });
-        }
-
-        const container = req.query.container;
-        const basePath = config.data.base_path;
-        let folderPath;
-        let fullPath;
-        if (!(algo === undefined)) {
-          folderPath = path.join(basePath, '.app-data', 'algorithms', container);
-          fullPath = path.join(folderPath, algo + '.json');
-        } else {
-          return res.status(httpStatus.OK).json({
-            data: json,
-            message: 'Configuration successfully imported'
-          });
-        }
-
-        try {
-          await fs.promises.mkdir(folderPath, { recursive: true });
-        } catch (error) {
-          return next(
-            new APIError(
-              'Saving configuration file failed',
-              httpStatus.INTERNAL_SERVER_ERROR
-            )
-          );
-        }
-
-        try {
-          await fs.promises.writeFile(fullPath, req.file.buffer);
-
-          if (!(algo === undefined)) {
-            const id = req.query.id;
-            const update = await AlgoController.updateAlgoConf(id, algo + '.json');
-
-            if (update.ok) {
-              res.status(httpStatus.OK).json({
-                data: {
-                  algo: update.data,
-                  file: algo + '.json'
-                },
-                message: 'File successfully imported'
-              });
-            } else {
-              return next(
-                new APIError('Updating database failed', httpStatus.INTERNAL_SERVER_ERROR)
-              );
-            }
-          }
-        } catch (error) {
-          return next(
-            new APIError(
-              'Saving configuration file failed',
-              httpStatus.INTERNAL_SERVER_ERROR
-            )
-          );
-        }
-      } catch (error) {
-        return next(
-          new APIError('File validation failed', httpStatus.UNPROCESSABLE_ENTITY)
-        );
-      }
-    } catch (error) {
-      return next(
-        new APIError('File conversion failed', httpStatus.UNSUPPORTED_MEDIA_TYPE)
-      );
-    }
-  }
-
-  async convertConfig(req, res, next) {
-    if (!Object.values(FileType).includes(FileType.CONFIG)) {
-      return next(new APIError('Unknown type', httpStatus.BAD_REQUEST));
-    }
-
-    const conf = req.body;
-    const version = req.query.v;
-
-    try {
-      const validation = await FileHelper.validateJson(conf, version, SchemaType.CONFIG);
-
-      if (!validation.ok) {
-        return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
-          data: validation.errors,
-          message: 'error'
-        });
-      }
-
-      try {
-        const obj = JSON.parse(JSON.stringify(conf));
-        const yml = await FileHelper.jsonToYml(obj);
-
-        res.status(httpStatus.OK).json({
-          data: yml,
-          message: 'success'
-        });
-      } catch (error) {
-        return next(
-          new APIError('File conversion failed', httpStatus.INTERNAL_SERVER_ERROR)
-        );
-      }
-    } catch (error) {
-      return next(
-        new APIError('File validation failed', httpStatus.UNPROCESSABLE_ENTITY)
-      );
     }
   }
 
@@ -855,7 +516,7 @@ class FileController {
     }
   }
 
-  async streamDataFile(req, res, next) {
+  async streamFile(req, res, next) {
     const filename = req.params.file;
     const userId = req.user.id;
     const source = req.query.source;
@@ -937,4 +598,4 @@ class FileController {
   }
 }
 
-export default new FileController();
+export default new DataController();

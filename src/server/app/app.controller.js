@@ -14,7 +14,7 @@ class AppController {
         .exec();
 
       if (!appKeys) {
-        return next(new APIError('Cannot find all app keys.', httpStatus.NOT_FOUND));
+        return next(new APIError('Cannot find all app keys', httpStatus.NOT_FOUND));
       }
 
       const results = [];
@@ -81,7 +81,7 @@ class AppController {
           key: key
         }
       },
-      message: 'App key successfully generated.'
+      message: 'App key successfully generated'
     });
   }
 
@@ -108,7 +108,7 @@ class AppController {
 
       if (!appKey) {
         return next(
-          new APIError('App key not found, cannot be updated.', httpStatus.NOT_FOUND)
+          new APIError('App key not found, cannot be updated', httpStatus.NOT_FOUND)
         );
       }
 
@@ -116,7 +116,7 @@ class AppController {
         data: {
           appKey: appKey
         },
-        message: `App key successfully updated.`
+        message: `App key successfully updated`
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -132,7 +132,7 @@ class AppController {
 
     if (!app) {
       return next(
-        new APIError('App key not found, cannot be revoked.', httpStatus.NOT_FOUND)
+        new APIError('App key not found, cannot be revoked', httpStatus.NOT_FOUND)
       );
     }
 
@@ -140,7 +140,7 @@ class AppController {
 
     res.status(httpStatus.OK).json({
       data: app,
-      message: 'App key successfully revoked.'
+      message: 'App key successfully revoked'
     });
   }
 
@@ -148,7 +148,7 @@ class AppController {
     const app = await App.remove().exec();
 
     if (!(app.ok === 1)) {
-      return next(new APIError('App keys cannot be all revoked.', httpStatus.NOT_FOUND));
+      return next(new APIError('App keys cannot be all revoked', httpStatus.NOT_FOUND));
     }
 
     Logger.info(`All app keys revoked by user: ${req.user.id}`);
@@ -157,7 +157,7 @@ class AppController {
       data: {
         total: app.deletedCount
       },
-      message: 'All app keys successfully revoked.'
+      message: 'All app keys successfully revoked'
     });
   }
 }

@@ -19,12 +19,15 @@ import Mongo from '@Mongo';
 import authRoutes from './server/auth/auth.routes';
 import appsRoutes from './server/app/app.routes';
 import usersRoutes from './server/user/user.routes';
-import filesRoutes from './server/file/file.routes';
+import dataRoutes from './server/file/data/data.routes';
+import dataInertialRoutes from './server/file/data/inertial/data.inertial.routes';
+import confRoutes from './server/file/conf/conf.routes';
 import dataSourcesRoutes from './server/data-source/data-source.routes';
 import featuresRoutes from './server/feature/feature.routes';
 import algosRoutes from './server/algorithm/algo.routes';
 import windowsRoutes from './server/window/window.routes';
 import jobsRoutes from './server/job/job.routes';
+import logsRoutes from './server/job/log/log.routes';
 import tasksRoutes from './server/job/task/task.routes';
 import adminUsersRoutes from './server/user/admin/admin.user.routes';
 
@@ -58,18 +61,21 @@ Mongo.start();
 APIv1.use('/v1', authRoutes);
 APIv1.use('/v1/apps', appsRoutes);
 APIv1.use('/v1/users', usersRoutes);
-APIv1.use('/v1/files', filesRoutes);
+APIv1.use('/v1/files', dataRoutes);
+APIv1.use('/v1/files', dataInertialRoutes);
+APIv1.use('/v1/files', confRoutes);
 APIv1.use('/v1/sources', dataSourcesRoutes);
 APIv1.use('/v1/features', featuresRoutes);
 APIv1.use('/v1/algos', algosRoutes);
 APIv1.use('/v1/windows', windowsRoutes);
 APIv1.use('/v1/jobs', jobsRoutes);
+APIv1.use('/v1/jobs', logsRoutes);
 APIv1.use('/v1/jobs', tasksRoutes);
 APIv1.use('/v1/admin/users', adminUsersRoutes);
 app.use('/api', APIv1);
 
 app.use((req, res, next) => {
-  const err = new APIError('API not found.', httpStatus.NOT_FOUND);
+  const err = new APIError('API not found', httpStatus.NOT_FOUND);
   next(err);
 });
 

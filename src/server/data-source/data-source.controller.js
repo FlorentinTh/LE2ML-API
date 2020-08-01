@@ -12,7 +12,7 @@ class DataSourceController {
         .exec();
 
       if (!sources) {
-        return next(new APIError('Cannot find all data sources.', httpStatus.NOT_FOUND));
+        return next(new APIError('Cannot find all data sources', httpStatus.NOT_FOUND));
       }
 
       const data = {
@@ -54,7 +54,7 @@ class DataSourceController {
 
     res.status(httpStatus.OK).json({
       data: source,
-      message: 'Data source successfully created.'
+      message: 'Data source successfully created'
     });
   }
 
@@ -80,7 +80,7 @@ class DataSourceController {
 
       if (!source) {
         return next(
-          new APIError('Data source not found, cannot be updated.', httpStatus.NOT_FOUND)
+          new APIError('Data source not found, cannot be updated', httpStatus.NOT_FOUND)
         );
       }
 
@@ -88,7 +88,7 @@ class DataSourceController {
         data: {
           source: source
         },
-        message: 'Data source successfully updated.'
+        message: 'Data source successfully updated'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

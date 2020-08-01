@@ -19,7 +19,7 @@ passport.use(
           .exec();
 
         if (!user) {
-          return done(new APIError('Authentication failed.', httpStatus.UNAUTHORIZED));
+          return done(new APIError('Authentication failed', httpStatus.UNAUTHORIZED));
         }
 
         return done(null, user);

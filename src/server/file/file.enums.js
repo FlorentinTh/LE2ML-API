@@ -9,8 +9,3 @@ export const FileType = {
   MODEL: 'models',
   FEATURES: 'features'
 };
-
-export const SchemaType = {
-  CONFIG: 'conf',
-  ALGO: 'algo'
-};

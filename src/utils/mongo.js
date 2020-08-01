@@ -16,11 +16,11 @@ class Mongo {
     mongoose.set('useFindAndModify', false);
 
     mongoose.connection.on('reconnected', () => {
-      Logger.info(`Database re-onnected. Worker process: ${process.pid}`);
+      Logger.info(`Database re-onnected, worker process: ${process.pid}`);
     });
 
     mongoose.connection.on('connected', () => {
-      Logger.info(`Database connected. Worker process: ${process.pid}`);
+      Logger.info(`Database connected, worker process: ${process.pid}`);
     });
 
     mongoose.connection.on('disconnected', () => {
@@ -45,7 +45,7 @@ class Mongo {
       });
     } catch (error) {
       Logger.error(
-        `Connection to database failed on worker: ${process.pid}. Reason: ${error.message}`
+        `Connection to database failed on worker: ${process.pid}, reason: ${error.message}`
       );
       process.exit(1);
     }

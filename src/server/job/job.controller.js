@@ -8,14 +8,12 @@ import { JobState, JobProcess } from './job.enums';
 import fs from 'fs';
 import path from 'path';
 import FileHelper from '@FileHelper';
-import { SchemaType } from '../file/file.enums';
+import { SchemaType } from '../file/conf/conf.enums';
 import { Types } from 'mongoose';
 import Configuration from '@Configuration';
-import LineByLineReader from 'line-by-line';
-import dayjs from 'dayjs';
-import JobLogsHelper from './logs/logs.helper';
+import JobLogsHelper from '@JobLogsHelper';
 import { TaskState } from './task/task.enums';
-import ContainerHelper from './container/container.helper';
+import ContainerHelper from '@ContainerHelper';
 
 const config = Config.getConfig();
 
@@ -63,32 +61,6 @@ class JobController {
     }
   }
 
-  async getJobLogEntries(req, res, next) {
-    const basePath = config.data.base_path;
-    const fullPath = path.join(basePath, '.app-data', 'jobs.log');
-
-    try {
-      await fs.promises.access(fullPath);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        return res.end();
-      } else {
-        return next(new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR));
-      }
-    }
-
-    res.setHeader('Content-Type', 'application/json');
-
-    const lineReader = new LineByLineReader(fullPath);
-    lineReader.on('line', line => {
-      res.write(line + '\n');
-    });
-
-    lineReader.once('end', line => {
-      res.end();
-    });
-  }
-
   async getJobChanges(req, res, next) {
     req.socket.setTimeout(0);
     req.socket.setNoDelay(true);
@@ -122,88 +94,6 @@ class JobController {
         if (job.user.toString() === req.user.id) {
           res.write('data: ' + JSON.stringify(job) + '\n\n');
         }
-
-        res.flush();
-      }
-    });
-
-    req.on('close', () => {
-      if (!res.finished) {
-        res.end();
-      }
-    });
-  }
-
-  async getAdminJobChanges(req, res, next) {
-    req.socket.setTimeout(0);
-    req.socket.setNoDelay(true);
-    req.socket.setKeepAlive(true);
-
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('X-Accel-Buffering', 'no');
-
-    if (req.httpVersion !== '2.0') {
-      res.setHeader('Connection', 'keep-alive');
-    }
-
-    const watch = EventJob.watch();
-
-    watch.on('change', async event => {
-      if (!res.finished) {
-        let job;
-        if (event.operationType === 'update') {
-          const jobId = event.documentKey._id;
-          try {
-            job = await EventJob.findOne()
-              .where('_id')
-              .in([jobId])
-              .exec();
-          } catch (error) {
-            return next(new APIError('Cannot find job', httpStatus.NOT_FOUND));
-          }
-        } else if (event.operationType === 'insert') {
-          job = event.fullDocument;
-        }
-
-        const user = await job.getUserDetails(job.user);
-        const jobObj = job.toObject();
-        jobObj.user = user;
-
-        let action;
-        if (event.operationType === 'update') {
-          const state = event.updateDescription.updatedFields.state;
-          if (!(state === undefined)) {
-            if (state === 'started') {
-              action = 'restarted';
-            } else {
-              action = state;
-            }
-          } else {
-            const isDeleted = event.updateDescription.updatedFields.isDeleted;
-
-            const tasks = event.updateDescription.updatedFields.tasks;
-
-            if (!(isDeleted === undefined)) {
-              action = 'deleted';
-            } else if (!(tasks === undefined)) {
-              action = 'updated';
-            }
-          }
-        } else if (event.operationType === 'insert') {
-          action = 'started';
-        }
-
-        res.write(
-          'data: ' +
-            JSON.stringify({
-              action: action,
-              date: dayjs().format('DD-MM-YYYY HH:mm'),
-              job: jobObj
-            }) +
-            '\n\n'
-        );
 
         res.flush();
       }
@@ -292,7 +182,7 @@ class JobController {
 
       next();
     } catch (error) {
-      return next(new APIError('Failed to start job.', httpStatus.INTERNAL_SERVER_ERROR));
+      return next(new APIError('Failed to start job', httpStatus.INTERNAL_SERVER_ERROR));
     }
   }
 
@@ -310,7 +200,7 @@ class JobController {
 
       if (!job) {
         return next(
-          new APIError('Job not found, cannot be completed.', httpStatus.NOT_FOUND)
+          new APIError('Job not found, cannot be completed', httpStatus.NOT_FOUND)
         );
       }
 
@@ -320,7 +210,7 @@ class JobController {
         data: {
           job: jobObj
         },
-        message: `Job successfully completed.`
+        message: `Job successfully completed`
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -395,7 +285,7 @@ class JobController {
     }
 
     if (!job) {
-      return next(new APIError('Job cannot be canceled.', httpStatus.NOT_FOUND));
+      return next(new APIError('Job cannot be canceled', httpStatus.NOT_FOUND));
     }
 
     const jobObj = await JobLogsHelper.writeEntry(job, 'canceled');
@@ -404,7 +294,7 @@ class JobController {
       data: {
         job: jobObj
       },
-      message: `Job successfully canceled.`
+      message: `Job successfully canceled`
     });
   }
 
@@ -471,7 +361,7 @@ class JobController {
       const configuration = new Configuration(conf);
       data.tasks = configuration.setTasks();
     } catch (error) {
-      return next(new APIError('Failed to start job.', httpStatus.INTERNAL_SERVER_ERROR));
+      return next(new APIError('Failed to start job', httpStatus.INTERNAL_SERVER_ERROR));
     }
 
     try {
@@ -487,9 +377,7 @@ class JobController {
     }
 
     if (!job) {
-      return next(
-        new APIError('Job not found, cannot be started.', httpStatus.NOT_FOUND)
-      );
+      return next(new APIError('Job not found, cannot be started', httpStatus.NOT_FOUND));
     }
 
     await JobLogsHelper.writeEntry(job, 'restarted');
@@ -516,7 +404,7 @@ class JobController {
 
       if (!job) {
         return next(
-          new APIError('Job not found, cannot be deleted.', httpStatus.NOT_FOUND)
+          new APIError('Job not found, cannot be deleted', httpStatus.NOT_FOUND)
         );
       }
 
@@ -537,7 +425,7 @@ class JobController {
         data: {
           job: job
         },
-        message: `Job successfully deleted.`
+        message: `Job successfully deleted`
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

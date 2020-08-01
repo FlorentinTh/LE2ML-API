@@ -35,10 +35,10 @@ function onError(error) {
 
   switch (error.code) {
     case 'EACCES':
-      Logger.error(`${bind} requires elevated privileges.`);
+      Logger.error(`${bind} requires elevated privileges`);
       process.exit(1);
     case 'EADDRINUSE':
-      Logger.error(`${bind} is already in use.`);
+      Logger.error(`${bind} is already in use`);
       process.exit(1);
     default:
       throw error;

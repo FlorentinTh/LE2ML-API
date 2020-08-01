@@ -3,9 +3,10 @@ import APIError from '@APIError';
 import EventJob from '../job.model';
 import { JobState } from '../job.enums';
 import { TaskState, TasksList } from './task.enums';
-import JobLogsHelper from '../logs/logs.helper';
+import JobLogsHelper from '@JobLogsHelper';
 import { validationResult } from 'express-validator';
-import ContainerHelper from '../container/container.helper';
+import ContainerHelper from '@ContainerHelper';
+
 class TaskController {
   async startTask(req, res, next) {
     let job = req.job;
@@ -27,7 +28,7 @@ class TaskController {
         return next();
       } else {
         return next(
-          new APIError('Job cannot be started.', httpStatus.UNPROCESSABLE_ENTITY)
+          new APIError('Job cannot be started', httpStatus.UNPROCESSABLE_ENTITY)
         );
       }
     }
@@ -66,7 +67,7 @@ class TaskController {
       job = await EventJob.findOneAndUpdate({ _id: job._id }, data, { new: true }).exec();
       if (!job) {
         return next(
-          new APIError('Job cannot be updated.', httpStatus.INTERNAL_SERVER_ERROR)
+          new APIError('Job cannot be updated', httpStatus.INTERNAL_SERVER_ERROR)
         );
       }
 
@@ -76,7 +77,7 @@ class TaskController {
         data: {
           job: jobObj
         },
-        message: `Job successfully updated.`
+        message: `Job successfully updated`
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -103,9 +104,7 @@ class TaskController {
     }
 
     if (!job) {
-      return next(
-        new APIError('Job not found, cannot be updated.', httpStatus.NOT_FOUND)
-      );
+      return next(new APIError('Job not found, cannot be updated', httpStatus.NOT_FOUND));
     }
 
     const data = {
@@ -157,7 +156,7 @@ class TaskController {
 
       if (!job) {
         return next(
-          new APIError('Job not found, cannot be updated.', httpStatus.NOT_FOUND)
+          new APIError('Job not found, cannot be updated', httpStatus.NOT_FOUND)
         );
       }
 
@@ -241,7 +240,7 @@ class TaskController {
 
     if (!job) {
       return next(
-        new APIError('Job cannot be updated.', httpStatus.INTERNAL_SERVER_ERROR)
+        new APIError('Job cannot be updated', httpStatus.INTERNAL_SERVER_ERROR)
       );
     }
 
@@ -251,7 +250,7 @@ class TaskController {
       data: {
         job: jobObj
       },
-      message: `Job successfully completed.`
+      message: `Job successfully completed`
     });
   }
 }

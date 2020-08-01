@@ -74,7 +74,7 @@ class AdminController {
       //     .exec();
 
       if (!users) {
-        return next(new APIError('Cannot find all users.', httpStatus.NOT_FOUND));
+        return next(new APIError('Cannot find all users', httpStatus.NOT_FOUND));
       }
 
       const data = {
@@ -110,7 +110,7 @@ class AdminController {
 
       if (!user) {
         return next(
-          new APIError('User not found, cannot be updated.', httpStatus.NOT_FOUND)
+          new APIError('User not found, cannot be updated', httpStatus.NOT_FOUND)
         );
       }
 
@@ -118,7 +118,7 @@ class AdminController {
         data: {
           user: user
         },
-        message: `User successfully updated.`
+        message: `User successfully updated`
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -133,7 +133,7 @@ class AdminController {
 
       if (!user) {
         return next(
-          new APIError('User not found, cannot be deleted.', httpStatus.NOT_FOUND)
+          new APIError('User not found, cannot be deleted', httpStatus.NOT_FOUND)
         );
       }
 
@@ -152,7 +152,7 @@ class AdminController {
 
       res.status(httpStatus.OK).json({
         data: user,
-        message: 'User successfully deleted.'
+        message: 'User successfully deleted'
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -180,7 +180,7 @@ class AdminController {
       if (!user) {
         return next(
           new APIError(
-            'Email not found, temporary password cannot be set.',
+            'Email not found, temporary password cannot be set',
             httpStatus.NOT_FOUND
           )
         );
@@ -189,7 +189,7 @@ class AdminController {
       if (!(body.tempPassword === body.tempPasswordConfirm)) {
         return next(
           new APIError(
-            'Both temporary password and confirmation must be identical.',
+            'Both temporary password and confirmation must be identical',
             httpStatus.UNPROCESSABLE_ENTITY
           )
         );
@@ -198,7 +198,7 @@ class AdminController {
       if (user.tmpPassword) {
         return next(
           new APIError(
-            'User already have a temporary password.',
+            'User already have a temporary password',
             httpStatus.UNPROCESSABLE_ENTITY
           )
         );
@@ -212,7 +212,7 @@ class AdminController {
         data: {
           user: user
         },
-        message: 'Temporary password successfully applied.'
+        message: 'Temporary password successfully applied'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));

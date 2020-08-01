@@ -18,7 +18,7 @@ class AuthController {
     if (!(req.body.password === req.body.passwordConfirm)) {
       return next(
         new APIError(
-          'Both password and confirmation must be identical.',
+          'Both password and confirmation must be identical',
           httpStatus.UNPROCESSABLE_ENTITY
         )
       );
@@ -32,25 +32,19 @@ class AuthController {
     try {
       await user.setPassword(req.body.password);
     } catch (error) {
-      return next(
-        new APIError('[501] Registration failed', httpStatus.INTERNAL_SERVER_ERROR)
-      );
+      return next(new APIError('Registration failed', httpStatus.INTERNAL_SERVER_ERROR));
     }
 
     try {
       await user.save();
     } catch (error) {
-      return next(
-        new APIError('[502] Registration failed', httpStatus.INTERNAL_SERVER_ERROR)
-      );
+      return next(new APIError('Registration failed', httpStatus.INTERNAL_SERVER_ERROR));
     }
 
     try {
       await FileHelper.createDataDirectories(user._id.toString());
     } catch (error) {
-      return next(
-        new APIError('[503] Registration failed', httpStatus.INTERNAL_SERVER_ERROR)
-      );
+      return next(new APIError('Registration failed', httpStatus.INTERNAL_SERVER_ERROR));
     }
 
     res.status(httpStatus.OK).json({
@@ -78,13 +72,13 @@ class AuthController {
         .exec();
 
       if (!user) {
-        return next(new APIError('Authentication failed.', httpStatus.UNAUTHORIZED));
+        return next(new APIError('Authentication failed', httpStatus.UNAUTHORIZED));
       }
 
       const isValidPassword = await user.validatePassword(password);
 
       if (!isValidPassword) {
-        return next(new APIError('Invalid password.', httpStatus.UNAUTHORIZED));
+        return next(new APIError('Invalid password', httpStatus.UNAUTHORIZED));
       }
 
       const updateConnection = await User.findOneAndUpdate(
@@ -93,7 +87,7 @@ class AuthController {
       ).exec();
 
       if (!updateConnection) {
-        return next(new APIError('Sign-in failed.', httpStatus.INTERNAL_SERVER_ERROR));
+        return next(new APIError('Sign-in failed', httpStatus.INTERNAL_SERVER_ERROR));
       }
 
       const token = user.generateJwt(user);

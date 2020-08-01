@@ -1,9 +1,9 @@
 import express from 'express';
 import passport from 'passport';
-import FileController from './file.controller';
 import Authority from '@Authority';
-import { role } from '../user/user.role';
-import validation from './file.validation';
+import { role } from '../../user/user.role';
+import validation from './data.validation';
+import DataController from './data.controller';
 
 const router = express.Router();
 
@@ -12,66 +12,39 @@ router
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.getFiles
+    DataController.getFiles
   );
 
 router
-  .route('/stream/data/:file')
+  .route('/:file/stream')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.streamDataFile
+    DataController.streamFile
   );
 
 router
-  .route('/exists/:file')
+  .route('/:file/exists')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.fileExists
+    DataController.isFileExists
   );
 
 router
-  .route('/download/:file')
+  .route('/:file/download')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.downloadFile
+    DataController.downloadFile
   );
 
 router
-  .route('/headers/:file')
+  .route('/:file/headers')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.getFileHeaders
-  );
-
-router
-  .route('/upload/inertial')
-  .post(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.uploadInertialFile,
-    FileController.convertInertialFile,
-    FileController.validInertialFile
-  );
-
-router
-  .route('/import/conf')
-  .post(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.importConfig,
-    FileController.processConfig
-  );
-
-router
-  .route('/convert/conf')
-  .post(
-    passport.authenticate('jwt', { session: false }),
-    Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.convertConfig
+    DataController.getFileHeaders
   );
 
 router
@@ -80,17 +53,17 @@ router
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     validation.renameFile,
-    FileController.renameFile
+    DataController.renameFile
   );
 
 router
-  .route('/edit/:file')
+  .route('/:file/edit')
   .post(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FileController.removeAttributes,
-    FileController.renameAttributes,
-    FileController.editDone
+    DataController.removeAttributes,
+    DataController.renameAttributes,
+    DataController.editDone
   );
 
 router
@@ -99,7 +72,7 @@ router
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     validation.removeFile,
-    FileController.removeFile
+    DataController.removeFile
   );
 
 export default router;

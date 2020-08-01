@@ -15,7 +15,7 @@ class WindowController {
 
       if (!functions) {
         return next(
-          new APIError('Cannot find all window functions.', httpStatus.NOT_FOUND)
+          new APIError('Cannot find all window functions', httpStatus.NOT_FOUND)
         );
       }
 
@@ -61,7 +61,7 @@ class WindowController {
 
     res.status(httpStatus.OK).json({
       data: func,
-      message: 'Window function successfully created.'
+      message: 'Window function successfully created'
     });
   }
 
@@ -91,7 +91,7 @@ class WindowController {
       if (!func) {
         return next(
           new APIError(
-            'Window function not found, cannot be updated.',
+            'Window function not found, cannot be updated',
             httpStatus.NOT_FOUND
           )
         );
@@ -101,7 +101,7 @@ class WindowController {
         data: {
           function: func
         },
-        message: 'Window function successfully updated.'
+        message: 'Window function successfully updated'
       });
     } catch (error) {
       next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -117,7 +117,7 @@ class WindowController {
       if (!func) {
         return next(
           new APIError(
-            'Window function not found, cannot be deleted.',
+            'Window function not found, cannot be deleted',
             httpStatus.NOT_FOUND
           )
         );
@@ -127,7 +127,7 @@ class WindowController {
 
       res.status(httpStatus.OK).json({
         data: func,
-        message: 'Window function successfully deleted.'
+        message: 'Window function successfully deleted'
       });
     } catch (error) {
       return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
