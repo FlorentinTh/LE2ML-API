@@ -6,6 +6,12 @@ import { TaskState, TasksList } from './task.enums';
 import JobLogsHelper from '@JobLogsHelper';
 import { validationResult } from 'express-validator';
 import ContainerHelper from '@ContainerHelper';
+import FileHelper from '@FileHelper';
+import fs from 'fs';
+import path from 'path';
+import Config from '@Config';
+
+const config = Config.getConfig();
 
 class TaskController {
   async startTask(req, res, next) {
@@ -137,6 +143,36 @@ class TaskController {
           data: null,
           message: 'Task was already completed'
         });
+      }
+
+      if (body.task === TasksList.FEATURES) {
+        const fileList = [];
+
+        const jobFolder = path.join(
+          config.data.base_path,
+          job.user.toString(),
+          'jobs',
+          job._id.toString()
+        );
+
+        const inputPath = path.join(jobFolder, 'features');
+
+        try {
+          const files = await fs.promises.readdir(inputPath);
+
+          for (let i = 0; i < files.length; ++i) {
+            const file = files[i];
+            const stats = await fs.promises.stat(path.join(inputPath, file));
+
+            if (stats.isFile()) {
+              fileList.push(path.join(inputPath, file));
+            }
+          }
+
+          await FileHelper.mergeCSVFiles(fileList, jobFolder, { removeSource: true });
+        } catch (error) {
+          return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+        }
       }
 
       input[body.task] = body.state;

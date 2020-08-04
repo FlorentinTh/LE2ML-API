@@ -6,6 +6,7 @@ import Config from '@Config';
 import multer from 'multer';
 import StreamHelper from '@StreamHelper';
 import { FileType, FileMime } from '../../file.enums';
+import FileHelper from '../../../../helpers/file.helper';
 
 const config = Config.getConfig();
 
@@ -127,7 +128,7 @@ class DataInertialController {
     const reader = fs.createReadStream(req.file.path, opts);
     let errorOccurs = false;
 
-    reader.on('data', chunk => {
+    reader.on('data', async chunk => {
       reader.pause();
 
       const firstLine = chunk
@@ -136,10 +137,7 @@ class DataInertialController {
         .split(/\n/)[0];
 
       const attributes = firstLine.split(',');
-
-      if (!(attributes[attributes.length - 1] === 'label')) {
-        errorOccurs = true;
-      }
+      errorOccurs = await FileHelper.validateInertialFilesHeaders(attributes);
       reader.destroy();
     });
 

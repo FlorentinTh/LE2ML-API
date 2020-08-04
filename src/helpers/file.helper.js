@@ -9,6 +9,8 @@ import Config from '@Config';
 import Logger from '@Logger';
 import { SchemaType } from '../server/file/conf/conf.enums';
 import DataSource from '../server/data-source/data-source.model';
+import LineByLineReader from 'line-by-line';
+import StreamHelper from '@StreamHelper';
 
 const config = Config.getConfig();
 
@@ -311,6 +313,168 @@ class FileHelper {
     } catch (error) {
       Logger.error(`Unable to write into jobs log file`);
       throw new Error('Unable to write into jobs log file');
+    }
+  }
+
+  static async validateInertialFilesHeaders(attributes) {
+    const lastCol = attributes[attributes.length - 1];
+    if (!(lastCol.toLowerCase() === 'label')) {
+      return true;
+    }
+
+    for (let i = 0; i < attributes.length; ++i) {
+      const attribute = attributes[i];
+
+      if (!(attribute.toLowerCase() === 'label')) {
+        if (attribute.includes('acc')) {
+          if (attribute.includes('gyr') || attribute.includes('mag')) {
+            return true;
+          } else if (
+            !attribute.includes('x') &&
+            !attribute.includes('y') &&
+            !attribute.includes('z')
+          ) {
+            return true;
+          }
+        } else if (attribute.includes('gyr')) {
+          if (attribute.includes('acc') || attribute.includes('mag')) {
+            return true;
+          } else if (
+            !attribute.includes('x') &&
+            !attribute.includes('y') &&
+            !attribute.includes('z')
+          ) {
+            return true;
+          }
+        } else if (attribute.includes('mag')) {
+          if (attribute.includes('acc') || attribute.includes('gyr')) {
+            return true;
+          } else if (
+            !attribute.includes('x') &&
+            !attribute.includes('y') &&
+            !attribute.includes('z')
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  static async mergeCSVFiles(files, outputDir, options = { removeSource: false }) {
+    if (!(files.constructor === Array)) {
+      throw new Error('Expected type for argument files is Array');
+    }
+
+    if (!(outputDir.constructor === String)) {
+      throw new Error('Expected type for argument outputDir is String');
+    }
+
+    if (files.length > 1) {
+      const lr1 = new LineByLineReader(files[files.length - 2]);
+      const lr2 = new LineByLineReader(files[files.length - 1]);
+
+      const wsOutput = fs.createWriteStream(path.join(outputDir, 'features.csv.tmp'), {
+        encoding: 'utf-8'
+      });
+
+      let headers;
+      let lineCount1 = 0;
+      let lineCount2 = 0;
+      let data1;
+
+      lr1.on('line', async line => {
+        lr1.pause();
+        ++lineCount1;
+
+        if (lineCount1 === 1) {
+          headers = line;
+        } else {
+          data1 = line;
+        }
+
+        lr2.resume();
+      });
+
+      lr2.on('line', async line => {
+        lr2.pause();
+        ++lineCount2;
+
+        if (lineCount2 === 1) {
+          headers = headers + ',' + line.split(',');
+          wsOutput.write(headers);
+        } else {
+          wsOutput.write('\n' + data1 + ',' + line);
+        }
+
+        data1 = undefined;
+        lr1.resume();
+      });
+
+      lr1.on('end', async () => {
+        wsOutput.close();
+
+        const tempFile = files[files.length - 2];
+
+        files.splice(files.length - 2, 1);
+        files.splice(files.length - 1, 1);
+
+        const output = path.join(outputDir, 'features.csv');
+        await fs.promises.rename(path.join(outputDir, 'features.csv.tmp'), output);
+        files.push(output);
+
+        if (files.length > 1) {
+          return await this.mergeCSVFiles(files, outputDir, {
+            removeSource: options.removeSource
+          });
+        } else {
+          const headersFinal = await StreamHelper.getFirstLineStream(output);
+          let totalLabelCols = 0;
+          const labelColsPos = [];
+          const headersArr = headersFinal.split(',');
+
+          for (let i = 0; i < headersArr.length; ++i) {
+            const header = headersArr[i];
+            if (header === 'label' && !(i === headersArr.length - 1)) {
+              totalLabelCols++;
+              labelColsPos.push(i);
+            }
+          }
+
+          if (totalLabelCols > 0 && labelColsPos.length > 0) {
+            const lr = new LineByLineReader(output);
+            const wsOutput = fs.createWriteStream(
+              path.join(outputDir, 'features.csv.tmp'),
+              { encoding: 'utf-8' }
+            );
+
+            lr.on('line', async line => {
+              lr.pause();
+              let lineArr = line.split(',');
+
+              lineArr = lineArr.filter((value, index) => {
+                return labelColsPos.indexOf(index) === -1;
+              });
+
+              wsOutput.write('\n' + lineArr.join(','));
+              lr.resume();
+            });
+
+            lr.on('end', async () => {
+              wsOutput.close();
+              await fs.promises.rename(path.join(outputDir, 'features.csv.tmp'), output);
+
+              if (options.removeSource) {
+                await fs.promises.rmdir(path.dirname(tempFile), { recursive: true });
+              }
+            });
+          }
+        }
+      });
+    } else {
+      throw new Error('You must provide at least two files to be merged');
     }
   }
 }
