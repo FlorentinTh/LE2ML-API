@@ -43,11 +43,11 @@ router
   );
 
 router
-  .route('/:domain')
+  .route('/source/:source')
   .get(
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
-    FeatureController.getFeaturesByDomain
+    FeatureController.getFeaturesBySource
   );
 
 router

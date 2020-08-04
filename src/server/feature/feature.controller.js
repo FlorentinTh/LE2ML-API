@@ -33,20 +33,16 @@ class FeatureController {
     }
   }
 
-  async getFeaturesByDomain(req, res, next) {
-    const domainParam = req.params.domain;
-
-    if (!(domainParam === FeatureDomain.TIME || domainParam === FeatureDomain.FREQ)) {
-      return next(new APIError('Unknown domain', httpStatus.BAD_REQUEST));
-    }
+  async getFeaturesBySource(req, res, next) {
+    const sourceParam = req.params.source;
 
     try {
       const features = await Feature.find()
         .select()
         .where({ enabled: true })
         .where({ isDeleted: false })
-        .where('domain')
-        .in([domainParam])
+        .where('source')
+        .in([sourceParam])
         .exec();
 
       if (!features) {
