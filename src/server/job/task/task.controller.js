@@ -169,7 +169,27 @@ class TaskController {
             }
           }
 
-          await FileHelper.mergeCSVFiles(fileList, jobFolder, { removeSource: true });
+          const confPath = path.join(jobFolder, 'conf.json');
+          const conf = await fs.promises.readFile(confPath, { encoding: 'utf-8' });
+          const confObj = JSON.parse(conf);
+
+          const mergeOptions = {
+            removeSource: true
+          };
+
+          if (confObj.features.save) {
+            mergeOptions.saveFile = true;
+            mergeOptions.saveDest = path.join(
+              config.data.base_path,
+              job.user.toString(),
+              'data',
+              confObj.source,
+              'features',
+              confObj.features.filename
+            );
+          }
+
+          await FileHelper.mergeCSVFiles(fileList, jobFolder, mergeOptions);
         } catch (error) {
           return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
         }

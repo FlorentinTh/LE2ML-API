@@ -363,7 +363,11 @@ class FileHelper {
     return false;
   }
 
-  static async mergeCSVFiles(files, outputDir, options = { removeSource: false }) {
+  static async mergeCSVFiles(
+    files,
+    outputDir,
+    options = { removeSource: false, saveFile: false, saveDest: null }
+  ) {
     if (!(files.constructor === Array)) {
       throw new Error('Expected type for argument files is Array');
     }
@@ -426,9 +430,7 @@ class FileHelper {
         files.push(output);
 
         if (files.length > 1) {
-          return await this.mergeCSVFiles(files, outputDir, {
-            removeSource: options.removeSource
-          });
+          return await this.mergeCSVFiles(files, outputDir, options);
         } else {
           const headersFinal = await StreamHelper.getFirstLineStream(output);
           let totalLabelCols = 0;
@@ -465,6 +467,10 @@ class FileHelper {
             lr.on('end', async () => {
               wsOutput.close();
               await fs.promises.rename(path.join(outputDir, 'features.csv.tmp'), output);
+
+              if (options.saveFile && !(options.saveDest === null)) {
+                await fs.promises.copyFile(output, options.saveDest);
+              }
 
               if (options.removeSource) {
                 await fs.promises.rmdir(path.dirname(tempFile), { recursive: true });
