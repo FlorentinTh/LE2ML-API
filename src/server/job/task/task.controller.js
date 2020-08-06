@@ -55,8 +55,12 @@ class TaskController {
 
         taskContainer.started = true;
         taskContainer.id = container;
+        req.containerFailed = false;
       } catch (error) {
-        return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+        req.containerFailed = true;
+        req.job = job._id;
+        req.task = currentTask;
+        return next();
       }
     }
 
@@ -236,8 +240,15 @@ class TaskController {
   }
 
   async failTask(req, res, next) {
-    const id = req.params.id;
-    const task = req.query.task;
+    let id = req.params.id;
+    if (id === undefined) {
+      id = req.job;
+    }
+
+    let task = req.query.task;
+    if (task === undefined) {
+      task = req.task;
+    }
 
     let job;
     try {
@@ -250,14 +261,15 @@ class TaskController {
       return next(new APIError('Job not found', httpStatus.NOT_FOUND));
     }
 
-    if (!(job.tasks[task] === TaskState.STARTED)) {
-      return next(new APIError('Task cannot be set to failed', httpStatus.NOT_FOUND));
+    if (!req.containerFailed) {
+      if (!(job.tasks[task] === TaskState.STARTED)) {
+        return next(new APIError('Task cannot be set to failed', httpStatus.NOT_FOUND));
+      }
     }
 
     const data = {
       state: JobState.ERROR,
-      completedOn: Date.now(),
-      containers: {}
+      completedOn: Date.now()
     };
 
     const tasks = job.tasks;
@@ -274,19 +286,22 @@ class TaskController {
       }
     }
 
-    const taskContainers = job.containers[task];
-    for (let i = 0; i < taskContainers.length; ++i) {
-      const taskContainer = taskContainers[i];
-      try {
-        await ContainerHelper.stopContainer(taskContainer.id);
-      } catch (error) {
-        return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+    if (!req.containerFailed) {
+      data.containers = {};
+      const taskContainers = job.containers[task];
+      for (let i = 0; i < taskContainers.length; ++i) {
+        const taskContainer = taskContainers[i];
+        try {
+          await ContainerHelper.stopContainer(taskContainer.id);
+        } catch (error) {
+          return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+        }
+        taskContainer.started = false;
       }
-      taskContainer.started = false;
-    }
 
-    Object.assign(job.containers[task], taskContainers);
-    Object.assign(data.containers, job.containers);
+      Object.assign(job.containers[task], taskContainers);
+      Object.assign(data.containers, job.containers);
+    }
 
     try {
       job = await EventJob.findOneAndUpdate({ _id: id }, data, { new: true }).exec();
@@ -302,11 +317,11 @@ class TaskController {
 
     const jobObj = await JobLogsHelper.writeEntry(job, 'failed');
 
-    res.status(httpStatus.OK).json({
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       data: {
         job: jobObj
       },
-      message: `Job successfully completed`
+      message: `Task ${task} failed`
     });
   }
 }

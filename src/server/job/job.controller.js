@@ -187,6 +187,12 @@ class JobController {
   }
 
   async completeJob(req, res, next) {
+    if (!(req.containerFailed === undefined)) {
+      if (req.containerFailed) {
+        return next();
+      }
+    }
+
     let job = req.job;
     const data = {
       state: JobState.COMPLETED,

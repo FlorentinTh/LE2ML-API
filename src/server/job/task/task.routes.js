@@ -13,7 +13,8 @@ router
     validation.update,
     TaskController.completeTask,
     TaskController.startTask,
-    JobController.completeJob
+    JobController.completeJob,
+    TaskController.failTask
   );
 
 router

@@ -31,7 +31,8 @@ router
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     validation.start,
     JobController.startJob,
-    TaskController.startTask
+    TaskController.startTask,
+    TaskController.failTask
   );
 
 router
@@ -48,7 +49,8 @@ router
     passport.authenticate('jwt', { session: false }),
     Authority.allowOnlyRoles(role.ADMIN, role.USER),
     JobController.restartJob,
-    TaskController.startTask
+    TaskController.startTask,
+    TaskController.failTask
   );
 
 router
