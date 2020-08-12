@@ -316,51 +316,34 @@ class FileHelper {
     }
   }
 
-  static async validateInertialFilesHeaders(attributes) {
-    const lastCol = attributes[attributes.length - 1];
-    if (!(lastCol.toLowerCase() === 'label')) {
-      return true;
-    }
+  static async validateInertialFile(attributes) {
+    return new Promise(resolve => {
+      const lastCol = attributes[attributes.length - 1];
+      if (!(lastCol.toLowerCase() === 'label')) {
+        resolve(false);
+      }
 
-    for (let i = 0; i < attributes.length; ++i) {
-      const attribute = attributes[i];
+      const sensors = ['acc', 'gyr', 'mag'];
 
-      if (!(attribute.toLowerCase() === 'label')) {
-        if (attribute.includes('acc')) {
-          if (attribute.includes('gyr') || attribute.includes('mag')) {
-            return true;
-          } else if (
-            !attribute.includes('x') &&
-            !attribute.includes('y') &&
-            !attribute.includes('z')
-          ) {
-            return true;
-          }
-        } else if (attribute.includes('gyr')) {
-          if (attribute.includes('acc') || attribute.includes('mag')) {
-            return true;
-          } else if (
-            !attribute.includes('x') &&
-            !attribute.includes('y') &&
-            !attribute.includes('z')
-          ) {
-            return true;
-          }
-        } else if (attribute.includes('mag')) {
-          if (attribute.includes('acc') || attribute.includes('gyr')) {
-            return true;
-          } else if (
-            !attribute.includes('x') &&
-            !attribute.includes('y') &&
-            !attribute.includes('z')
-          ) {
-            return true;
+      for (let i = 0; i < sensors.length; ++i) {
+        const data = attributes.filter(attribute => attribute.includes(sensors[i]));
+
+        let count;
+        if (data.length > 0) {
+          count = data.filter(item => {
+            if (item.includes('_x') || item.includes('_y') || item.includes('_z')) {
+              return item;
+            }
+          }).length;
+
+          if (!(count === 3)) {
+            resolve(false);
           }
         }
       }
-    }
 
-    return false;
+      resolve(true);
+    });
   }
 
   static async mergeCSVFiles(

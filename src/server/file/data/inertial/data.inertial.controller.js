@@ -126,7 +126,7 @@ class DataInertialController {
   async validInertialFile(req, res, next) {
     const opts = { encoding: 'utf-8' };
     const reader = fs.createReadStream(req.file.path, opts);
-    let errorOccurs = false;
+    let isValid = false;
 
     reader.on('data', async chunk => {
       reader.pause();
@@ -137,12 +137,12 @@ class DataInertialController {
         .split(/\n/)[0];
 
       const attributes = firstLine.split(',');
-      errorOccurs = await FileHelper.validateInertialFilesHeaders(attributes);
+      isValid = await FileHelper.validateInertialFile(attributes);
       reader.destroy();
     });
 
     reader.on('close', async () => {
-      if (errorOccurs) {
+      if (!isValid) {
         try {
           await fs.promises.unlink(req.file.path);
           return res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
