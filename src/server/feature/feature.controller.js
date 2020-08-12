@@ -42,6 +42,7 @@ class FeatureController {
         .where({ isDeleted: false })
         .where('source')
         .in([sourceParam])
+        .sort({ slug: 1 })
         .exec();
 
       if (!features) {
