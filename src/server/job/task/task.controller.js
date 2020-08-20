@@ -141,6 +141,17 @@ class TaskController {
       }
     }
 
+    const jobFolder = path.join(
+      config.data.base_path,
+      job.user.toString(),
+      'jobs',
+      job._id.toString()
+    );
+
+    const confPath = path.join(jobFolder, 'conf.json');
+    const conf = await fs.promises.readFile(confPath, { encoding: 'utf-8' });
+    const confObj = JSON.parse(conf);
+
     if (!isOtherContainerRunning) {
       if (job.tasks[body.task] === body.state) {
         return res.status(httpStatus.CONFLICT).json({
@@ -151,13 +162,6 @@ class TaskController {
 
       if (body.task === TasksList.FEATURES) {
         const fileList = [];
-
-        const jobFolder = path.join(
-          config.data.base_path,
-          job.user.toString(),
-          'jobs',
-          job._id.toString()
-        );
 
         const inputPath = path.join(jobFolder, 'features');
 
@@ -172,10 +176,6 @@ class TaskController {
               fileList.push(path.join(inputPath, file));
             }
           }
-
-          const confPath = path.join(jobFolder, 'conf.json');
-          const conf = await fs.promises.readFile(confPath, { encoding: 'utf-8' });
-          const confObj = JSON.parse(conf);
 
           const mergeOptions = {
             removeSource: true
@@ -201,9 +201,34 @@ class TaskController {
 
       input[body.task] = body.state;
     }
+
     Object.assign(data.tasks, job.tasks, input);
     Object.assign(job.containers[body.task], taskContainers);
     Object.assign(data.containers, job.containers);
+
+    if (body.task === TasksList.LEARNING) {
+      if (confObj.process === 'train') {
+        const model = confObj.model + '.model';
+        const modelFilePath = path.join(jobFolder, model);
+        try {
+          const stats = await fs.promises.stat(modelFilePath);
+
+          if (stats.isFile()) {
+            const modelDestPath = path.join(
+              config.data.base_path,
+              job.user.toString(),
+              'data',
+              confObj.source,
+              'models',
+              model
+            );
+            await fs.promises.copyFile(modelFilePath, modelDestPath);
+          }
+        } catch (error) {
+          return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+        }
+      }
+    }
 
     try {
       const job = await EventJob.findOneAndUpdate(
