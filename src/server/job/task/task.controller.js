@@ -193,7 +193,11 @@ class TaskController {
             );
           }
 
-          await FileHelper.mergeCSVFiles(fileList, jobFolder, mergeOptions);
+          if (fileList > 1) {
+            await FileHelper.mergeCSVFiles(fileList, jobFolder, mergeOptions);
+          } else {
+            await FileHelper.moveCSVFeatureFile(fileList[0]);
+          }
         } catch (error) {
           return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
         }

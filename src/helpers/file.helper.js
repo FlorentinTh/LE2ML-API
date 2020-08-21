@@ -466,6 +466,16 @@ class FileHelper {
       throw new Error('You must provide at least two files to be merged');
     }
   }
+
+  static async moveCSVFeatureFile(file, options = { removeSource: false }) {
+    const destination = path.join(path.resolve(path.dirname(file), '..'), 'features.csv');
+
+    await fs.promises.copyFile(file, destination);
+
+    if (options.removeSource) {
+      await fs.promises.rmdir(path.dirname(file), { recursive: true });
+    }
+  }
 }
 
 export default FileHelper;
