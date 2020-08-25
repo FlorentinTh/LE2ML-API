@@ -22,29 +22,33 @@ class V1 {
       Object.assign(containers, { windowing: null });
     }
 
-    const features = this.config.features;
-    if (!(features === undefined) && features.length > 0) {
-      const featuresContainers = [];
-      for (let i = 0; i < features.length; ++i) {
-        if (!featuresContainers.includes(features[i].container)) {
-          featuresContainers.push(features[i].container);
+    if (!(this.config.features === undefined)) {
+      const features = this.config.features.list;
+      if (!(features === undefined) && features.length > 0) {
+        const featuresContainers = [];
+        for (let i = 0; i < features.length; ++i) {
+          if (!featuresContainers.includes(features[i].container)) {
+            featuresContainers.push(features[i].container);
+          }
         }
-      }
 
-      const featuresArray = [];
+        const featuresArray = [];
 
-      for (let i = 0; i < featuresContainers.length; ++i) {
-        featuresArray.push({
-          id: null,
-          name: featuresContainers[i],
-          token: uuidv4(),
-          started: null
+        for (let i = 0; i < featuresContainers.length; ++i) {
+          featuresArray.push({
+            id: null,
+            name: featuresContainers[i],
+            token: uuidv4(),
+            started: null
+          });
+        }
+
+        Object.assign(containers, {
+          features: featuresArray
         });
+      } else {
+        Object.assign(containers, { features: null });
       }
-
-      Object.assign(containers, {
-        features: featuresArray
-      });
     } else {
       Object.assign(containers, { features: null });
     }
@@ -71,7 +75,7 @@ class V1 {
       Object.assign(tasks, { windowing: null });
     }
 
-    if (!(this.config.features === undefined) && this.config.features.length > 0) {
+    if (!(this.config.features === undefined) && this.config.features.list.length > 0) {
       Object.assign(tasks, { features: TaskState.QUEUED });
     } else {
       Object.assign(tasks, { features: null });
@@ -87,6 +91,16 @@ class V1 {
     }
 
     return tasks;
+  }
+
+  setResults() {
+    if (this.config.process === 'train' && this.config['cross-validation']) {
+      return {
+        accuracy: null,
+        f1Score: null,
+        kappa: null
+      };
+    }
   }
 }
 

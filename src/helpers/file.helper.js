@@ -467,13 +467,13 @@ class FileHelper {
     }
   }
 
-  static async moveCSVFeatureFile(file, options = { removeSource: false }) {
+  static async moveCSVFeatureFile(file, options = { saveFile: false, saveDest: null }) {
     const destination = path.join(path.resolve(path.dirname(file), '..'), 'features.csv');
 
     await fs.promises.copyFile(file, destination);
 
-    if (options.removeSource) {
-      await fs.promises.rmdir(path.dirname(file), { recursive: true });
+    if (options.saveFile && !(options.saveDest === null)) {
+      await fs.promises.copyFile(destination, options.saveDest);
     }
   }
 }

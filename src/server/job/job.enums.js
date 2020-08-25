@@ -15,3 +15,8 @@ export const JobProcess = {
   TESTING: 'testing',
   NONE: 'none'
 };
+
+export const ResultOutput = {
+  MATRIX: 'matrix',
+  PREDICTIONS: 'predictions'
+};

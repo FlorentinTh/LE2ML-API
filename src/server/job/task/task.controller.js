@@ -177,26 +177,40 @@ class TaskController {
             }
           }
 
-          const mergeOptions = {
-            removeSource: true
-          };
-
-          if (confObj.features.save) {
-            mergeOptions.saveFile = true;
-            mergeOptions.saveDest = path.join(
-              config.data.base_path,
-              job.user.toString(),
-              'data',
-              confObj.source,
-              'features',
-              confObj.features.filename
-            );
-          }
-
           if (fileList > 1) {
+            const mergeOptions = {
+              removeSource: true
+            };
+
+            if (confObj.features.save) {
+              mergeOptions.saveFile = true;
+              mergeOptions.saveDest = path.join(
+                config.data.base_path,
+                job.user.toString(),
+                'data',
+                confObj.source,
+                'features',
+                confObj.features.filename
+              );
+            }
+
             await FileHelper.mergeCSVFiles(fileList, jobFolder, mergeOptions);
           } else {
-            await FileHelper.moveCSVFeatureFile(fileList[0]);
+            const copyOptions = {};
+
+            if (confObj.features.save) {
+              copyOptions.saveFile = true;
+              copyOptions.saveDest = path.join(
+                config.data.base_path,
+                job.user.toString(),
+                'data',
+                confObj.source,
+                'features',
+                confObj.features.filename
+              );
+            }
+
+            await FileHelper.moveCSVFeatureFile(fileList[0], copyOptions);
           }
         } catch (error) {
           return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
@@ -210,28 +224,12 @@ class TaskController {
     Object.assign(job.containers[body.task], taskContainers);
     Object.assign(data.containers, job.containers);
 
-    if (body.task === TasksList.LEARNING) {
-      if (confObj.process === 'train') {
-        const model = confObj.model + '.model';
-        const modelFilePath = path.join(jobFolder, model);
-        try {
-          const stats = await fs.promises.stat(modelFilePath);
-
-          if (stats.isFile()) {
-            const modelDestPath = path.join(
-              config.data.base_path,
-              job.user.toString(),
-              'data',
-              confObj.source,
-              'models',
-              model
-            );
-            await fs.promises.copyFile(modelFilePath, modelDestPath);
-          }
-        } catch (error) {
-          return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
-        }
-      }
+    if (body.task === TasksList.LEARNING && !(body.results === undefined)) {
+      data.results = {
+        accuracy: body.results[0],
+        f1Score: body.results[1],
+        kappa: body.results[2]
+      };
     }
 
     try {

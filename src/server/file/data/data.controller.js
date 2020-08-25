@@ -8,6 +8,8 @@ import { FileType } from '../file.enums';
 import { validationResult } from 'express-validator';
 import striplines from 'striplines';
 import csv from 'csv';
+import readdirp from 'readdirp';
+
 const config = Config.getConfig();
 
 class DataController {
@@ -25,7 +27,8 @@ class DataController {
 
     let files;
     try {
-      files = await fs.promises.readdir(fullPath);
+      const entries = await readdirp.promise(fullPath);
+      files = entries.map(file => file);
     } catch (error) {
       return res.status(httpStatus.OK).json({
         data: [],
@@ -40,7 +43,7 @@ class DataController {
         const file = files[i];
         let stats;
         try {
-          stats = await fs.promises.stat(path.join(fullPath, file));
+          stats = await fs.promises.stat(path.resolve(file.fullPath));
         } catch (error) {
           return next(
             new APIError('Unable to read some files', httpStatus.INTERNAL_SERVER_ERROR)
@@ -48,10 +51,14 @@ class DataController {
         }
 
         data.push({
-          filename: path.parse(file).name,
-          type: file.split('.').pop(),
+          filename: path.parse(file.basename).name,
+          type: file.basename.split('.').pop(),
           size: stats.size,
-          dateCreated: stats.birthtime
+          dateCreated: stats.birthtime,
+          container:
+            type === FileType.MODEL
+              ? path.basename(path.dirname(path.resolve(file.fullPath)))
+              : null
         });
       }
     }

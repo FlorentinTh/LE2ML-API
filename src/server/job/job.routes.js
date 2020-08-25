@@ -25,6 +25,14 @@ router
   );
 
 router
+  .route('/:id/download')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN, role.USER),
+    JobController.downloadResultFile
+  );
+
+router
   .route('/')
   .put(
     passport.authenticate('jwt', { session: false }),

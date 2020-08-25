@@ -54,6 +54,10 @@ class Job extends Schema {
           type: Object,
           default: {}
         },
+        results: {
+          type: Object,
+          default: null
+        },
         isDeleted: {
           type: Boolean,
           default: false
@@ -63,7 +67,6 @@ class Job extends Schema {
     );
 
     job.methods.getUserDetails = this.getUserDetails;
-    job.methods.getTasks = this.getTasks;
   }
 
   async getUserDetails(userId) {

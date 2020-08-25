@@ -36,6 +36,15 @@ class Configuration {
         throw new Error(`Version ${this.version} of configuration is not supported yet`);
     }
   }
+
+  setResults() {
+    switch (this.version) {
+      case '1':
+        return new V1(this.config).setResults();
+      default:
+        throw new Error(`Version ${this.version} of configuration is not supported yet`);
+    }
+  }
 }
 
 export default Configuration;
