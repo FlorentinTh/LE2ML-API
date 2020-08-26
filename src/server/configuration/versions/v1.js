@@ -6,10 +6,6 @@ class V1 {
     this.config = config;
   }
 
-  getProp(prop) {
-    return this.config[prop];
-  }
-
   setContainers() {
     const containers = {};
 

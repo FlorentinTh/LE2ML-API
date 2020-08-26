@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import APIError from '@APIError';
 import EventJob from '../job.model';
-import { JobState } from '../job.enums';
+import { JobState, JobProcess } from '../job.enums';
 import { TaskState, TasksList } from './task.enums';
 import JobLogsHelper from '@JobLogsHelper';
 import { validationResult } from 'express-validator';
@@ -224,12 +224,45 @@ class TaskController {
     Object.assign(job.containers[body.task], taskContainers);
     Object.assign(data.containers, job.containers);
 
-    if (body.task === TasksList.LEARNING && !(body.results === undefined)) {
-      data.results = {
-        accuracy: body.results[0],
-        f1Score: body.results[1],
-        kappa: body.results[2]
-      };
+    if (body.task === TasksList.LEARNING) {
+      if (!(body.results === undefined)) {
+        data.results = {
+          accuracy: body.results[0],
+          f1Score: body.results[1],
+          kappa: body.results[2]
+        };
+      }
+
+      if (job.process === JobProcess.TRAINING) {
+        const modelFilename = confObj.model;
+        const sourceModelFilePath = path.join(jobFolder, modelFilename);
+        const destModelFolderPath = path.join(
+          config.data.base_path,
+          job.user.toString(),
+          'data',
+          confObj.source,
+          'models',
+          confObj.algorithm.container
+        );
+
+        try {
+          await fs.promises.access(destModelFolderPath);
+        } catch (error) {
+          if (error.code === 'ENOENT') {
+            await fs.promises.mkdir(destModelFolderPath, { recursive: true });
+          } else {
+            return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+          }
+        }
+
+        const destModelFilePath = path.join(destModelFolderPath, modelFilename);
+
+        try {
+          await fs.promises.copyFile(sourceModelFilePath, destModelFilePath);
+        } catch (error) {
+          return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+        }
+      }
     }
 
     try {
@@ -290,7 +323,9 @@ class TaskController {
 
     if (!req.containerFailed) {
       if (!(job.tasks[task] === TaskState.STARTED)) {
-        return next(new APIError('Task cannot be set to failed', httpStatus.NOT_FOUND));
+        return next(
+          new APIError('Task cannot be set to failed', httpStatus.INTERNAL_SERVER_ERROR)
+        );
       }
     }
 

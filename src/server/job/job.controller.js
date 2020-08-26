@@ -161,12 +161,13 @@ class JobController {
       }
 
       const configuration = new Configuration(conf);
+      const confObj = configuration.getConf();
       job.tasks = configuration.setTasks();
       job.containers = configuration.setContainers();
-      job.pipeline = configuration.getProp('pipeline');
+      job.pipeline = confObj.pipeline;
       job.results = configuration.setResults();
 
-      const process = configuration.getProp('process');
+      const process = confObj.process;
       switch (process) {
         case 'train':
           job.process = JobProcess.TRAINING;
@@ -181,7 +182,6 @@ class JobController {
 
       const newJob = await job.save();
       const basePath = config.data.base_path;
-      const userId = req.user.id;
       const fullPath = path.join(basePath, userId, 'jobs', newJob._id.toString());
 
       await fs.promises.mkdir(fullPath);
@@ -190,14 +190,38 @@ class JobController {
         JSON.stringify(conf, null, 2)
       );
 
-      const input = configuration.getProp('input');
+      const input = confObj.input;
       if (Object.keys(input)[0] === 'file') {
-        const dataSource = configuration.getProp('source');
+        const dataSource = confObj.source;
         const type = input.file.type;
         const filename = input.file.filename;
         const source = path.join(basePath, userId, 'data', dataSource, type, filename);
-        const dest = path.join(basePath, userId, 'jobs', newJob._id.toString(), filename);
+        const dest = path.join(fullPath, filename);
         await fs.promises.copyFile(source, dest);
+      }
+
+      if (JobProcess.TESTING.includes(process)) {
+        const source = confObj.source;
+        const container = confObj.algorithm.container;
+        const modelFilename = confObj.model;
+
+        const sourceModelFilePath = path.join(
+          basePath,
+          userId,
+          'data',
+          source,
+          'models',
+          container,
+          modelFilename
+        );
+
+        const destModelFilePath = path.join(fullPath, modelFilename);
+
+        try {
+          await fs.promises.copyFile(sourceModelFilePath, destModelFilePath);
+        } catch (error) {
+          return next(new APIError(error.message, httpStatus.INTERNAL_SERVER_ERROR));
+        }
       }
 
       await JobLogsHelper.writeEntry(job, 'started');
@@ -207,6 +231,7 @@ class JobController {
 
       next();
     } catch (error) {
+      console.log(error);
       return next(new APIError('Failed to start job', httpStatus.INTERNAL_SERVER_ERROR));
     }
   }

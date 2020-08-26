@@ -6,17 +6,8 @@ class Configuration {
     this.version = config === null ? null : config.version;
   }
 
-  getProp(prop) {
-    if (!(typeof prop === 'string')) {
-      throw new Error('Expected type for argument prop is String');
-    }
-
-    switch (this.version) {
-      case '1':
-        return new V1(this.config).getProp(prop);
-      default:
-        throw new Error(`Version ${this.version} of configuration is not supported yet`);
-    }
+  getConf() {
+    return this.config;
   }
 
   setTasks() {
