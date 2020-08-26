@@ -27,11 +27,12 @@ class ContainerHelper {
     const basePath = config.data.base_path;
     const jobFolderPath = path.join(basePath, userId, 'jobs', jobId);
     const containerConf = {
-      Image: image,
+      Image: image + ':latest',
       Env: [`JOB=${jobId}`, `USER=${userId}`, `TOKEN=${token}`],
       HostConfig: {
         AutoRemove: true,
-        Binds: [`${jobFolderPath}:/usr/src/app/job`]
+        Binds: [`${jobFolderPath}:/job`],
+        NetworkMode: 'bridge'
       }
     };
 
