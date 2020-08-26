@@ -231,7 +231,6 @@ class JobController {
 
       next();
     } catch (error) {
-      console.log(error);
       return next(new APIError('Failed to start job', httpStatus.INTERNAL_SERVER_ERROR));
     }
   }
