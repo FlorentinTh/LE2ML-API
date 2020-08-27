@@ -29,7 +29,10 @@ const defaultValidationSchema = Joi.object({
   CONF_SCHEMA: Joi.string().required(),
   ALGO_SCHEMA: Joi.string().required(),
   CERT_FILE_PATH: Joi.string().required(),
-  KEY_FILE_PATH: Joi.string().required()
+  KEY_FILE_PATH: Joi.string().required(),
+  REMOVE_CONTAINERS: Joi.boolean()
+    .required()
+    .default(false)
 })
   .unknown()
   .required();
@@ -71,6 +74,9 @@ class Config {
       certs: {
         crt_path: path.normalize(env.CERT_FILE_PATH),
         key_path: path.normalize(env.KEY_FILE_PATH)
+      },
+      containers: {
+        remove: env.REMOVE_CONTAINERS
       }
     };
   }
