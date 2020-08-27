@@ -196,7 +196,9 @@ class TaskController {
 
             await FileHelper.mergeCSVFiles(fileList, jobFolder, mergeOptions);
           } else {
-            const copyOptions = {};
+            const copyOptions = {
+              removeSource: true
+            };
 
             if (confObj.features.save) {
               copyOptions.saveFile = true;
