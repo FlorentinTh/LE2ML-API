@@ -390,7 +390,7 @@ class FileHelper {
         ++lineCount2;
 
         if (lineCount2 === 1) {
-          headers = headers + ',' + line.split(',');
+          headers = headers + ',' + line;
           wsOutput.write(headers);
         } else {
           wsOutput.write('\n' + data1 + ',' + line);
@@ -435,6 +435,8 @@ class FileHelper {
               { encoding: 'utf-8' }
             );
 
+            let lineCount = 0;
+
             lr.on('line', async line => {
               lr.pause();
               let lineArr = line.split(',');
@@ -443,8 +445,14 @@ class FileHelper {
                 return labelColsPos.indexOf(index) === -1;
               });
 
-              wsOutput.write('\n' + lineArr.join(','));
+              if (lineCount === 0) {
+                wsOutput.write(lineArr.join(','));
+              } else {
+                wsOutput.write('\n' + lineArr.join(','));
+              }
+
               lr.resume();
+              ++lineCount;
             });
 
             lr.on('end', async () => {

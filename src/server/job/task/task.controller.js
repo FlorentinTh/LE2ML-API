@@ -177,7 +177,7 @@ class TaskController {
             }
           }
 
-          if (fileList > 1) {
+          if (fileList.length > 1) {
             const mergeOptions = {
               removeSource: true
             };
@@ -236,7 +236,7 @@ class TaskController {
       }
 
       if (job.process === JobProcess.TRAINING) {
-        const modelFilename = confObj.model;
+        const modelFilename = confObj.model + '.model';
         const sourceModelFilePath = path.join(jobFolder, modelFilename);
         const destModelFolderPath = path.join(
           config.data.base_path,
