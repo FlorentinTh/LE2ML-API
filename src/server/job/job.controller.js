@@ -251,8 +251,10 @@ class JobController {
     const containers = Object.keys(job.containers);
 
     for (let i = 0; i < containers.length; ++i) {
-      if (job.containers[containers[i]][0].started) {
-        job.containers[containers[i]][0].started = false;
+      if (!(job.containers[containers[i]] === null)) {
+        if (job.containers[containers[i]][0].started) {
+          job.containers[containers[i]][0].started = false;
+        }
       }
     }
 
