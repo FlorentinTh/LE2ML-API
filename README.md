@@ -1,8 +1,8 @@
-# PiCluster-API
+# LE2ML-API
 
-[![GitHub Release](https://img.shields.io/github/release/FlorentinTh/PiCluster-API?style=flat-square)](https://github.com/FlorentinTh/PiCluster-API/releases) [![GitHub](https://img.shields.io/github/license/FlorentinTh/PiCluster-API?style=flat-square)](https://github.com/FlorentinTh/PiCluster-API/blob/master/LICENSE)
+[![GitHub Release](https://img.shields.io/github/release/FlorentinTh/LE2ML-API?style=flat-square)](https://github.com/FlorentinTh/LE2ML-API/releases) [![GitHub](https://img.shields.io/github/license/FlorentinTh/LE2ML-API?style=flat-square)](https://github.com/FlorentinTh/LE2ML-API/blob/master/LICENSE)
 
-Repository of the API for the PiCluster project.
+Repository of the API for the LE2ML workbench.
 
 ## Authors
 

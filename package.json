@@ -1,7 +1,7 @@
 {
-  "name": "picluster-api",
+  "name": "le2ml-api",
   "version": "1.0.0",
-  "description": "API for the PiCluster project",
+  "description": "API for the LE2ML project",
   "main": "src/server.js",
   "scripts": {
     "lint": "eslint . --ext .js,.json",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FlorentinTh/PiCluster-API.git"
+    "url": "git+https://github.com/FlorentinTh/LE2ML-API.git"
   },
   "author": "FlorentinTh",
   "license": "Apache-2.0",
@@ -24,9 +24,9 @@
     "lint"
   ],
   "bugs": {
-    "url": "https://github.com/FlorentinTh/PiCluster-API/issues"
+    "url": "https://github.com/FlorentinTh/LE2ML-API/issues"
   },
-  "homepage": "https://github.com/FlorentinTh/PiCluster-API#readme",
+  "homepage": "https://github.com/FlorentinTh/LE2ML-API#readme",
   "engines": {
     "node": ">=10.x <=12.x"
   },
