@@ -311,6 +311,7 @@ class DataController {
                 if (!colsToRemove.includes(index)) {
                   return value;
                 }
+                return null;
               });
             })
           )
@@ -567,6 +568,7 @@ class DataController {
               if (attIndex === index) {
                 return value;
               }
+              return null;
             });
           })
         )

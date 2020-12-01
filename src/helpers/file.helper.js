@@ -334,6 +334,7 @@ class FileHelper {
             if (item.includes('_x') || item.includes('_y') || item.includes('_z')) {
               return item;
             }
+            return null;
           }).length;
 
           if (!(count === 3)) {
