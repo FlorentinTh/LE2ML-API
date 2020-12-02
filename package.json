@@ -82,7 +82,7 @@
     "babel-eslint": "^10.1.0",
     "babel-plugin-module-resolver": "^4.0.0",
     "cpy-cli": "^3.1.1",
-    "cross-env": "^7.0.2",
+    "cross-env": "^7.0.3",
     "eslint": "^7.14.0",
     "eslint-config-node": "^4.1.0",
     "eslint-config-prettier": "^6.15.0",
