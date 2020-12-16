@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "ajv": "^6.12.6",
+    "ajv": "^7.0.0",
     "ajv-formats-draft2019": "^1.4.3",
     "archiver": "^5.1.0",
     "bcrypt": "^5.0.0",
