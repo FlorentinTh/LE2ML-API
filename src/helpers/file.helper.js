@@ -159,7 +159,7 @@ class FileHelper {
     }
 
     try {
-      const res = yaml.safeLoad(data, 'utf-8');
+      const res = yaml.load(data, 'utf-8');
       return res;
     } catch (error) {
       Logger.error('Conversion from YML to JSON failed');
@@ -173,7 +173,7 @@ class FileHelper {
     }
 
     try {
-      const res = yaml.safeDump(data, 'utf-8');
+      const res = yaml.dump(data, 'utf-8');
       return res;
     } catch (error) {
       Logger.error('Conversion from JSON to YML failed');
