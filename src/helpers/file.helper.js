@@ -3,7 +3,8 @@ import fse from 'fs-extra';
 import path from 'path';
 import yaml from 'js-yaml';
 import Ajv from 'ajv';
-import AjvFormat from 'ajv-formats-draft2019';
+import addFormat from 'ajv-formats';
+import addFormat2019 from 'ajv-formats-draft2019';
 import hideFile from 'hidefile';
 import Config from '@Config';
 import Logger from '@Logger';
@@ -209,14 +210,15 @@ class FileHelper {
 
       const schema = JSON.parse(file);
       const ajv = new Ajv({
+        strict: false,
         allErrors: true,
-        jsonPointers: true,
         loadSchema: async uri => {}
       });
 
-      AjvFormat(ajv);
+      addFormat(ajv);
+      addFormat2019(ajv, { formats: ['iri-reference'] });
 
-      const validate = await ajv.compileAsync(schema);
+      const validate = await ajv.compile(schema);
 
       try {
         const valid = await validate(data);
