@@ -56,7 +56,9 @@ app.use(helmet());
 app.use(cors());
 app.use(passport.initialize());
 
-Mongo.start();
+(async () => {
+  await Mongo.start();
+})();
 
 APIv1.use('/v1', authRoutes);
 APIv1.use('/v1/apps', appsRoutes);

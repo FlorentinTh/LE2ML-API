@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "LE2ML-API",
+    "version": "1.0.0",
+    "description": "API for the LE2ML workbench project",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/Apache-2.0"
+    },
+    "contact": {
+      "name": "Florentin Thullier",
+      "url": "https://github.com/florentinTh"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://localhost:{port}/api/{version}",
+      "variables": {
+        "port": {
+          "enum": [
+            "3000"
+          ],
+          "default": "3000"
+        },
+        "version": {
+          "enum": [
+            "v1"
+          ],
+          "default": "v1"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Possible operations to perform on users"
+    }
+  ],
+  "definitions": {
+    "Message": {
+      "type": "string",
+      "example": "success message"
+    },
+    "Total": {
+      "type": "integer",
+      "format": "int32",
+      "example": 1
+    },
+    "Delete": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "type": "integer",
+          "format":"int32"
+        },
+        "ok": {
+          "type": "integer",
+          "format":"int32"
+        },
+        "deleteCount": {
+          "type": "integer",
+          "format":"int32"
+        }
+      },
+      "example": {
+        "n": 1,
+        "ok": 1,
+        "deleteCount": 1
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth" : {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter JWT Bearer Token"
+      }
+    }
+  }
+}
