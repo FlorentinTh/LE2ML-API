@@ -12,10 +12,14 @@ import cors from 'cors';
 import httpStatus from 'http-status';
 import helmet from 'helmet';
 import passport from 'passport';
+import swaggerUI from 'swagger-ui-express';
+
 import Config from '@Config';
 import APIError from '@APIError';
 import '@Passport';
 import Mongo from '@Mongo';
+import DocumentationBuilder from '@DocumentationBuilder';
+
 import authRoutes from './server/auth/auth.routes';
 import appsRoutes from './server/app/app.routes';
 import usersRoutes from './server/user/user.routes';
@@ -59,6 +63,10 @@ app.use(passport.initialize());
 (async () => {
   await Mongo.start();
 })();
+
+const documentationBuilder = new DocumentationBuilder('v1');
+const documentationFile = documentationBuilder.build();
+APIv1.use('/v1/api-doc', swaggerUI.serve, swaggerUI.setup(documentationFile));
 
 APIv1.use('/v1', authRoutes);
 APIv1.use('/v1/apps', appsRoutes);
