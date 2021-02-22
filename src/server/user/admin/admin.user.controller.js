@@ -172,10 +172,7 @@ class AdminController {
     const body = req.body;
 
     try {
-      const user = await User.findOne()
-        .where('email')
-        .in([email])
-        .exec();
+      const user = await User.findOne().where('email').in([email]).exec();
 
       if (!user) {
         return next(

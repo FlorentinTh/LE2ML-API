@@ -13,10 +13,7 @@ passport.use(
     },
     async (payload, done) => {
       try {
-        const user = await User.findOne()
-          .where('_id')
-          .in([payload._id])
-          .exec();
+        const user = await User.findOne().where('_id').in([payload._id]).exec();
 
         if (!user) {
           return done(new APIError('Authentication failed', httpStatus.UNAUTHORIZED));

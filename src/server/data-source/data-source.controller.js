@@ -7,9 +7,7 @@ import StringHelper from '@StringHelper';
 class DataSourceController {
   async getDataSources(req, res, next) {
     try {
-      const sources = await DataSource.find()
-        .select()
-        .exec();
+      const sources = await DataSource.find().select().exec();
 
       if (!sources) {
         return next(new APIError('Cannot find all data sources', httpStatus.NOT_FOUND));

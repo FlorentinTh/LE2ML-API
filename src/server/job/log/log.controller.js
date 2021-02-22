@@ -50,10 +50,7 @@ class JobController {
         if (event.operationType === 'update') {
           const jobId = event.documentKey._id;
           try {
-            job = await EventJob.findOne()
-              .where('_id')
-              .in([jobId])
-              .exec();
+            job = await EventJob.findOne().where('_id').in([jobId]).exec();
           } catch (error) {
             return next(new APIError('Cannot find job', httpStatus.NOT_FOUND));
           }

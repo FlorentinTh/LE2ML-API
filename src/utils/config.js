@@ -5,34 +5,26 @@ import path from 'path';
 dotenv.config();
 
 const defaultValidationSchema = Joi.object({
-  NODE_ENV: Joi.string()
-    .valid('development', 'production')
-    .default('development'),
+  NODE_ENV: Joi.string().valid('development', 'production').default('development'),
   PORT: Joi.number().default(3000),
   LOG_FILE: Joi.string().required(),
   JWT_SECRET: Joi.string().required(),
   MONGO_HOST: Joi.string().required(),
-  MONGO_PORT: Joi.number()
-    .required()
-    .default(27017),
+  MONGO_PORT: Joi.number().required().default(27017),
   MONGO_AUTH_DB: Joi.string().required(),
   MONGO_CONF_DB: Joi.string().required(),
   MONGO_EVENT_DB: Joi.string().required(),
   MONGO_USER: Joi.string().required(),
   MONGO_PASSWORD: Joi.string().required(),
   REDIS_HOST: Joi.string().required(),
-  REDIS_PORT: Joi.number()
-    .required()
-    .default(6379),
+  REDIS_PORT: Joi.number().required().default(6379),
   REDIS_PASSWORD: Joi.string().required(),
   DATA_BASE_PATH: Joi.string().required(),
   CONF_SCHEMA: Joi.string().required(),
   ALGO_SCHEMA: Joi.string().required(),
   CERT_FILE_PATH: Joi.string().required(),
   KEY_FILE_PATH: Joi.string().required(),
-  REMOVE_CONTAINERS: Joi.boolean()
-    .required()
-    .default(false)
+  REMOVE_CONTAINERS: Joi.boolean().required().default(false)
 })
   .unknown()
   .required();

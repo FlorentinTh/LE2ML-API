@@ -131,10 +131,7 @@ class DataInertialController {
     reader.on('data', async chunk => {
       reader.pause();
 
-      const firstLine = chunk
-        .toString()
-        .replace(/\r/g, '')
-        .split(/\n/)[0];
+      const firstLine = chunk.toString().replace(/\r/g, '').split(/\n/)[0];
 
       const attributes = firstLine.split(',');
       isValid = await FileHelper.validateInertialFile(attributes);

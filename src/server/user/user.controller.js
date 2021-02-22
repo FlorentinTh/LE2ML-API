@@ -95,10 +95,7 @@ class UserController {
     const body = req.body;
 
     try {
-      const user = await User.findOne()
-        .where('_id')
-        .in([id])
-        .exec();
+      const user = await User.findOne().where('_id').in([id]).exec();
 
       if (!user) {
         return next(

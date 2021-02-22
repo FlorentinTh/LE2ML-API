@@ -32,9 +32,7 @@ class Authority {
       const key = req.headers['app-key'];
 
       try {
-        const apps = await App.find()
-          .select()
-          .exec();
+        const apps = await App.find().select().exec();
 
         if (!apps) {
           return next(new APIError('No matching key found', httpStatus.UNAUTHORIZED));

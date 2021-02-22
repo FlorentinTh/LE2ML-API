@@ -74,10 +74,7 @@ class StreamHelper {
       writableObjectMode: true
     });
 
-    reader
-      .pipe(JSONStream.parse('*'))
-      .pipe(jsonToCsv)
-      .pipe(writer);
+    reader.pipe(JSONStream.parse('*')).pipe(jsonToCsv).pipe(writer);
   }
 
   static zipFileStream(filePath, filename, destFolder, callback) {

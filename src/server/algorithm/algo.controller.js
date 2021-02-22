@@ -13,10 +13,7 @@ const config = Config.getConfig();
 class AlgoController {
   async getAlgos(req, res, next) {
     try {
-      const algos = await Algorithm.find()
-        .select()
-        .where({ isDeleted: false })
-        .exec();
+      const algos = await Algorithm.find().select().where({ isDeleted: false }).exec();
 
       if (!algos) {
         return next(new APIError('Cannot find all algorithms', httpStatus.NOT_FOUND));

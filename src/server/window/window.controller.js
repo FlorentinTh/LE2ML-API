@@ -8,10 +8,7 @@ import Logger from '@Logger';
 class WindowController {
   async getFunctions(req, res, next) {
     try {
-      const functions = await Window.find()
-        .select()
-        .where({ isDeleted: false })
-        .exec();
+      const functions = await Window.find().select().where({ isDeleted: false }).exec();
 
       if (!functions) {
         return next(
