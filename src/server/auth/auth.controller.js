@@ -47,7 +47,7 @@ class AuthController {
       return next(new APIError('Registration failed', httpStatus.INTERNAL_SERVER_ERROR));
     }
 
-    res.status(httpStatus.OK).json({
+    res.status(httpStatus.CREATED).json({
       data: null,
       message: 'User successfully registered.'
     });
