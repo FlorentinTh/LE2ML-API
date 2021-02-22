@@ -4,6 +4,7 @@ import deepExtend from 'deep-extend';
 
 const dirnamePath = path.resolve(path.resolve(__dirname));
 const documentationFolder = path.resolve(dirnamePath, '..', 'doc');
+const styleFile = path.resolve(path.join(documentationFolder, 'doc.css'));
 
 class DocumentationBuilder {
   constructor(version) {
@@ -88,6 +89,15 @@ class DocumentationBuilder {
       return this.commonFileContent;
     } catch (error) {
       return this.commonFileContent;
+    }
+  }
+
+  getStyle() {
+    try {
+      const style = fs.readFileSync(styleFile);
+      return style.toString();
+    } catch (error) {
+      throw new Error(`Impossible to load style file.`);
     }
   }
 }

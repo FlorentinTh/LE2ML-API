@@ -66,7 +66,16 @@ app.use(passport.initialize());
 
 const documentationBuilder = new DocumentationBuilder('v1');
 const documentationFile = documentationBuilder.build();
-APIv1.use('/v1/api-doc', swaggerUI.serve, swaggerUI.setup(documentationFile));
+const documentationStyle = documentationBuilder.getStyle();
+
+APIv1.use(
+  '/v1/api-doc',
+  swaggerUI.serve,
+  swaggerUI.setup(documentationFile, {
+    customCss: documentationStyle,
+    customSiteTitle: 'LE2ML API Documentation'
+  })
+);
 
 APIv1.use('/v1', authRoutes);
 APIv1.use('/v1/apps', appsRoutes);
