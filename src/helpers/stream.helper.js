@@ -30,10 +30,11 @@ class StreamHelper {
     let counter = 0;
 
     writer.write('[');
+
     papaparse.parse(reader, {
       delimiter: ',',
       header: true,
-      step: function(results) {
+      step: results => {
         if (counter === nbLines - 2) {
           writer.write(JSON.stringify(results.data), null, 4);
         } else {
@@ -42,6 +43,7 @@ class StreamHelper {
         counter++;
       }
     });
+
     reader.on('end', () => {
       writer.write(']');
       writer.end();
