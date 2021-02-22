@@ -1,0 +1,193 @@
+{
+  "paths": {
+    "/admin/users": {
+      "parameters": [
+        {
+          "name": "role",
+          "in": "query",
+          "required": false,
+          "description": "Role of the users (**_admin_** or **_user_**)",
+          "schema": {
+            "type": "string",
+            "default": "user"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Fetch all active users from the database",
+        "security": [
+          {
+            "AdminRoleBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "$ref": "#/definitions/Total"
+                        },
+                        "users": {
+                          "$ref": "#/definitions/Users"
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "**Bad Request:** incorrect query parameter. Expected to be **_admin_** or **_user_**.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "**Unauthorized:** provided password is incorrect or the current user try to update another user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** no active users in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "User ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Fetch a given user",
+        "security": [
+          {
+            "AdminRoleBearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Update a given user",
+        "security": [
+          {
+            "AdminRoleBearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Disable a given active user",
+        "security": [
+          {
+            "AdminRoleBearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/users/{id}/role": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "User ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Update the role of a given user",
+        "security": [
+          {
+            "AdminRoleBearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/users/email/{email}": {
+
+    },
+    "/admin/users/password/{email}": {
+
+    }
+  }
+}

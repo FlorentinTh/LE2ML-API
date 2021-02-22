@@ -1,3 +1,345 @@
 {
-
+  "paths": {
+    "/users/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "User ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update a given user",
+        "security": [
+          {
+            "UserRoleBearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existing user in database",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/UserShort"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/TokenResponse"
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "**Unauthorized:** provided password is incorrect or the current user try to update another user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** provided _User ID_ in request parameter does not exist in database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "**Unprocessable:** one or more inputs are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/password": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "User ID",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Change the password of a given user",
+        "security": [
+          {
+            "UserRoleBearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Update the password of an existing user in database",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "currentPassword",
+                  "newPassword",
+                  "newPasswordConfirm"
+                ],
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "newPasswordConfirm": {
+                    "type": "string",
+                    "minLength": 8
+                  }
+                },
+                "example" : {
+                  "currentPassword": "P@s$w0rD",
+                  "newPassword": "N3wP@s$w0rD",
+                  "newPasswordConfirm": "N3wP@s$w0rD"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/TokenResponse"
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "**Unauthorized:** provided password is incorrect or the current user try to update another user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** provided _User ID_ in request parameter does not exist in database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "**Unprocessable:** one or more inputs are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "UserShort": {
+      "required": [
+        "lastname",
+        "firstname",
+        "email",
+        "password",
+        "passwordConfirm"
+      ],
+      "properties": {
+        "lasname": {
+          "type": "string"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "email": {
+          "type": "email"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8
+        },
+        "passwordConfirm": {
+          "type": "string",
+          "minLength": 8
+        }
+      },
+      "example" : {
+        "lastname": "john",
+        "firstname": "doe",
+        "email": "john.doe@email.com",
+        "password": "P@s$w0rD",
+        "passwordConfirm": "P@s$w0rD"
+      }
+    },
+    "UserFull": {
+      "properties": {
+        "lasname": {
+          "type": "string"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "email": {
+          "type": "email"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"]
+        },
+        "dateCreated": {
+          "type": "date-time"
+        },
+        "lastConnection": {
+          "type": "date-time"
+        }
+      },
+      "example" : {
+        "lastname": "john",
+        "firstname": "doe",
+        "email": "john.doe@email.com",
+        "role": "user",
+        "dateCreated": "2021-02-22T16:12:34.663+00:00",
+        "lastConnection": "2021-02-22T17:58:32.994+00:00"
+      }
+    },
+    "Users": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/UserFull"
+      }
+    },
+    "TokenResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "object",
+          "properties": {
+            "token": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
 }

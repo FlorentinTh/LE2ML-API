@@ -34,6 +34,10 @@
   ],
   "tags": [
     {
+      "name": "Admin",
+      "description": "Administration only operations"
+    },
+    {
       "name": "Authentication",
       "description": "User authentication"
     },
@@ -43,9 +47,13 @@
     }
   ],
   "definitions": {
-    "Message": {
+    "SuccessMessage": {
       "type": "string",
       "example": "success message"
+    },
+    "ErrorMessage": {
+      "type": "string",
+      "example": "error message"
     },
     "Total": {
       "type": "integer",
@@ -77,11 +85,17 @@
   },
   "components": {
     "securitySchemes": {
-      "BearerAuth" : {
+      "AdminRoleBearerAuth" : {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Enter JWT Bearer Token"
+        "description": "Enter a valid JWT. Required role: \"**_admin_**\""
+      },
+      "UserRoleBearerAuth" : {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter a valid JWT. Required role: \"**_user_**\""
       }
     }
   }
