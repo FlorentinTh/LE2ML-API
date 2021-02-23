@@ -4,7 +4,7 @@ import deepExtend from 'deep-extend';
 
 const dirnamePath = path.resolve(path.resolve(__dirname));
 const documentationFolder = path.resolve(dirnamePath, '..', 'doc');
-const styleFile = path.resolve(path.join(documentationFolder, 'doc.css'));
+const styleFile = path.resolve(path.join(documentationFolder, 'doc.min.css'));
 
 class DocumentationBuilder {
   constructor(version) {
