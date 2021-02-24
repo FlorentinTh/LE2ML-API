@@ -34,16 +34,16 @@
   ],
   "tags": [
     {
-      "name": "Admin",
-      "description": "Administration only operations"
-    },
-    {
       "name": "Authentication",
       "description": "User authentication"
     },
     {
       "name": "Users",
       "description": "Possible operations to perform on users"
+    },
+    {
+      "name": "Users Admin",
+      "description": "Users administration only operations"
     }
   ],
   "definitions": {
@@ -59,28 +59,6 @@
       "type": "integer",
       "format": "int32",
       "example": 1
-    },
-    "Delete": {
-      "type": "object",
-      "properties": {
-        "n": {
-          "type": "integer",
-          "format":"int32"
-        },
-        "ok": {
-          "type": "integer",
-          "format":"int32"
-        },
-        "deleteCount": {
-          "type": "integer",
-          "format":"int32"
-        }
-      },
-      "example": {
-        "n": 1,
-        "ok": 1,
-        "deleteCount": 1
-      }
     }
   },
   "components": {

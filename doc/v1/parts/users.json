@@ -28,7 +28,16 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/definitions/UserShort"
+                "type": "object",
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/User"
+                  },
+                  {
+                    "$ref": "#/definitions/UserRole"
+                  }
+                ]
+
               }
             }
           }
@@ -42,7 +51,7 @@
                   "type": "object",
                   "properties": {
                     "data": {
-                      "$ref": "#/definitions/TokenResponse"
+                      "$ref": "#/definitions/Token"
                     },
                     "message": {
                       "$ref": "#/definitions/SuccessMessage"
@@ -181,7 +190,7 @@
                   "type": "object",
                   "properties": {
                     "data": {
-                      "$ref": "#/definitions/TokenResponse"
+                      "$ref": "#/definitions/Token"
                     },
                     "message": {
                       "$ref": "#/definitions/SuccessMessage"
@@ -256,16 +265,12 @@
     }
   },
   "definitions": {
-    "UserShort": {
-      "required": [
-        "lastname",
-        "firstname",
-        "email",
-        "password",
-        "passwordConfirm"
-      ],
+    "User": {
       "properties": {
-        "lasname": {
+        "_id": {
+          "type": "string"
+        },
+        "lastname": {
           "type": "string"
         },
         "firstname": {
@@ -273,39 +278,27 @@
         },
         "email": {
           "type": "email"
-        },
-        "password": {
-          "type": "string",
-          "minLength": 8
-        },
-        "passwordConfirm": {
-          "type": "string",
-          "minLength": 8
         }
       },
       "example" : {
         "lastname": "john",
         "firstname": "doe",
-        "email": "john.doe@email.com",
-        "password": "P@s$w0rD",
-        "passwordConfirm": "P@s$w0rD"
+        "email": "john.doe@email.com"
       }
     },
-    "UserFull": {
+    "UserRole": {
       "properties": {
-        "lasname": {
-          "type": "string"
-        },
-        "firstname": {
-          "type": "string"
-        },
-        "email": {
-          "type": "email"
-        },
         "role": {
           "type": "string",
           "enum": ["admin", "user"]
-        },
+        }
+      },
+      "example" : {
+        "role": "user"
+      }
+    },
+    "UserDates": {
+      "properties": {
         "dateCreated": {
           "type": "date-time"
         },
@@ -314,21 +307,67 @@
         }
       },
       "example" : {
-        "lastname": "john",
-        "firstname": "doe",
-        "email": "john.doe@email.com",
-        "role": "user",
-        "dateCreated": "2021-02-22T16:12:34.663+00:00",
-        "lastConnection": "2021-02-22T17:58:32.994+00:00"
+        "dateCreated": "2021-02-22T16:12:34.663Z",
+        "lastConnection": "2021-02-23T20:15:42.390Z"
       }
+    },
+    "UserRemaining": {
+      "properties": {
+        "tmpPassword": {
+          "type": "boolean"
+        },
+        "isDeleted": {
+          "type": "boolean"
+        },
+        "salt": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        }
+      },
+      "example" : {
+        "tmpPassword": false,
+        "isDeleted": false,
+        "salt": "<secret>",
+        "hash": "<secret>"
+      }
+    },
+    "UserFull": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/User"
+        },
+        {
+          "$ref": "#/definitions/UserRole"
+        },
+        {
+          "$ref": "#/definitions/UserDates"
+        },
+        {
+          "$ref": "#/definitions/UserRemaining"
+        }
+      ]
     },
     "Users": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/UserFull"
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/definitions/User"
+          },
+          {
+            "$ref": "#/definitions/UserRole"
+          },
+          {
+            "$ref": "#/definitions/UserDates"
+          }
+        ]
       }
     },
-    "TokenResponse": {
+    "Token": {
       "type": "object",
       "properties": {
         "user": {

@@ -15,7 +15,7 @@
       ],
       "get": {
         "tags": [
-          "Admin"
+          "Users Admin"
         ],
         "summary": "Fetch all active users from the database",
         "security": [
@@ -65,21 +65,6 @@
               }
             }
           },
-          "401": {
-            "description": "**Unauthorized:** provided password is incorrect or the current user try to update another user.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "$ref": "#/definitions/ErrorMessage"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "403": {
             "description": "**Forbidden:** user does not have sufficient privileges.",
             "content": {
@@ -97,6 +82,21 @@
           },
           "404": {
             "description": "**Not Found:** no active users in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "**Internal Error:** database operation failed.",
             "content": {
               "application/json": {
                 "schema": {
@@ -127,36 +127,306 @@
       ],
       "get": {
         "tags": [
-          "Admin"
+          "Users Admin"
         ],
         "summary": "Fetch a given user",
         "security": [
           {
             "AdminRoleBearerAuth": []
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "allOf": [
+                            {
+                              "$ref": "#/definitions/User"
+                            },
+                            {
+                              "$ref": "#/definitions/UserRole"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** the requested user does not exist in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "**Internal Error:** database operation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "post": {
         "tags": [
-          "Admin"
+          "Users Admin"
         ],
         "summary": "Update a given user",
         "security": [
           {
             "AdminRoleBearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "description": "Update an existing user in database",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "lastname",
+                  "firstname",
+                  "email",
+                  "role"
+                ],
+                "properties": {
+                  "lasname": {
+                      "type": "string"
+                  },
+                  "firstname": {
+                      "type": "string"
+                  },
+                  "email": {
+                      "type": "email"
+                  },
+                  "role": {
+                      "type": "string",
+                      "enum": ["admin", "user"]
+                  }
+                },
+                "example" : {
+                  "lastname": "john",
+                  "firstname": "doe",
+                  "email": "john.doe@email.com",
+                  "role": "user"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/definitions/UserFull"
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** the requested user to be updated does not exist in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "**Unprocessable:** one or more inputs are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "**Internal Error:** database operation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "delete": {
         "tags": [
-          "Admin"
+          "Users Admin"
         ],
         "summary": "Disable a given active user",
         "security": [
           {
             "AdminRoleBearerAuth": []
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/definitions/UserFull"
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** the requested user to be disabled does not exist in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "**Internal Error:** database or file system operation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/admin/users/{id}/role": {
@@ -173,21 +443,360 @@
       ],
       "post": {
         "tags": [
-          "Admin"
+          "Users Admin"
         ],
         "summary": "Update the role of a given user",
         "security": [
           {
             "AdminRoleBearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "description": "Update the role of a given user",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "role"
+                ],
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "enum": ["admin", "user"]
+                  }
+                },
+                "example" : {
+                  "role": "admin"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/definitions/UserFull"
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** the requested user to be updated does not exist in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "**Unprocessable:** one or more inputs are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "**Internal Error:** database operation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/admin/users/email/{email}": {
-
+      "parameters": [
+        {
+          "name": "email",
+          "in": "path",
+          "required": true,
+          "description": "User Email",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Users Admin"
+        ],
+        "summary": "Fetch a given user by email",
+        "security": [
+          {
+            "AdminRoleBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/definitions/User"
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** the requested user does not exist in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "**Internal Error:** database operation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "/admin/users/password/{email}": {
-
+      "parameters": [
+        {
+          "name": "email",
+          "in": "path",
+          "required": true,
+          "description": "User Email",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [
+          "Users Admin"
+        ],
+        "summary": "Set a temporary password to a given user",
+        "security": [
+          {
+            "AdminRoleBearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Set a temporary password to a given user",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "tempPassword",
+                  "tempPasswordConfirm"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "email"
+                  },
+                  "tempPassword": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "tempPasswordConfirm": {
+                    "type": "string",
+                    "minLength": 8
+                  }
+                },
+                "example" : {
+                  "email": "john.doe@email.com",
+                  "tempPassword": "T3MpP@s$w0rD",
+                  "tempPasswordConfirm": "T3MpP@s$w0rD"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "**OK**",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/definitions/UserFull"
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/definitions/SuccessMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "**Forbidden:** user does not have sufficient privileges.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "**Not Found:** the requested user does not exist in the database.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "**Unprocessable:** one or more inputs are not valid or user already have a temporary password or temporary password and its confirmation are not identical.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "**Internal Error:** database operation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/ErrorMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
