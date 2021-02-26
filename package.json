@@ -36,7 +36,7 @@
     "ajv-formats": "^1.5.1",
     "ajv-formats-draft2019": "^1.4.3",
     "archiver": "^5.2.0",
-    "bcrypt": "^5.0.0",
+    "bcrypt": "^5.0.1",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
