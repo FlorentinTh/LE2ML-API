@@ -14,8 +14,8 @@
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
-    "parser": "babel-eslint",
     "sourceType": "module",
     "ecmaVersion": 2017
   },
