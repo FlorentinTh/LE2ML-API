@@ -5,7 +5,6 @@ import https from 'https';
 import express from 'express';
 import morgan from 'morgan';
 import winston from './utils/logger';
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import cors from 'cors';
@@ -52,8 +51,8 @@ const appServer = https.createServer(options, app);
 
 isDev ? app.use(morgan('dev')) : app.use(morgan('combined'), { stream: winston.stream });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression());
 app.use(helmet());
