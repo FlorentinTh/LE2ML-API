@@ -2,7 +2,7 @@ import stream from 'stream';
 import fs from 'fs';
 import papaparse from 'papaparse';
 import csvjson from 'csvjson';
-import JSONStream from 'jsonstream';
+import JSONStream from 'JSONStream';
 import Archiver from 'archiver';
 import dayjs from 'dayjs';
 import readline from 'readline';

@@ -1,4 +1,4 @@
-import Joi from '@hapi/joi';
+import Joi from 'joi';
 import dotenv from 'dotenv';
 import path from 'path';
 
