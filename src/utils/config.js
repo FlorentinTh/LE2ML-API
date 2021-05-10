@@ -1,8 +1,7 @@
 import Joi from 'joi';
-import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config();
+import 'dotenv/config';
 
 const defaultValidationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production').default('development'),
