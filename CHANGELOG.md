@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/FlorentinTh/LE2ML-API/compare/v1.1.0...v1.1.1) (2021-05-14)
+
+
+### Bug Fixes
+
+* **csv parser:** add missing encoding format for csv parser ([8945954](https://github.com/FlorentinTh/LE2ML-API/commit/8945954847a45a832f5c160654b10390117a3162))
+* **file download:** remove use of required file server to download files ([55f3082](https://github.com/FlorentinTh/LE2ML-API/commit/55f30829790b715bd6b112196fb3f1bc54991b68))
+
+
+### Chore
+
+* **deps:** update dependencies ([d162aeb](https://github.com/FlorentinTh/LE2ML-API/commit/d162aeb75f662eb46a9f060910a94153221cc938))
+
 ## 1.1.0 (2021-05-13)
 
 
