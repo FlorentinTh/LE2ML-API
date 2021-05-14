@@ -15,6 +15,14 @@ router
   );
 
 router
+  .route('/log/file')
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    Authority.allowOnlyRoles(role.ADMIN),
+    LogController.downloadJobLogFile
+  );
+
+router
   .route('/log/changes')
   .get(
     passport.authenticate('jwt', { session: false }),

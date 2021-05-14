@@ -124,46 +124,27 @@ class DataController {
 
         if (from === 'csv' && to === 'json') {
           await StreamHelper.csvStreamToJsonFile(fullPath, reader, writer);
+        } else if (from === 'json' && to === 'csv') {
+          await StreamHelper.jsonStreamToCsvFile(reader, writer);
         }
 
         writer.on('close', async () => {
-          StreamHelper.zipFileStream(
-            destPath,
-            file.split('.')[0] + '.' + to,
-            path.join(userId, '.tmp'),
-            async (err, path) => {
-              if (err) {
-                return next(
-                  new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR)
-                );
-              } else {
-                await fs.promises.unlink(destPath);
-                res.status(httpStatus.OK).json({
-                  data: path,
-                  message: 'success'
-                });
-              }
+          res.download(destPath, error => {
+            if (error) {
+              return next(
+                new APIError('Error downloading file', httpStatus.INTERNAL_SERVER_ERROR)
+              );
             }
-          );
+          });
         });
       } else {
-        StreamHelper.zipFileStream(
-          fullPath,
-          file,
-          path.join(userId, '.tmp'),
-          (err, path) => {
-            if (err) {
-              return next(
-                new APIError('File system error', httpStatus.INTERNAL_SERVER_ERROR)
-              );
-            } else {
-              res.status(httpStatus.OK).json({
-                data: path,
-                message: 'success'
-              });
-            }
+        res.download(fullPath, error => {
+          if (error) {
+            return next(
+              new APIError('Error downloading file', httpStatus.INTERNAL_SERVER_ERROR)
+            );
           }
-        );
+        });
       }
     } catch (error) {
       if (error.code === 'ENOENT') {

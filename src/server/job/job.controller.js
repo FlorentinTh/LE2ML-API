@@ -121,9 +121,13 @@ class JobController {
 
     try {
       await fs.promises.access(fullPath);
-      res.status(httpStatus.OK).json({
-        data: filePath,
-        message: 'success'
+
+      res.download(fullPath, error => {
+        if (error) {
+          return next(
+            new APIError('Error downloading file', httpStatus.INTERNAL_SERVER_ERROR)
+          );
+        }
       });
     } catch (error) {
       return next(new APIError('File not found', httpStatus.NOT_FOUND));
