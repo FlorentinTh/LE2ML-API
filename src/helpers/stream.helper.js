@@ -34,11 +34,12 @@ class StreamHelper {
     papaparse.parse(reader, {
       delimiter: ',',
       header: true,
+      encoding: 'utf-8',
       step: results => {
         if (counter === nbLines - 2) {
-          writer.write(JSON.stringify(results.data), null, 4);
+          writer.write(JSON.stringify(results.data, null, 2));
         } else {
-          writer.write(JSON.stringify(results.data, null, 4) + ',\r\n');
+          writer.write(JSON.stringify(results.data, null, 2) + ',\r\n');
         }
         counter++;
       }
