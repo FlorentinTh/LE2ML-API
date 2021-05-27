@@ -4,8 +4,5 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "eslint-plugin-json"
-        versions: ["3.x"]
     assignees:
       - "FlorentinTh"
