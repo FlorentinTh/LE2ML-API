@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/FlorentinTh/LE2ML-API/compare/v1.1.1...v1.1.2) (2021-05-27)
+
+
+### Chore
+
+* **deps:** update dependencies ([44f155f](https://github.com/FlorentinTh/LE2ML-API/commit/44f155fbe15843e113c7df98a00c939b7a481790))
+* **deps:** update dependencies ([6e1932f](https://github.com/FlorentinTh/LE2ML-API/commit/6e1932fbe768396d7b07ad9f62874f4f2bf6c73e))
+* **deps:** update dependencies ([59a5bb7](https://github.com/FlorentinTh/LE2ML-API/commit/59a5bb7a52c9c4906dbc75e30d881d60339b6bd6))
+* **deps:** update dependencies ([93e8eea](https://github.com/FlorentinTh/LE2ML-API/commit/93e8eeab673c803ac9e3e607bb8846876d0cb28c))
+* **deps:** update dependencies ([b66b34b](https://github.com/FlorentinTh/LE2ML-API/commit/b66b34be019e787a296da90a69645af23718550b))
+* **deps:** update dependencies ([d4464b5](https://github.com/FlorentinTh/LE2ML-API/commit/d4464b541d6f1795ba69a93febc8617b4451732e))
+* **deps:** update dependencies ([cc14b07](https://github.com/FlorentinTh/LE2ML-API/commit/cc14b0775ad0051b6b9e43af6e4c391aa2cefe02))
+* **deps:** update dependencies and update npm to v7.x ([fd4418b](https://github.com/FlorentinTh/LE2ML-API/commit/fd4418be531bb252141b196c3882487e739ca78c))
+
 ### [1.1.1](https://github.com/FlorentinTh/LE2ML-API/compare/v1.1.0...v1.1.1) (2021-05-14)
 
 
