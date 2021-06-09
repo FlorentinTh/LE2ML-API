@@ -3,6 +3,7 @@ import path from 'path';
 // import spdy from 'spdy';
 import https from 'https';
 import express from 'express';
+import favicon from 'serve-favicon';
 import morgan from 'morgan';
 import winston from './utils/logger';
 import cookieParser from 'cookie-parser';
@@ -51,6 +52,7 @@ const appServer = https.createServer(options, app);
 
 isDev ? app.use(morgan('dev')) : app.use(morgan('combined'), { stream: winston.stream });
 
+app.use(favicon(path.join(__dirname, 'public', 'img', 'favicon.ico')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
