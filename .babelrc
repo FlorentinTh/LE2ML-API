@@ -8,7 +8,7 @@
         "root": ["."],
         "alias": {
           "@Server": "./src/server",
-          "@DocumentationBuilder": "./doc/doc.builder",
+          "@DocumentationBuilder": "./src/doc/doc.builder",
           "@APIError": "./src/utils/api.error",
           "@Authority": "./src/utils/authority",
           "@Config": "./src/utils/config",
