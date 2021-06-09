@@ -192,3 +192,4 @@ $RECYCLE.BIN/
 .certs/
 .keys/
 logs/
+build/
