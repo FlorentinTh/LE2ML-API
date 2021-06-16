@@ -37,11 +37,12 @@ import adminUsersRoutes from './server/user/admin/admin.user.routes';
 
 const config = Config.getConfig();
 const isDev = config.env === 'development';
-const rootPath = path.resolve(path.join(__dirname, '..'));
+
+const rootPath = isDev ? path.resolve(path.join(__dirname, '..')) : '';
 
 const options = {
-  key: fs.readFileSync(path.resolve(rootPath, config.certs.key_path)),
-  cert: fs.readFileSync(path.resolve(rootPath, config.certs.crt_path))
+  key: fs.readFileSync(path.join(rootPath, config.certs.key_path)),
+  cert: fs.readFileSync(path.join(rootPath, config.certs.crt_path))
 };
 
 const app = express();
@@ -50,7 +51,7 @@ const APIv1 = express();
 const appServer = https.createServer(options, app);
 // const appServer = spdy.createServer(options, app);
 
-isDev ? app.use(morgan('dev')) : app.use(morgan('combined'), { stream: winston.stream });
+isDev ? app.use(morgan('dev')) : app.use(morgan('combined', { stream: winston.stream }));
 
 app.use(favicon(path.join(__dirname, 'public', 'img', 'favicon.ico')));
 app.use(express.json());
