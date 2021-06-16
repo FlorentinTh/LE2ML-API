@@ -1,18 +1,13 @@
 version: '3'
 
 services:
-  mongo:
-    image: 'mongo:4.2'
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-    ports:
-      - 27017:27017
-
-  redis:
-    image: 'redis:5.0'
-    command: redis-server --requirepass password
+  le2ml-api:
+    image: 'le2ml-api:latest'
     restart: always
     ports:
-      - 6379:6379
+      - 3000:3000
+    volumes:
+      - ./.certs:/.certs
+      - ./log:/log
+      - ./data:/data
+    network_mode: bridge
