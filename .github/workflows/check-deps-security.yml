@@ -1,6 +1,9 @@
 name: snyk
 
-on: push
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   check-deps-security:
