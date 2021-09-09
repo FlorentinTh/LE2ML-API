@@ -2,6 +2,73 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/FlorentinTh/LE2ML-API/compare/v1.1.2...v1.2.0) (2021-09-09)
+
+
+### Features
+
+* **favicon:** add favicon and relocate public directory inside src folder ([cdb7731](https://github.com/FlorentinTh/LE2ML-API/commit/cdb773133aab6c455d713e3e8c4c89407e7cfcf9))
+
+
+### Bug Fixes
+
+* **cache:** remove use of express-redis-cache dependency ([f2612e0](https://github.com/FlorentinTh/LE2ML-API/commit/f2612e092f459bb4d63a48ae7c961a644a2ee637))
+* **mongo:** update mongodb configuration according to latest dependency changes (v6.x) ([b75edd4](https://github.com/FlorentinTh/LE2ML-API/commit/b75edd45c8917b79596d30a69b6cdfae08a6d826))
+* **server.js:** fix few errors while app running in production environment ([309f78d](https://github.com/FlorentinTh/LE2ML-API/commit/309f78d94f1ea6be7c0a18cb6b4e05c936931bd3))
+* **workflows:** fix missing .env in build workflow ([1f8f70f](https://github.com/FlorentinTh/LE2ML-API/commit/1f8f70f19b5a190b2a5ecf250c631704beae27a3))
+
+
+### Refactors
+
+* **doc.builder:** relocate documentation builder inside src directory ([efd5d2c](https://github.com/FlorentinTh/LE2ML-API/commit/efd5d2cd8d3b15f0c7d7c4f4abe0e39b2ea89ebf))
+* **lint:** add renamed build output directory instead of previsous dist directory ([87a0125](https://github.com/FlorentinTh/LE2ML-API/commit/87a01258b0a66b605aba9c935bf864cfffbcf7d0))
+* **workflows:** change name of dependencies ckecking workflow ([6450733](https://github.com/FlorentinTh/LE2ML-API/commit/64507339b196615137e49838964d7eea96436f04))
+
+
+### Documentation
+
+* **readme:** add Snyk badge to README ([9298d73](https://github.com/FlorentinTh/LE2ML-API/commit/9298d73bb34442651c285941f7295f1659ecf59a))
+* **readme:** update readme ([20f5699](https://github.com/FlorentinTh/LE2ML-API/commit/20f569932d1372edede116dbbaf764494abf8d98))
+* **readme:** update readme ([68c7cdc](https://github.com/FlorentinTh/LE2ML-API/commit/68c7cdcb07d869d6c7fe0b27fb471ebb69f5e5f7))
+
+
+### CI
+
+* **github:** update github related files for dependencies checking ([48e1436](https://github.com/FlorentinTh/LE2ML-API/commit/48e143650c6c2bb5906428bb1e0bad7702738ef8))
+* **workflows:** add a build file to github actions worflows ([01e1476](https://github.com/FlorentinTh/LE2ML-API/commit/01e1476434da474fb0175f55ee37791c9abee9f2))
+* **workflows:** add github action workflow file to check dependencies vulnerabilities with Snyk ([865a050](https://github.com/FlorentinTh/LE2ML-API/commit/865a050b5b84c5ace2e3eb3eff1c2440f1e6c16a))
+* **workflows:** disable trigger of workflows for dependabot alerts ([c4517a2](https://github.com/FlorentinTh/LE2ML-API/commit/c4517a251ea62ad101167e9775eb2bec9999a8bc))
+
+
+### Build System
+
+* **dependabot:** update dependabot configuration to only check for production dependencies updates ([c6af943](https://github.com/FlorentinTh/LE2ML-API/commit/c6af943b109adf9133ae4c19ff35b63d2c7e774b))
+* **docker:** add required docker files to build project ([611d0d3](https://github.com/FlorentinTh/LE2ML-API/commit/611d0d3d17c9837f669112dd44a53b284b9f78b1)), closes [#283](https://github.com/FlorentinTh/LE2ML-API/issues/283)
+* **docker:** update docker-compose.yml file example ([3640ee8](https://github.com/FlorentinTh/LE2ML-API/commit/3640ee89ae65b9966b3bba3b309eaa0856423447))
+* **npm:** change package build scripts ([17d8757](https://github.com/FlorentinTh/LE2ML-API/commit/17d8757d53a957dbd7215a6c8407e7c46c5307fd))
+
+
+### Chore
+
+* **deps:** add some dependencies ([7fb62f0](https://github.com/FlorentinTh/LE2ML-API/commit/7fb62f0d2fd7cb2876756643277545928a058711))
+* **deps:** update dependencies ([af45b82](https://github.com/FlorentinTh/LE2ML-API/commit/af45b8296385372c0c40215b7546f1e5d8dd700f))
+* **deps:** update dependencies ([3173441](https://github.com/FlorentinTh/LE2ML-API/commit/3173441a866f62a89b1360b25a791b203b78bfe1))
+* **deps:** update dependencies ([25a2fd5](https://github.com/FlorentinTh/LE2ML-API/commit/25a2fd5995d83a1bca9a76f0a9ed15d3f801cb57))
+* **deps:** update dependencies ([25b8ee7](https://github.com/FlorentinTh/LE2ML-API/commit/25b8ee7b62e393b734bb4281e7a0554722968d07))
+* **deps:** update dependencies ([38756a7](https://github.com/FlorentinTh/LE2ML-API/commit/38756a70af0fe790c6eb22624b841c1f8cc89460))
+* **deps:** update dependencies ([998a50c](https://github.com/FlorentinTh/LE2ML-API/commit/998a50c09ed596605749b501d2e8413d6a365ade))
+* **deps:** update dependencies ([368d5d9](https://github.com/FlorentinTh/LE2ML-API/commit/368d5d963c67127233117cc571c24f412bd0677d))
+* **deps:** update dependencies ([24fb216](https://github.com/FlorentinTh/LE2ML-API/commit/24fb21627f9cbabed43bdf2aa2253be3e7d75bd2))
+* **deps:** update dependencies ([6300f90](https://github.com/FlorentinTh/LE2ML-API/commit/6300f90622591390c0049c2a1d21d1a366549096))
+* **deps:** update dependencies ([3af8126](https://github.com/FlorentinTh/LE2ML-API/commit/3af81262305dab3e0f023e57fe32f8a28779cf18))
+* **deps:** update dependencies ([8411701](https://github.com/FlorentinTh/LE2ML-API/commit/84117013c064191c4b61bb7e05d657438e8e95a8))
+* **deps:** update dependencies ([8353b3a](https://github.com/FlorentinTh/LE2ML-API/commit/8353b3a3d85b676313b664f3f7e55b2fea95568b))
+* **deps:** update dependencies ([835f92f](https://github.com/FlorentinTh/LE2ML-API/commit/835f92f75695fd3c0ee8a8c9091c201ad72d5a30))
+* **deps:** update dependencies ([45e75e3](https://github.com/FlorentinTh/LE2ML-API/commit/45e75e304554a9ba9214fbfdacced5f2e1d69bb5))
+* **deps:** update dependencies ([b5c0d9f](https://github.com/FlorentinTh/LE2ML-API/commit/b5c0d9f979b4abffa607cdc3fbdfa3f5a827e4c5))
+* **deps:** update dependencies ([625f9e9](https://github.com/FlorentinTh/LE2ML-API/commit/625f9e95d7765da5bf949f131c27108a07b40a70))
+* **project:** update .env example file and add rule to .gitignore ([be79a5e](https://github.com/FlorentinTh/LE2ML-API/commit/be79a5eadc88dbad25c9c3e00eaec459558430a1))
+
 ### [1.1.2](https://github.com/FlorentinTh/LE2ML-API/compare/v1.1.1...v1.1.2) (2021-05-27)
 
 
