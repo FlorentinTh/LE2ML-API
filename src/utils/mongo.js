@@ -10,11 +10,6 @@ class Mongo {
   constructor() {
     this.connectionString = `mongodb+srv://${config.mongo.user}:${config.mongo.password}@${config.mongo.host}/test?retryWrites=true&w=majority`;
 
-    mongoose.set('useNewUrlParser', true);
-    mongoose.set('useCreateIndex', true);
-    mongoose.set('useUnifiedTopology', true);
-    mongoose.set('useFindAndModify', false);
-
     mongoose.connection.on('reconnected', () => {
       Logger.info(`Database re-onnected, worker process: ${process.pid}`);
     });
@@ -38,11 +33,7 @@ class Mongo {
 
   async start() {
     try {
-      await mongoose.connect(this.connectionString, {
-        // auth: {
-        //   authdb: 'admin'
-        // }
-      });
+      await mongoose.connect(this.connectionString, {});
     } catch (error) {
       Logger.error(
         `Connection to database failed on worker: ${process.pid}, reason: ${error.message}`
