@@ -45,7 +45,7 @@
     "cross-env": "^7.0.3",
     "csv": "^5.5.3",
     "csvjson": "^5.1.0",
-    "dayjs": "^1.10.6",
+    "dayjs": "^1.10.7",
     "deep-extend": "^0.6.0",
     "dockerode": "^3.3.1",
     "dotenv": "^10.0.0",
