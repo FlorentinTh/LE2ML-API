@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.2](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.1...v1.2.2) (2021-10-14)
+
+
+### Bug Fixes
+
+* **authentication:** use bearer passport built-in function ([d85f235](https://github.com/FlorentinTh/LE2ML-API/commit/d85f235f864630c9bde2d84b24778c7650cdbbff))
+
+
+### Styling
+
+* **bin:** fix linting errors ([9e38a9e](https://github.com/FlorentinTh/LE2ML-API/commit/9e38a9e9833658f207d54728782d2786618ca9a1))
+
+
+### Chore
+
+* **deps:** update dependencies ([40600b0](https://github.com/FlorentinTh/LE2ML-API/commit/40600b067db5cd8b9d453d476bcfe42b8e3c01f4))
+* **deps:** update dependencies ([a84b5b8](https://github.com/FlorentinTh/LE2ML-API/commit/a84b5b896a931c12307418ad899f8d90abb89993))
+* **deps:** update dependencies ([e0ea5c8](https://github.com/FlorentinTh/LE2ML-API/commit/e0ea5c838dea308cfeca38200fe8a0473602628c))
+* **deps:** update dependencies ([b3575f0](https://github.com/FlorentinTh/LE2ML-API/commit/b3575f065c080bdcfef25eba2db532031eed2d3a))
+* **deps:** update dependencies ([e5a0ef9](https://github.com/FlorentinTh/LE2ML-API/commit/e5a0ef962446336e4f18eb2dd75545a16d4670e1))
+
 ### [1.2.1](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.0...v1.2.1) (2021-09-12)
 
 
