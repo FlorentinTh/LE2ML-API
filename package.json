@@ -33,7 +33,7 @@
   "homepage": "https://github.com/FlorentinTh/LE2ML-API#readme",
   "dependencies": {
     "@babel/runtime": "^7.15.4",
-    "ajv": "^8.6.3",
+    "ajv": "^8.8.0",
     "ajv-formats": "^2.1.1",
     "ajv-formats-draft2019": "^1.6.1",
     "archiver": "^5.3.0",
