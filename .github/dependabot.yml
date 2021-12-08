@@ -8,5 +8,10 @@ updates:
     allow:
       - dependency-name: "*"
         dependency-type: "production"
+    ignore:
+      - dependency-name: "file-type"
+        versions: ["17.x"]
+      - dependency-name: "csv"
+        versions: ["6.x"]
     assignees:
       - "FlorentinTh"
