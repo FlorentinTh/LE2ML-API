@@ -1,10 +1,7 @@
-import bluebird from 'bluebird';
-import redis from 'redis';
+import { createClient } from 'redis';
 import Config from '@Config';
 
 const config = Config.getConfig();
-
-bluebird.promisifyAll(redis);
 
 class Redis {
   constructor() {
@@ -20,7 +17,8 @@ class Redis {
   }
 
   createClient() {
-    return redis.createClient({
+    return createClient({
+      legacyMode: true,
       host: this.host,
       port: this.port
     });
