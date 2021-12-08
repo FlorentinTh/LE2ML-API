@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.3](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.2...v1.2.3) (2021-12-08)
+
+
+### Documentation
+
+* **README:** update README ([2640f0a](https://github.com/FlorentinTh/LE2ML-API/commit/2640f0abd41c7f7b881eece13d08fca892f2ba2a))
+
+
+### Chore
+
+* **deps:** update dependencies ([0c21fee](https://github.com/FlorentinTh/LE2ML-API/commit/0c21fee2958640240bcbed011389c1738cffaac9))
+
+
+### Refactors
+
+* **redis:** refactor redis utility class to handle updated dependency breaking changes ([7e4a7dc](https://github.com/FlorentinTh/LE2ML-API/commit/7e4a7dc0da90bc3f94138681394a8dc5599fc51f))
+
+
+### CI
+
+* **dependabot:** add ignore rules for dependencies updates that are not compatible anymore ([5165253](https://github.com/FlorentinTh/LE2ML-API/commit/5165253ef8997a72e6790eef2b5aac12243df48f))
+
 ### [1.2.2](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.1...v1.2.2) (2021-10-14)
 
 
