@@ -194,3 +194,4 @@ $RECYCLE.BIN/
 logs/
 build/
 data/
+.dccache
