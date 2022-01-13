@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.4](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.3...v1.2.4) (2022-01-13)
+
+
+### Chore
+
+* **deps:** update dependencies ([20eecd2](https://github.com/FlorentinTh/LE2ML-API/commit/20eecd205d6aa462909a289f5a6427a96925b4c2))
+
 ### [1.2.3](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.2...v1.2.3) (2021-12-08)
 
 
