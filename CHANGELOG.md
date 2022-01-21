@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.4...v1.3.0) (2022-01-21)
+
+
+### Features
+
+* **server:** add express-rate-limit to protect against DDoS attacks ([c6c6b65](https://github.com/FlorentinTh/LE2ML-API/commit/c6c6b65c074bd44efd5d818fb48370692f568f5f)), closes [#471](https://github.com/FlorentinTh/LE2ML-API/issues/471)
+
+
+### Chore
+
+* **deps:** update dependencies ([1c5cf8b](https://github.com/FlorentinTh/LE2ML-API/commit/1c5cf8b1d6ba92e1eb5f8036f279ce25fb20b5b9))
+
+
+### Refactors
+
+* **sources-file:** refactor few identified issues to pass code quality test ([e99cf2a](https://github.com/FlorentinTh/LE2ML-API/commit/e99cf2aa3a717954a24273966715a262fa26aa45))
+
 ### [1.2.4](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.3...v1.2.4) (2022-01-13)
 
 
