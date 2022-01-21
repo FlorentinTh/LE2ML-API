@@ -16,7 +16,6 @@ jobs:
           - macos-latest
 
         node-version:
-          - 12
           - 14
           - 16
 
