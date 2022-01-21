@@ -11,6 +11,7 @@ import compression from 'compression';
 import cors from 'cors';
 import httpStatus from 'http-status';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import passport from 'passport';
 import swaggerUI from 'swagger-ui-express';
 
@@ -59,6 +60,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression());
 app.use(helmet());
+
+app.disable('x-powered-by');
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use(limiter);
+
 app.use(cors());
 app.use(passport.initialize());
 
