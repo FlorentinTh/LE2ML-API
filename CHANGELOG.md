@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/FlorentinTh/LE2ML-API/compare/v1.3.0...v1.3.1) (2022-01-21)
+
+
+### CI
+
+* **build-workflow:** remove support of node-12 ([6f95b25](https://github.com/FlorentinTh/LE2ML-API/commit/6f95b255718efe877ed7b6561f2705a6368fa529))
+
+
+### Chore
+
+* **dockerfile:** now build the project in a node-14 container instead of node-12 ([b4d3dfa](https://github.com/FlorentinTh/LE2ML-API/commit/b4d3dfaa6a57c0372b6309476eda9ef9c5617deb))
+
 ## [1.3.0](https://github.com/FlorentinTh/LE2ML-API/compare/v1.2.4...v1.3.0) (2022-01-21)
 
 
