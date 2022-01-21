@@ -228,7 +228,7 @@ class FileHelper {
         };
 
         if (!valid) {
-          res.errors = this.validationErrorsHandler(validate.errors);
+          res.errors = FileHelper.validationErrorsHandler(validate.errors);
         } else {
           res.ok = true;
         }
@@ -416,7 +416,7 @@ class FileHelper {
         files.push(output);
 
         if (files.length > 1) {
-          return await this.mergeCSVFiles(files, outputDir, options);
+          return await FileHelper.mergeCSVFiles(files, outputDir, options);
         } else {
           const headersFinal = await StreamHelper.getFirstLineStream(output);
           let totalLabelCols = 0;

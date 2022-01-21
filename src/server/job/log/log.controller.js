@@ -24,7 +24,7 @@ class JobController {
       }
     }
 
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     const lineReader = new LineByLineReader(logFile);
 
