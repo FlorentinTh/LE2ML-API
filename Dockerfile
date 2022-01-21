@@ -1,4 +1,4 @@
-FROM node:12-slim AS build
+FROM node:14-slim AS build
 
 WORKDIR /usr/src/app
 
@@ -10,7 +10,7 @@ RUN npm install
 
 RUN npm run build
 
-FROM node:12-slim
+FROM node:14-slim
 
 COPY package*.json .
 
