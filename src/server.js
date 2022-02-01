@@ -61,8 +61,6 @@ app.use(cookieParser());
 app.use(compression());
 app.use(helmet());
 
-app.disable('x-powered-by');
-
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
