@@ -25,7 +25,7 @@ class AlgoController {
       };
 
       res.status(httpStatus.OK).json({
-        data: data,
+        data,
         message: 'success'
       });
     } catch (error) {
@@ -119,7 +119,7 @@ class AlgoController {
 
       res.status(httpStatus.OK).json({
         data: {
-          algo: algo
+          algo
         },
         message: `Algorithm successfully updated`
       });

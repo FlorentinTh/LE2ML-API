@@ -52,7 +52,7 @@ class JobController {
 
       res.status(httpStatus.OK).json({
         data: {
-          jobs: jobs
+          jobs
         },
         message: 'success'
       });
@@ -494,7 +494,7 @@ class JobController {
 
       res.status(httpStatus.OK).json({
         data: {
-          job: job
+          job
         },
         message: `Job successfully deleted`
       });

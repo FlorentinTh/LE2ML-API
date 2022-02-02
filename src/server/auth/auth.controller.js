@@ -67,7 +67,7 @@ class AuthController {
 
     try {
       const user = await User.findOne()
-        .where({ email: email })
+        .where({ email })
         .where({ isDeleted: false })
         .exec();
 

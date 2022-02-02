@@ -28,7 +28,7 @@ class FileHelper {
         const error = errors[i];
         const entry = error.dataPath.split('/').slice(-1)[0];
         const message = error.message;
-        errorsArray.push({ entry: entry, message: message });
+        errorsArray.push({ entry, message });
       }
     }
 

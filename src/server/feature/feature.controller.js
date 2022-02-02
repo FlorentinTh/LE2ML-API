@@ -11,7 +11,7 @@ class FeatureController {
     try {
       const features = await Feature.find()
         .select()
-        .where({ isDeleted: false, source: source })
+        .where({ isDeleted: false, source })
         .exec();
 
       if (!features) {
@@ -20,11 +20,11 @@ class FeatureController {
 
       const data = {
         total: features.length,
-        features: features
+        features
       };
 
       res.status(httpStatus.OK).json({
-        data: data,
+        data,
         message: 'success'
       });
     } catch (error) {
@@ -51,11 +51,11 @@ class FeatureController {
 
       const data = {
         total: features.length,
-        features: features
+        features
       };
 
       res.status(httpStatus.OK).json({
-        data: data,
+        data,
         message: 'success'
       });
     } catch (error) {
@@ -126,7 +126,7 @@ class FeatureController {
 
       res.status(httpStatus.OK).json({
         data: {
-          feature: feature
+          feature
         },
         message: `Feature successfully updated`
       });

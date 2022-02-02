@@ -64,7 +64,7 @@ class DataController {
     }
 
     res.status(httpStatus.OK).json({
-      data: data,
+      data,
       message: 'success'
     });
   }
@@ -181,7 +181,7 @@ class DataController {
       }
 
       res.status(httpStatus.OK).json({
-        data: data,
+        data,
         message: 'success'
       });
     } catch (error) {
@@ -432,7 +432,7 @@ class DataController {
 
         res.status(httpStatus.OK).json({
           data: {
-            file: file
+            file
           },
           message: 'File successfully modified.'
         });

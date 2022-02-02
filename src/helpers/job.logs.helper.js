@@ -18,7 +18,7 @@ class JobLogsHelper {
 
     try {
       await FileHelper.writeToJobsLog({
-        action: action,
+        action,
         date: dayjs().format('DD-MM-YYYY HH:mm'),
         job: jobObj
       });

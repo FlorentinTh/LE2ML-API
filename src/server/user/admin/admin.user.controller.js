@@ -13,7 +13,7 @@ class AdminController {
     try {
       const user = await User.findOne()
         .select(['lastname', 'firstname', 'email'])
-        .where({ email: email })
+        .where({ email })
         .where({ isDeleted: false })
         .exec();
 
@@ -23,7 +23,7 @@ class AdminController {
 
       res.status(httpStatus.OK).json({
         data: {
-          user: user
+          user
         },
         message: 'success'
       });
@@ -79,11 +79,11 @@ class AdminController {
 
       const data = {
         total: users.length,
-        users: users
+        users
       };
 
       res.status(httpStatus.OK).json({
-        data: data,
+        data,
         message: 'success'
       });
     } catch (error) {
@@ -116,7 +116,7 @@ class AdminController {
 
       res.status(httpStatus.OK).json({
         data: {
-          user: user
+          user
         },
         message: `User successfully updated`
       });
@@ -207,7 +207,7 @@ class AdminController {
 
       res.status(httpStatus.OK).json({
         data: {
-          user: user
+          user
         },
         message: 'Temporary password successfully applied'
       });

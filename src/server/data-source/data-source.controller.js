@@ -15,11 +15,11 @@ class DataSourceController {
 
       const data = {
         total: sources.length,
-        sources: sources
+        sources
       };
 
       res.status(httpStatus.OK).json({
-        data: data,
+        data,
         message: 'success'
       });
     } catch (error) {
@@ -84,7 +84,7 @@ class DataSourceController {
 
       res.status(httpStatus.OK).json({
         data: {
-          source: source
+          source
         },
         message: 'Data source successfully updated'
       });

@@ -20,7 +20,7 @@ class UserController {
 
       res.status(httpStatus.OK).json({
         data: {
-          user: user
+          user
         },
         message: 'success'
       });
@@ -72,7 +72,7 @@ class UserController {
       res.status(httpStatus.OK).json({
         data: {
           user: {
-            token: token
+            token
           }
         },
         message: 'User successfully updated'
@@ -135,7 +135,7 @@ class UserController {
       res.status(httpStatus.OK).json({
         data: {
           user: {
-            token: token
+            token
           }
         },
         message: 'Password successfully modified'

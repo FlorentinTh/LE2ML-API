@@ -35,7 +35,7 @@ class AppController {
       };
 
       res.status(httpStatus.OK).json({
-        data: data,
+        data,
         message: 'success'
       });
     } catch (error) {
@@ -78,7 +78,7 @@ class AppController {
     res.status(httpStatus.OK).json({
       data: {
         app: {
-          key: key
+          key
         }
       },
       message: 'App key successfully generated'
@@ -114,7 +114,7 @@ class AppController {
 
       res.status(httpStatus.OK).json({
         data: {
-          appKey: appKey
+          appKey
         },
         message: `App key successfully updated`
       });

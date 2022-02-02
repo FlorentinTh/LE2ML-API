@@ -18,11 +18,11 @@ class WindowController {
 
       const data = {
         total: functions.length,
-        functions: functions
+        functions
       };
 
       res.status(httpStatus.OK).json({
-        data: data,
+        data,
         message: 'success'
       });
     } catch (error) {

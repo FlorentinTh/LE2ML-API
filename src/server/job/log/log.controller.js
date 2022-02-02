@@ -120,7 +120,7 @@ class JobController {
         res.write(
           'data: ' +
             JSON.stringify({
-              action: action,
+              action,
               date: dayjs().format('DD-MM-YYYY HH:mm'),
               job: jobObj
             }) +

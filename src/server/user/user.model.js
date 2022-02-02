@@ -92,7 +92,7 @@ class User extends Schema {
     return {
       data: {
         user: {
-          token: token
+          token
         }
       },
       message: 'User successfully authenticated.'
