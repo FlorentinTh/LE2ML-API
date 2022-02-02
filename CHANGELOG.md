@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/FlorentinTh/LE2ML-API/compare/v1.3.1...v1.3.2) (2022-02-02)
+
+
+### Bug Fixes
+
+* **server:** remove useless http header ([3d1fbf6](https://github.com/FlorentinTh/LE2ML-API/commit/3d1fbf616693deb292d8bd5d991d059b75741eaa))
+
+
+### CI
+
+* **build-workflow:** remove update npm task that is not required anymore ([ae23ed3](https://github.com/FlorentinTh/LE2ML-API/commit/ae23ed3632016ccd843942f48296b611945b68c9))
+
+
+### Refactors
+
+* **src-files:** refactor to comply with object-shorthand eslint rule ([094c431](https://github.com/FlorentinTh/LE2ML-API/commit/094c431b0ef952b638a0f99afd5988c0b8581495))
+
+
+### Chore
+
+* **deps:** update dependencies ([250a5d4](https://github.com/FlorentinTh/LE2ML-API/commit/250a5d4d496ad2b66ea5530efaf4169756299dcd))
+* **deps:** update dependencies ([b3184d9](https://github.com/FlorentinTh/LE2ML-API/commit/b3184d93d00b7de9c6ad04ba2e31f57f8df5628b))
+
 ### [1.3.1](https://github.com/FlorentinTh/LE2ML-API/compare/v1.3.0...v1.3.1) (2022-01-21)
 
 
