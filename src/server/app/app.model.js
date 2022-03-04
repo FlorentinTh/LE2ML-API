@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { v1 as uuidv1 } from 'uuid';
 import Config from '@Config';
 import User from '../user/user.model';
