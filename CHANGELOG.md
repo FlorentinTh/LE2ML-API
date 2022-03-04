@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.3](https://github.com/FlorentinTh/LE2ML-API/compare/v1.3.2...v1.3.3) (2022-03-04)
+
+
+### Chore
+
+* **deps:** move from bcrypt to bcryptjs to resolve security issues in peer dependencies ([7d91e60](https://github.com/FlorentinTh/LE2ML-API/commit/7d91e60f4d5a9ad67d564c7a18d88d0b93a15ef8))
+* **deps:** update dependencies ([ec9ad8e](https://github.com/FlorentinTh/LE2ML-API/commit/ec9ad8e6473e934f557d2a39038ff6b4f62ec6d6))
+* **deps:** update dependencies ([03789a8](https://github.com/FlorentinTh/LE2ML-API/commit/03789a8ab00e7098898627a6d48a3d9f5976450f))
+* **deps:** update dependencies ([f9fdacd](https://github.com/FlorentinTh/LE2ML-API/commit/f9fdacdc0a1d4ffea46e630cec98075b0e836241))
+* **deps:** update dependencies ([066b82e](https://github.com/FlorentinTh/LE2ML-API/commit/066b82e2862d3e8aec002634a0e0cfb14802b3fe))
+* **deps:** update dependencies ([c52f8a3](https://github.com/FlorentinTh/LE2ML-API/commit/c52f8a3d7b399fcccba1287d01f1890fde812f6c))
+* **deps:** update dependencies ([5c07444](https://github.com/FlorentinTh/LE2ML-API/commit/5c074447a643f632508ccf94ded09e8188175194))
+
 ### [1.3.2](https://github.com/FlorentinTh/LE2ML-API/compare/v1.3.1...v1.3.2) (2022-02-02)
 
 
