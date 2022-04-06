@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/FlorentinTh/LE2ML-API#readme",
   "dependencies": {
-    "@babel/runtime": "^7.17.8",
+    "@babel/runtime": "^7.17.9",
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
     "ajv-formats-draft2019": "^1.6.1",
