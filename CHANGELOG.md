@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.5](https://github.com/FlorentinTh/LE2ML-API/compare/v1.3.4...v1.3.5) (2022-04-19)
+
+
+### Chore
+
+* **deps:** update dependencies ([0a2e8b2](https://github.com/FlorentinTh/LE2ML-API/commit/0a2e8b2e6829e920a1826c29b65a32b0c8904f1b))
+* **eslint:** change eslint config and dependencies ([3e2a753](https://github.com/FlorentinTh/LE2ML-API/commit/3e2a75330f3334daabbe2f8ce3051dbab212a973))
+
 ### [1.3.4](https://github.com/FlorentinTh/LE2ML-API/compare/v1.3.3...v1.3.4) (2022-03-31)
 
 
