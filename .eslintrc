@@ -1,6 +1,6 @@
 {
   "extends": [
-    "standard",
+    "eslint:recommended",
     "plugin:prettier/recommended",
     "plugin:json/recommended",
     "plugin:import/errors",
@@ -17,7 +17,7 @@
   "parser": "@babel/eslint-parser",
   "parserOptions": {
     "sourceType": "module",
-    "ecmaVersion": 2017
+    "ecmaVersion": 2022
   },
   "rules": {
     "no-console": "warn",
@@ -30,7 +30,8 @@
         "asyncArrow": "always"
       }
     ],
-    "new-cap": "warn",
+    "new-cap": "off",
+    "no-unused-vars": "off",
     "max-len": [
       "warn",
       {
